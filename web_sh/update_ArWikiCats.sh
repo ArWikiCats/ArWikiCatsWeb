@@ -1,16 +1,24 @@
 #!/bin/bash
+# toolforge-jobs run installar --image python3.11 --command "~/web_sh/update_ArWikiCats.sh" --wait
+
+# use bash strict mode
+set -euo pipefail
+
 source ~/.bashrc
+
+# GitHub token must be provided via environment variable
 TOKEN="${GH_TOKEN}"
 
+# Branch name (default: main)
 BRANCH="${1:-main}"
 
-echo ">>> clone --branch ${BRANCH} ."
+echo ">>> clone --branch ${BRANCH}"
 
 REPO_URL="https://MrIbrahem:${TOKEN}@github.com/MrIbrahem/ArWikiCats.git"
 CLONE_DIR="/data/project/armake/arwikicats_x"
 
-# Navigate to the project directory
-cd /data/project/armake/ || exit
+# Navigate to the base working directory
+cd /data/project/armake/ || exit 1
 
 # Remove any existing clone directory
 rm -rf "$CLONE_DIR"
@@ -23,12 +31,17 @@ else
     exit 1
 fi
 
-TARGET_DIR="bots/ma/ArWikiCats"
-# Copy the required files to the target directory
-cp -rf "$CLONE_DIR/ArWikiCats/"* "$TARGET_DIR/" -v
+# Enter the cloned repository
+cd "$CLONE_DIR" || exit 1
 
-# Optional: Install dependencies
-#"$HOME/local/bin/python3" -m pip install -r "$TARGET_DIR/requirements.in"
+# Activate the virtual environment and install dependencies
+source $HOME/www/python/venv/bin/activate
 
-# Remove the "$CLONE_DIR" directory.
+# Install the package in upgrade mode
+pip install -r requirements.in -U
+pip install . -U
+
+# Optional: clean up the clone directory after installation
 rm -rf "$CLONE_DIR"
+
+# toolforge-jobs run installar --image python3.11 --command "~/web_sh/update_ArWikiCats.sh" --wait
