@@ -11,20 +11,12 @@ import logs_bot
 
 sys.argv.append("noprint")
 
-path1 = "i:/core/bots/ma"
-
-HOME = os.getenv("HOME")
-
-if HOME:
-    path2 = HOME + "/www/python/bots"
-    sys.path.append(str(path2))
-else:
-    sys.path.append(path1)
-# ---
 try:
-    from make2 import event
+    from ArWikiCats import batch_resolve_labels, resolve_arabic_category_label
 except ImportError:
-    event = None
+    batch_resolve_labels = None
+    resolve_arabic_category_label = None
+
 
 app = Flask(__name__)
 # CORS(app)  # ← لتفعيل CORS
@@ -91,26 +83,17 @@ def get_title(title) -> str:
         logs_db.log_request("/api/<title>", title, response_status, time.time() - start_time)
         return jsonify({"error": "User-Agent header is required"}), 400
     # ---
-    if event is None:
+    if resolve_arabic_category_label is None:
         logs_db.log_request("/api/<title>", title, "error", time.time() - start_time)
         return jsonify({"error": "حدث خطأ أثناء تحميل المكتبة"})
     # ---
-    json_result = event([title], tst_prnt_all=False) or {"result": ""}
+    label = resolve_arabic_category_label(title)
     # ---
-    data = {}
-    # ---
-    # for x, v in json_result.items(): data = {"result": v} break
-    # ---
-    data = {"result": next(iter(json_result.values()), "")}
+    data = {"result": label}
     # ---
     delta = time.time() - start_time
     # ---
-    # تحديد حالة الاستجابة
-    response_status = data.get("result") if data.get("result") else "no_result"
-    # ---
-    data['sql'] = logs_db.log_request("/api/<title>", title, response_status, delta)
-    # ---
-    # data["time"] = delta
+    data['sql'] = logs_db.log_request("/api/<title>", title, label or "no_result", delta)
     # ---
     return jsonify(data)
 
@@ -142,21 +125,23 @@ def get_titles():
     # print("get_titles:")
     # print(titles)
 
-    if event is None:
+    if batch_resolve_labels is None:
         logs_db.log_request("/api/list", titles, "error", delta)
         return jsonify({"error": "حدث خطأ أثناء تحميل المكتبة"})
     # ---
-    json_result, no_labs = event(titles, return_no_labs=True, tst_prnt_all=False) or {}
+    result = batch_resolve_labels(titles)
+    print(result.labels)
+    print(result.no_labels)
     # ---
-    len_result = len(json_result)
+    len_result = len(result.labels)
     # ---
-    for x in no_labs:
-        if x not in json_result.keys():
-            json_result[x] = ""
+    for x in result.no_labels:
+        if x not in result.labels:
+            result.labels[x] = ""
     # ---
     delta2 = time.time() - start_time
     # ---
-    response_data = {"results": json_result, "no_labs": len(no_labs), "with_labs": len_result, "duplicates": duplicates, "time": delta2}
+    response_data = {"results": result.labels, "no_labs": len(result.no_labels), "with_labs": len_result, "duplicates": duplicates, "time": delta2}
     # ---
     # تحديد حالة الاستجابة
     response_status = "success" if len_result > 0 else "no_result"
