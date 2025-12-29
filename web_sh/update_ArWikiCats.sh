@@ -6,16 +6,12 @@ set -euo pipefail
 
 source ~/.bashrc
 
-# GitHub token must be provided via environment variable
-TOKEN="${GH_TOKEN}"
+: "${GH_TOKEN:?GH_TOKEN is not set}"
 
-# Branch name (default: main)
 BRANCH="${1:-main}"
 
-echo ">>> clone --branch ${BRANCH}"
-
-REPO_URL="https://MrIbrahem:${TOKEN}@github.com/MrIbrahem/ArWikiCats.git"
 CLONE_DIR="/data/project/armake/arwikicats_x"
+REPO_URL="https://github.com/MrIbrahem/ArWikiCats.git"
 
 # Navigate to the base working directory
 cd /data/project/armake/ || exit 1
@@ -23,19 +19,32 @@ cd /data/project/armake/ || exit 1
 # Remove any existing clone directory
 rm -rf "$CLONE_DIR"
 
-# Clone the repository
-if git clone --branch "$BRANCH" "$REPO_URL" "$CLONE_DIR"; then
-    echo "Repository cloned successfully."
-else
-    echo "Failed to clone the repository." >&2
-    exit 1
-fi
+# Create a temporary askpass helper
+ASKPASS_SCRIPT="$(mktemp)"
+cat > "$ASKPASS_SCRIPT" <<'EOF'
+#!/bin/sh
+echo "$GH_TOKEN"
+EOF
+chmod 700 "$ASKPASS_SCRIPT"
+
+export GIT_ASKPASS="$ASKPASS_SCRIPT"
+export GIT_USERNAME="MrIbrahem"
+export GIT_TERMINAL_PROMPT=0
+
+echo ">>> clone --branch ${BRANCH}"
+
+git clone --branch "$BRANCH" "$REPO_URL" "$CLONE_DIR"
+
+# Cleanup credentials helper immediately
+rm -f "$ASKPASS_SCRIPT"
+unset GIT_ASKPASS GIT_USERNAME GIT_TERMINAL_PROMPT
+
 
 # Enter the cloned repository
 cd "$CLONE_DIR" || exit 1
 
 # Activate the virtual environment and install dependencies
-source $HOME/www/python/venv/bin/activate
+source "$HOME/www/python/venv/bin/activate"
 
 # Install the package in upgrade mode
 pip install -r requirements.in -U
