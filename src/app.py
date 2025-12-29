@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-import os
 import sys
 import time
 from flask import Flask, render_template, request, Response
 import json
-# from flask_cors import CORS
+from flask_cors import CORS
 
 import logs_db
 import logs_bot
@@ -19,7 +18,11 @@ except ImportError:
 
 
 app = Flask(__name__)
-# CORS(app)  # ← لتفعيل CORS
+# Allow cross-origin requests (needed when calling this API from pages like https://ar.wikipedia.org)
+CORS(
+    app,
+    resources={r"/api/*": {"origins": ["https://ar.wikipedia.org", "https://www.ar.wikipedia.org"]}},
+)
 
 
 def jsonify(data : dict) -> str:
