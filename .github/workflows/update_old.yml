@@ -1,4 +1,4 @@
-name: Auto Update Toolforge
+name: Auto Update old
 
 on:
   push:

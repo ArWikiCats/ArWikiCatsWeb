@@ -1,4 +1,4 @@
-name: Auto Update 3
+name: Auto Update new
 
 on:
   push:
@@ -41,12 +41,10 @@ jobs:
               cp -r /mnt/nfs/labstore-secondary-tools-home/${{ secrets.USERNAME }}/web_make2_temp ~/make2-web &&
               chmod -R 770 ~/make2-web &&
               cp -rf ~/make2-web/web_sh/*.sh ~/web_sh -v &&
-              ~/web_sh/install_make2.sh ${{ secrets.GF_TOKEN }} &&
-              ~/web_sh/install_ma_lists.sh ${{ secrets.GF_TOKEN }} &&
-              ~/web_sh/update1.sh &&
               rm -rf ~/make2-web &&
               echo \"Updated on: $(date '+%Y-%m-%d %H:%M:%S')\" > ~/update_from_github &&
               toolforge-jobs run pipup --image python3.11 --command "~/web_sh/pip.sh" --wait &&
+              toolforge-jobs run installar --image python3.11 --command "~/web_sh/update_ArWikiCats.sh" --wait &&
               toolforge-webservice python3.11 stop &&
               toolforge-webservice python3.11 start &&
               echo ''
