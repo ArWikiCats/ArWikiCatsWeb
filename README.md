@@ -150,7 +150,7 @@ ArWikiCatsWeb/
 - **Logging System**: SQLite-based logging for tracking requests and performance
 - **CORS Configuration**: Allows requests from ar.wikipedia.org domains
 
-## Requirements
+## API Requirements
 
 All API requests must include a `User-Agent` header. Requests without this header will return a 400 error.
 
