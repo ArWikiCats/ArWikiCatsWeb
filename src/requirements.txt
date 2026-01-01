@@ -4,3 +4,4 @@ flask_cors
 tqdm
 psutil
 humanize
+ArWikiCats
