@@ -44,7 +44,6 @@ jobs:
               rm -rf ~/make2-web &&
               echo \"Updated on: $(date '+%Y-%m-%d %H:%M:%S')\" > ~/update_from_github &&
               toolforge-jobs run pipup --image python3.11 --command "~/web_sh/pip.sh" --wait &&
-              toolforge-jobs run installar --image python3.11 --command "~/web_sh/update_ArWikiCats.sh" --wait &&
               toolforge-webservice python3.11 stop &&
               toolforge-webservice python3.11 start &&
               echo ''
