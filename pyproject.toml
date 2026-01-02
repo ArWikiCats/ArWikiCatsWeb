@@ -1,0 +1,98 @@
+
+# ============================================
+#                 BLACK
+# ============================================
+[tool.black]
+line-length = 120
+target-version = ["py310"]
+include = '\.pyi?$'
+exclude = '''
+    /(
+        \.git
+      | \.hg
+      | \.mypy_cache
+      | \.tox
+      | \.venv
+      | _build
+      | buck-out
+      | build
+      | dist
+    )/
+'''
+
+# ============================================
+#                 ISORT
+# ============================================
+[tool.isort]
+profile = "black"
+line_length = 120
+
+# Keep vertical formatting (multi-line import style)
+multi_line_output = 3
+use_parentheses = true
+force_grid_wrap = 0
+include_trailing_comma = true
+
+# OPTIONAL: You can add this to ensure isort does NOT collapse into one line
+ensure_newline_before_comments = true
+
+# Project paths
+# src_paths = "ArWikiCats"
+# known_first_party = "ArWikiCats"
+skip = [
+    ".env",
+    "env",
+    ".venv",
+    "venv",
+    "build",
+    "dist",
+    "__pycache__",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".git",
+]
+
+# ============================================
+#                 RUFF
+# ============================================
+[tool.ruff]
+exclude = [
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "old",
+    "build",
+    "dist",
+    "site-packages",
+    "venv",
+]
+line-length = 120
+target-version = "py313"
+
+[tool.ruff.format]
+# Allow Ruff/Black to maintain vertical list formatting
+skip-magic-trailing-comma = false
+
+[tool.ruff.lint]
+ignore = ["E402", "E225", "E226", "E227", "E228", "E252", "E501", "F841", "E224", "E203", "F401"]
+
+# ============================================
+#                 Flynt
+# ============================================
+[tool.flynt]
+line_length = 120
