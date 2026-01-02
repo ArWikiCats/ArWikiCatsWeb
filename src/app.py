@@ -5,8 +5,7 @@ from flask_cors import CORS
 from routes.api import api_bp
 
 from logs_db import init_db
-import logs_bot
-from logs_bot import view_logs
+from logs_bot import view_logs, retrieve_logs_by_date
 
 app = Flask(__name__)
 # Allow cross-origin requests (needed when calling this API from pages like https://ar.wikipedia.org)
@@ -36,7 +35,7 @@ def no_result() -> str:
 @app.route("/logs_by_day", methods=["GET"])
 def logs_by_day() -> str:
     # ---
-    result = logs_bot.logs_by_day(request)
+    result = retrieve_logs_by_date(request)
     # ---
     return render_template(
         "logs_by_day.html",

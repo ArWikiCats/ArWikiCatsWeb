@@ -149,7 +149,7 @@ def get_logs(per_page=10, offset=0, order="DESC", order_by="timestamp", status="
     return logs
 
 
-def logs_by_day(table_name="logs"):
+def fetch_logs_by_date(table_name="logs"):
     # ---
     query_by_day = """
         SELECT

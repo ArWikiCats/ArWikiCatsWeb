@@ -137,7 +137,7 @@ def view_logs(request):
     return result
 
 
-def logs_by_day(request):
+def retrieve_logs_by_date(request):
     # ---
     db_path = request.args.get("db_path")
     # ---
@@ -153,7 +153,7 @@ def logs_by_day(request):
     if table_name not in db_tables:
         table_name = "logs"
     # ---
-    logs_data = logs_db.logs_by_day(table_name=table_name)
+    logs_data = logs_db.fetch_logs_by_date(table_name=table_name)
     # ---
     data_logs = {}
     # ---

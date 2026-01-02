@@ -23,7 +23,7 @@ def jsonify(data: dict) -> str:
 
 @api_bp.route("/logs_by_day", methods=["GET"])
 def get_logs_by_day() -> str:
-    result = logs_bot.logs_by_day(request)
+    result = logs_bot.retrieve_logs_by_date(request)
     result = result.get("logs", [])
     # ---
     return jsonify(result)
