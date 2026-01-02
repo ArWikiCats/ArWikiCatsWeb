@@ -202,7 +202,7 @@ def retrieve_logs_by_date(request):
     return data
 
 
-def all_logs_en2ar(day=None):
+def retrieve_logs_en_to_ar(day=None):
     # ---
     logs_data = logs_db.all_logs_en2ar(day=day)
     # ---

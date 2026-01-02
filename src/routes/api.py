@@ -3,8 +3,8 @@ import time
 from flask import Blueprint, request, Response
 import json
 
-import logs_db
-import logs_bot
+from ..logs_db import log_request, get_response_status
+from .. import logs_bot
 
 try:
     from ArWikiCats import batch_resolve_labels, resolve_arabic_category_label  # type: ignore
@@ -32,7 +32,7 @@ def get_logs_by_day() -> str:
 @api_bp.route("/all", methods=["GET"])
 @api_bp.route("/all/<day>", methods=["GET"])
 def get_logs_all(day=None) -> str:
-    result = logs_bot.all_logs_en2ar(day)
+    result = logs_bot.retrieve_logs_en_to_ar(day)
     # ---
     return jsonify(result)
 
@@ -40,7 +40,7 @@ def get_logs_all(day=None) -> str:
 @api_bp.route("/category", methods=["GET"])
 @api_bp.route("/category/<day>", methods=["GET"])
 def get_logs_category(day=None) -> str:
-    result = logs_bot.all_logs_en2ar(day)
+    result = logs_bot.retrieve_logs_en_to_ar(day)
     # ---
     if "no_result" in result:
         del result["no_result"]
@@ -51,7 +51,7 @@ def get_logs_category(day=None) -> str:
 @api_bp.route("/no_result", methods=["GET"])
 @api_bp.route("/no_result/<day>", methods=["GET"])
 def get_logs_no_result(day=None) -> str:
-    result = logs_bot.all_logs_en2ar(day)
+    result = logs_bot.retrieve_logs_en_to_ar(day)
     # ---
     if "data_result" in result:
         del result["data_result"]
@@ -61,7 +61,7 @@ def get_logs_no_result(day=None) -> str:
 
 @api_bp.route("/status", methods=["GET"])
 def get_status_table() -> str:
-    result = logs_db.get_response_status()
+    result = get_response_status()
     # ---
     return jsonify(result)
 
@@ -74,11 +74,11 @@ def get_title(title) -> str:
     # Check for User-Agent header
     if not request.headers.get("User-Agent"):
         response_status = "User-Agent missing"
-        logs_db.log_request("/api/<title>", title, response_status, time.time() - start_time)
+        log_request("/api/<title>", title, response_status, time.time() - start_time)
         return jsonify({"error": "User-Agent header is required"}), 400
     # ---
     if resolve_arabic_category_label is None:
-        logs_db.log_request("/api/<title>", title, "error", time.time() - start_time)
+        log_request("/api/<title>", title, "error", time.time() - start_time)
         return jsonify({"error": "حدث خطأ أثناء تحميل المكتبة"})
     # ---
     label = resolve_arabic_category_label(title)
@@ -87,7 +87,7 @@ def get_title(title) -> str:
     # ---
     delta = time.time() - start_time
     # ---
-    data['sql'] = logs_db.log_request("/api/<title>", title, label or "no_result", delta)
+    data['sql'] = log_request("/api/<title>", title, label or "no_result", delta)
     # ---
     return jsonify(data)
 
@@ -108,19 +108,19 @@ def get_titles():
     # Check for User-Agent header
     if not request.headers.get("User-Agent"):
         response_status = "User-Agent missing"
-        logs_db.log_request("/api/list", titles, response_status, delta)
+        log_request("/api/list", titles, response_status, delta)
         return jsonify({"error": "User-Agent header is required"}), 400
     # ---
     # تأكد أن البيانات قائمة
     if not isinstance(titles, list):
-        logs_db.log_request("/api/list", titles, "error", delta)
+        log_request("/api/list", titles, "error", delta)
         return jsonify({"error": "بيانات غير صالحة"}), 400
 
     # print("get_titles:")
     # print(titles)
 
     if batch_resolve_labels is None:
-        logs_db.log_request("/api/list", titles, "error", delta)
+        log_request("/api/list", titles, "error", delta)
         return jsonify({"error": "حدث خطأ أثناء تحميل المكتبة"})
     # ---
     result = batch_resolve_labels(titles)
@@ -137,7 +137,7 @@ def get_titles():
     # ---
     # تحديد حالة الاستجابة
     response_status = "success" if len_result > 0 else "no_result"
-    logs_db.log_request("/api/list", titles, response_status, delta2)
+    log_request("/api/list", titles, response_status, delta2)
     # ---
     return jsonify(response_data)
 
