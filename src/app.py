@@ -18,22 +18,14 @@ CORS(
 app.register_blueprint(api_bp)
 
 
-@app.route("/logs", methods=["GET"])
-def render_logs_view() -> str:
-    # ---
-    result = view_logs(request)
-    # ---
-    return render_template("logs.html", result=result)
-
-
 @app.route("/no_result", methods=["GET"])
-def no_result() -> str:
+def render_no_results_page() -> str:
     # ---
     return render_template("no_result.html")
 
 
 @app.route("/logs_by_day", methods=["GET"])
-def logs_by_day() -> str:
+def render_daily_logs() -> str:
     # ---
     result = retrieve_logs_by_date(request)
     # ---
@@ -47,23 +39,31 @@ def logs_by_day() -> str:
 
 
 @app.route("/", methods=["GET"])
-def main() -> str:
+def render_index_page() -> str:
     return render_template("index.html")
 
 
+@app.route("/logs", methods=["GET"])
+def render_logs_view() -> str:
+    # ---
+    result = view_logs(request)
+    # ---
+    return render_template("logs.html", result=result)
+
+
 @app.route("/list", methods=["GET"])
-def titles() -> str:
+def render_title_list() -> str:
     return render_template("list.html")
 
 
 @app.route("/chart", methods=["GET"])
-def charts() -> str:
+def render_chart() -> str:
     return render_template("chart.html")
 
 
-@app.route("/x", methods=["GET"])
-def charts2() -> str:
-    return render_template("x.html")
+@app.route("/chart2", methods=["GET"])
+def render_chart2() -> str:
+    return render_template("chart2.html")
 
 
 @app.errorhandler(404)
