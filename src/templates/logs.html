@@ -29,7 +29,7 @@
         </div>
         <div class="card-body">
             <!-- Filter Form -->
-            <form method="get" action="{{ url_for('logs_views') }}" class="form-inline mb-3 gap-2">
+            <form method="get" action="{{ url_for('render_logs_view') }}" class="form-inline mb-3 gap-2">
                 <input type="text" name="table_name" value="{{ result.tab.table_name }}" hidden />
                 <div class="row">
                     <div class="col-md-4">
@@ -130,7 +130,7 @@
                         <ul class="pagination justify-content-center">
                             <!-- First page -->
                             <li class="page-item {% if result.tab.page == 1 %}disabled{% endif %}">
-                                <a class="page-link" href="{{ url_for('logs_views', page=1, **common_args) }}"
+                                <a class="page-link" href="{{ url_for('render_logs_view', page=1, **common_args) }}"
                                     aria-label="First Page">
                                     <span aria-hidden="true">&laquo;&laquo;</span>
                                 </a>
@@ -138,7 +138,7 @@
 
                             <!-- Previous page -->
                             <li class="page-item {% if result.tab.page == 1 %}disabled{% endif %}">
-                                <a class="page-link" href="{{ url_for('logs_views', page=result.tab.page-1, **common_args) }}"
+                                <a class="page-link" href="{{ url_for('render_logs_view', page=result.tab.page-1, **common_args) }}"
                                     aria-label="Previous Page">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
@@ -147,7 +147,7 @@
                             <!-- Page Numbers -->
                             {% for p in range(result.tab.start_page, result.tab.end_page + 1) %}
                             <li class="page-item {% if p == result.tab.page %}active{% endif %}">
-                                <a class="page-link" href="{{ url_for('logs_views', page=p, **common_args) }}">
+                                <a class="page-link" href="{{ url_for('render_logs_view', page=p, **common_args) }}">
                                     {{ p }}
                                 </a>
                             </li>
@@ -155,7 +155,7 @@
 
                             <!-- Next page -->
                             <li class="page-item {% if result.tab.page == result.tab.total_pages %}disabled{% endif %}">
-                                <a class="page-link" href="{{ url_for('logs_views', page=result.tab.page+1, **common_args) }}"
+                                <a class="page-link" href="{{ url_for('render_logs_view', page=result.tab.page+1, **common_args) }}"
                                     aria-label="Next Page">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
@@ -164,7 +164,7 @@
                             <!-- Last page -->
                             <li class="page-item {% if result.tab.page == result.tab.total_pages %}disabled{% endif %}">
                                 <a class="page-link"
-                                    href="{{ url_for('logs_views', page=result.tab.total_pages, **common_args) }}"
+                                    href="{{ url_for('render_logs_view', page=result.tab.total_pages, **common_args) }}"
                                     aria-label="Last Page">
                                     <span aria-hidden="true">&raquo;&raquo;</span>
                                 </a>

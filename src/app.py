@@ -19,7 +19,7 @@ app.register_blueprint(api_bp)
 
 
 @app.route("/logs", methods=["GET"])
-def logs_views() -> str:
+def render_logs_view() -> str:
     # ---
     result = view_logs(request)
     # ---
