@@ -10,7 +10,7 @@ backend: kubernetes
 cpu: 3
 
 # Set Kubernetes memory limit (--mem=...)
-mem: 6Gi
+# mem: 6Gi
 
 # Set ReplicaSet size for a Kubernetes deployment (--replicas=...)
 replicas: 2
