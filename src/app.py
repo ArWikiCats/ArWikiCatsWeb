@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import sys
-from flask import Flask, render_template, request
+from flask import Flask, render_template
 from flask_cors import CORS
 from routes.api import api_bp
+from routes.ui import ui_bp
 
 from logs_db import init_db
-from logs_bot import view_logs, retrieve_logs_by_date
 
 app = Flask(__name__)
 # Allow cross-origin requests (needed when calling this API from pages like https://ar.wikipedia.org)
@@ -17,53 +17,8 @@ CORS(
 # Register the API Blueprint
 app.register_blueprint(api_bp)
 
-
-@app.route("/no_result", methods=["GET"])
-def render_no_results_page() -> str:
-    # ---
-    return render_template("no_result.html")
-
-
-@app.route("/logs_by_day", methods=["GET"])
-def render_daily_logs() -> str:
-    # ---
-    result = retrieve_logs_by_date(request)
-    # ---
-    return render_template(
-        "logs_by_day.html",
-        logs=result.get("logs", []),
-        tab=result.get("tab", []),
-        status_table=result.get("status_table", []),
-        dbs=result.get("dbs", []),
-    )
-
-
-@app.route("/", methods=["GET"])
-def render_index_page() -> str:
-    return render_template("index.html")
-
-
-@app.route("/logs", methods=["GET"])
-def render_logs_view() -> str:
-    # ---
-    result = view_logs(request)
-    # ---
-    return render_template("logs.html", result=result)
-
-
-@app.route("/list", methods=["GET"])
-def render_title_list() -> str:
-    return render_template("list.html")
-
-
-@app.route("/chart", methods=["GET"])
-def render_chart() -> str:
-    return render_template("chart.html")
-
-
-@app.route("/chart2", methods=["GET"])
-def render_chart2() -> str:
-    return render_template("chart2.html")
+# Register the UI Blueprint
+app.register_blueprint(ui_bp)
 
 
 @app.errorhandler(404)
