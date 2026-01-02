@@ -38,7 +38,7 @@
     <nav class="navbar navbar-expand-lg bg-body-tertiary shadow mb-4">
         <div class="container-fluid">
             <div class="nav_title">
-                <a class="navbar-brand fw-bold" href="/">
+                <a class="navbar-brand fw-bold" href="{{ url_for('ui.render_index_page') }}">
                     <span class="tool_icon me-2"></span> ArWikiCatsWeb
                 </a>
             </div>
@@ -50,37 +50,39 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav flex-row flex-wrap bd-navbar-nav">
                     <li class="nav-item col-6 col-lg-auto">
-                        <a class="nav-link" href="/list"><i class="bi bi-braces-asterisk ms-1"></i>
+                        <a class="nav-link" href="{{ url_for('ui.render_title_list') }}"><i class="bi bi-braces-asterisk ms-1"></i>
                             List
                         </a>
                     </li>
                     <!-- <li class="nav-item col-6 col-lg-auto">
-                        <a class="nav-link" href="/logs_by_day"><i class="bi bi-journal-text ms-1"></i>
+                        <a class="nav-link" href="{{ url_for('ui.render_daily_logs') }}"><i class="bi bi-journal-text ms-1"></i>
                             Daily Logs
                         </a>
                     </li> -->
                     <li class="nav-item col-6 col-lg-auto">
-                        <a class="nav-link" href="/logs"><i class="bi bi-journal-text ms-1"></i>
+                        <a class="nav-link" href="{{ url_for('ui.render_logs_view') }}"><i
+                                class="bi bi-journal-text ms-1"></i>
                             Logs
                         </a>
                     </li>
                     <!-- <li class="nav-item col-6 col-lg-auto">
-                        <a class="nav-link" href="/logs?table_name=list_logs"><i class="bi bi-journal-text ms-1"></i>
+                        <a class="nav-link" href="{{ url_for('ui.render_logs_view', table_name='list_logs') }}"><i class="bi bi-journal-text ms-1"></i>
                             List Logs
                         </a>
                     </li> -->
                     <li class="nav-item col-6 col-lg-auto">
-                        <a class="nav-link" href="/chart"><i class="bi bi-journal-text ms-1"></i>
+                        <a class="nav-link" href="{{ url_for('ui.render_chart') }}"><i class="bi bi-journal-text ms-1"></i>
                             Chart
                         </a>
                     </li>
                     <li class="nav-item col-6 col-lg-auto">
-                        <a class="nav-link" href="/x"><i class="bi bi-journal-text ms-1"></i>
+                        <a class="nav-link" href="{{ url_for('ui.render_chart2') }}"><i
+                                class="bi bi-journal-text ms-1"></i>
                             Chart2
                         </a>
                     </li>
                     <li class="nav-item col-6 col-lg-auto">
-                        <a class="nav-link" href="/no_result"><i class="bi bi-journal-text ms-1"></i>
+                        <a class="nav-link" href="{{ url_for('ui.render_no_results_page') }}"><i class="bi bi-journal-text ms-1"></i>
                             no_result
                         </a>
                     </li>

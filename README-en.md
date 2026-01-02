@@ -106,13 +106,10 @@ This service is configured for deployment on Wikimedia Toolforge. Configuration 
 
 - **Backend**: Kubernetes
 - **Runtime**: Python 3.11
-- **CPU**: 3 cores
-- **Memory**: 6Gi
-- **Replicas**: 2
 
 Deploy using:
 ```bash
-webservice start
+toolforge webservice python3.11 start
 ```
 
 ### UWSGI
@@ -127,7 +124,6 @@ The service includes UWSGI configuration in `src/uwsgi.ini` for production deplo
 ArWikiCatsWeb/
 ├── src/
 │   ├── app.py              # Main Flask application
-│   ├── app1.py             # Alternative entry point
 │   ├── logs_bot.py         # Logging bot functionality
 │   ├── logs_db/            # Database logging module
 │   ├── templates/          # HTML templates

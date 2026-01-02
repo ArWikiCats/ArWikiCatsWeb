@@ -10,7 +10,7 @@ from .bot import (
     get_response_status,
     sum_response_count,
     change_db_path,
-    logs_by_day,
+    fetch_logs_by_date,
     all_logs_en2ar,
 )
 
@@ -24,6 +24,6 @@ __all__ = [
     "get_logs",
     "count_all",
     "get_response_status",
-    "logs_by_day",
+    "fetch_logs_by_date",
     "all_logs_en2ar",
 ]

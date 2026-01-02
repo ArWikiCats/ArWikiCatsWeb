@@ -9,17 +9,10 @@ import sqlite3
 from pathlib import Path
 
 HOME = os.getenv("HOME")
+main_path = HOME + "/www/python/dbs" if HOME else Path(__file__).parent.parent.parent
 
-main_path = Path(__file__).parent.parent.parent
-# ---
-if HOME:
-    main_path = HOME + "/www/python/dbs"
-# ---
-db_path = f"{str(main_path)}/new_logs.db"
+db_path_main = {1: f"{str(main_path)}/new_logs.db"}
 
-db_path_main = {1: str(db_path)}
-
-print("db_path", db_path_main[1])
 
 def change_db_path(file):
     # ---
@@ -35,6 +28,7 @@ def change_db_path(file):
     # ---
     return dbs
 
+
 def db_commit(query, params=[]):
     try:
         with sqlite3.connect(db_path_main[1]) as conn:
@@ -46,6 +40,7 @@ def db_commit(query, params=[]):
     except sqlite3.Error as e:
         print(f"init_db Database error: {e}")
         return e
+
 
 def init_db():
     query = """
@@ -77,6 +72,7 @@ def init_db():
         );
         """
     db_commit(query)
+
 
 def fetch_all(query, params=[], fetch_one=False):
     try:
