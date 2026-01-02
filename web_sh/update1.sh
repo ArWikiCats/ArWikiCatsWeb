@@ -46,4 +46,4 @@ fi
 
 # webservice python3.11 restart
 
-# toolforge-jobs run updatex --image python3.11 --command "$HOME/web_sh/update1.sh update"
+# toolforge-jobs run updatex --image python3.11 --command "$HOME/web_sh/update1.sh update" --wait
