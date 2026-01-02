@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from pathlib import Path
-
 import logs_db  # logs_db.change_db_path(file)
+from pathlib import Path
 
 db_tables = ["logs", "list_logs"]
 

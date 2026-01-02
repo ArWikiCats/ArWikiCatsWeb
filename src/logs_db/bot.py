@@ -7,11 +7,9 @@ from .logs_db.bot import change_db_path, db_commit, init_db, fetch_all
 import re
 
 try:
-    from .db import change_db_path as _change_db_path
-    from .db import db_commit, fetch_all, init_db
+    from .db import change_db_path as _change_db_path, db_commit, init_db, fetch_all
 except ImportError:
-    from db import change_db_path as _change_db_path
-    from db import db_commit, fetch_all, init_db
+    from db import change_db_path as _change_db_path, db_commit, init_db, fetch_all
 
 
 def change_db_path(file):
