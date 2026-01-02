@@ -1,5 +1,6 @@
-import requests
 import json
+
+import requests
 
 # Base URL - adjust if your server runs on a different port
 BASE_URL = "http://localhost:5000"

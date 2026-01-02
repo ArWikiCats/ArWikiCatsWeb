@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from bot import init_db, db_commit
+from bot import db_commit, init_db
 
 
 def update_existing_records():

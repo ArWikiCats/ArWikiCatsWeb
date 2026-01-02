@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
+import json
 import sys
 import time
-from flask import Flask, render_template, request, Response
-import json
+
+from flask import Flask, Response, render_template, request
 from flask_cors import CORS
 
-import logs_db
 import logs_bot
+import logs_db
 
 sys.argv.append("noprint")
 
