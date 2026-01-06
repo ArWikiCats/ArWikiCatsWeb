@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import sys
+
 from flask import Flask, render_template
 from flask_cors import CORS
+
 from .routes import api_bp, ui_bp
 
 

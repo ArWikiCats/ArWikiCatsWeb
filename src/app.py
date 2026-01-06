@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import sys
-from app import create_app              # noqa: E402
+
+from app import create_app  # noqa: E402
 from app.logs_db import init_db
 
 app = create_app()

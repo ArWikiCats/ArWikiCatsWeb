@@ -37,7 +37,7 @@ cp -rf "$HOME"/srcx/src/* "$TARGET_DIR/" -v || exit 1
 
 if source "$HOME/www/python/venv/bin/activate"; then
     # pip install -r $HOME/www/python/src/requirements.txt
-    pip install -r "$TARGET_DIR"/requirements.txt
+    pip install -r "$TARGET_DIR"/requirements.txt -U
     # exit 1
 else
     echo "Failed to activate virtual environment" >&2

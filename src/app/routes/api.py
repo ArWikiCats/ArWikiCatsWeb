@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-import time
-from flask import Blueprint, request, Response
 import json
+import time
 
-from ..logs_db import log_request, get_response_status
+from flask import Blueprint, Response, request
+
 from .. import logs_bot
+from ..logs_db import get_response_status, log_request
 
 try:
     from ArWikiCats import batch_resolve_labels, resolve_arabic_category_label  # type: ignore
@@ -13,7 +14,7 @@ except ImportError:
     resolve_arabic_category_label = None
 
 # Create the API Blueprint
-api_bp = Blueprint('api', __name__, url_prefix='/api')
+api_bp = Blueprint("api", __name__, url_prefix="/api")
 
 
 def jsonify(data: dict) -> str:
@@ -87,7 +88,7 @@ def get_title(title) -> str:
     # ---
     delta = time.time() - start_time
     # ---
-    data['sql'] = log_request("/api/<title>", title, label or "no_result", delta)
+    data["sql"] = log_request("/api/<title>", title, label or "no_result", delta)
     # ---
     return jsonify(data)
 
@@ -133,7 +134,13 @@ def get_titles():
     # ---
     delta2 = time.time() - start_time
     # ---
-    response_data = {"results": result.labels, "no_labs": len(result.no_labels), "with_labs": len_result, "duplicates": duplicates, "time": delta2}
+    response_data = {
+        "results": result.labels,
+        "no_labs": len(result.no_labels),
+        "with_labs": len_result,
+        "duplicates": duplicates,
+        "time": delta2,
+    }
     # ---
     # تحديد حالة الاستجابة
     response_status = "success" if len_result > 0 else "no_result"

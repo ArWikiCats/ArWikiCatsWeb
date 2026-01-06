@@ -7,9 +7,11 @@ from .logs_db.bot import change_db_path, db_commit, init_db, fetch_all
 import re
 
 try:
-    from .db import change_db_path as _change_db_path, db_commit, init_db, fetch_all
+    from .db import change_db_path as _change_db_path
+    from .db import db_commit, fetch_all, init_db
 except ImportError:
-    from db import change_db_path as _change_db_path, db_commit, init_db, fetch_all
+    from db import change_db_path as _change_db_path
+    from db import db_commit, fetch_all, init_db
 
 
 def change_db_path(file):
@@ -101,7 +103,7 @@ def get_response_status(table_name="logs"):
     # ---
     result = fetch_all(query, ())
     # ---
-    result = [row['response_status'] for row in result]
+    result = [row["response_status"] for row in result]
     # ---
     return result
 
@@ -163,7 +165,9 @@ def fetch_logs_by_date(table_name="logs"):
         FROM {table_name}
         GROUP BY date_only, status_group
         ORDER BY date_only;
-        """.format(table_name=table_name)
+        """.format(
+        table_name=table_name
+    )
     # ---
     result = fetch_all(query_by_day, ())
     # ---
@@ -197,6 +201,6 @@ def all_logs_en2ar(day=None):
     # ---
     data = fetch_all(query_by_day, params)
     # ---
-    result = {x["request_data"] : x["response_status"] for x in data}
+    result = {x["request_data"]: x["response_status"] for x in data}
     # ---
     return result

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, render_template, request
 
-from ..logs_bot import view_logs, retrieve_logs_by_date
+from ..logs_bot import retrieve_logs_by_date, view_logs
 
 # Create the UI Blueprint
-ui_bp = Blueprint('ui', __name__)
+ui_bp = Blueprint("ui", __name__)
 
 
 @ui_bp.route("/", methods=["GET"])
