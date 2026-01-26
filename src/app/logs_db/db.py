@@ -11,6 +11,9 @@ from pathlib import Path
 HOME = os.getenv("HOME")
 main_path = HOME + "/www/python/dbs" if HOME else Path(__file__).parent.parent.parent
 
+if not main_path.exists():
+    main_path.mkdir(parents=True, exist_ok=True)
+
 db_path_main = {1: f"{str(main_path)}/new_logs.db"}
 
 
