@@ -107,12 +107,6 @@ def get_titles():
     data = request.get_json()
     titles = data.get("titles", [])
     # ---
-    delta = time.time() - start_time
-    # ---
-    len_titles = len(titles)
-    titles = list(set(titles))
-    duplicates = len_titles - len(titles)
-    # ---
     # Check for User-Agent header
     ua_check = check_user_agent("/api/list", titles, start_time)
     if ua_check:
@@ -120,8 +114,15 @@ def get_titles():
     # ---
     # تأكد أن البيانات قائمة
     if not isinstance(titles, list):
+        delta = time.time() - start_time
         log_request("/api/list", titles, "error", delta)
         return jsonify({"error": "بيانات غير صالحة"}), 400
+    # ---
+    delta = time.time() - start_time
+    # ---
+    len_titles = len(titles)
+    titles = list(set(titles))
+    duplicates = len_titles - len(titles)
 
     # print("get_titles:")
     # print(titles)

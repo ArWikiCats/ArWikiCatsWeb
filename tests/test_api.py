@@ -201,7 +201,7 @@ class TestTitleEndpoint:
     def test_title_endpoint_with_user_agent(self, client):
         """Test title endpoint works with User-Agent."""
         with patch("src.app.routes.api.resolve_arabic_category_label") as mock_resolve:
-            with patch("src.app.routes.api.log_request"):
+            with patch("src.app.routes.api.log_request", return_value="test"):
                 mock_resolve.return_value = "تصنيف:اختبار"
 
                 response = client.get(
