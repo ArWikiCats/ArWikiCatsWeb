@@ -15,7 +15,7 @@ class TestAddStatus:
 
     def test_add_status_with_status(self):
         """Test add_status adds correct WHERE clause for status."""
-        from app.logs_db.bot import add_status
+        from src.app.logs_db.bot import add_status
 
         query = "SELECT * FROM logs"
         params = []
@@ -27,7 +27,7 @@ class TestAddStatus:
 
     def test_add_status_with_category(self):
         """Test add_status handles 'Category' status specially."""
-        from app.logs_db.bot import add_status
+        from src.app.logs_db.bot import add_status
 
         query = "SELECT * FROM logs"
         params = []
@@ -39,7 +39,7 @@ class TestAddStatus:
 
     def test_add_status_with_like(self):
         """Test add_status adds LIKE clause correctly."""
-        from app.logs_db.bot import add_status
+        from src.app.logs_db.bot import add_status
 
         query = "SELECT * FROM logs"
         params = []
@@ -51,7 +51,7 @@ class TestAddStatus:
 
     def test_add_status_with_valid_day(self):
         """Test add_status adds date filter for valid day format."""
-        from app.logs_db.bot import add_status
+        from src.app.logs_db.bot import add_status
 
         query = "SELECT * FROM logs"
         params = []
@@ -63,7 +63,7 @@ class TestAddStatus:
 
     def test_add_status_with_invalid_day(self):
         """Test add_status ignores invalid day format."""
-        from app.logs_db.bot import add_status
+        from src.app.logs_db.bot import add_status
 
         query = "SELECT * FROM logs"
         params = []
@@ -74,7 +74,7 @@ class TestAddStatus:
 
     def test_add_status_with_multiple_conditions(self):
         """Test add_status combines multiple conditions with AND."""
-        from app.logs_db.bot import add_status
+        from src.app.logs_db.bot import add_status
 
         query = "SELECT * FROM logs"
         params = []
@@ -88,7 +88,7 @@ class TestAddStatus:
 
     def test_add_status_with_tuple_params(self):
         """Test add_status converts tuple params to list."""
-        from app.logs_db.bot import add_status
+        from src.app.logs_db.bot import add_status
 
         query = "SELECT * FROM logs"
         params = ()  # tuple instead of list
@@ -159,7 +159,7 @@ class TestDatabaseOperations:
 
     def test_fetch_all_returns_list(self, temp_db):
         """Test that fetch_all returns a list of dictionaries."""
-        from app.logs_db import db
+        from src.app.logs_db import db
 
         # Patch the db_path_main to use our temp database
         original_path = db.db_path_main[1]
@@ -175,7 +175,7 @@ class TestDatabaseOperations:
 
     def test_fetch_all_fetch_one(self, temp_db):
         """Test that fetch_all with fetch_one=True returns single dict."""
-        from app.logs_db import db
+        from src.app.logs_db import db
 
         original_path = db.db_path_main[1]
         db.db_path_main[1] = temp_db
@@ -191,7 +191,7 @@ class TestDatabaseOperations:
 
     def test_fetch_all_no_result(self, temp_db):
         """Test fetch_all returns empty list when no results."""
-        from app.logs_db import db
+        from src.app.logs_db import db
 
         original_path = db.db_path_main[1]
         db.db_path_main[1] = temp_db
@@ -206,7 +206,7 @@ class TestDatabaseOperations:
 
     def test_db_commit_success(self, temp_db):
         """Test that db_commit returns True on success."""
-        from app.logs_db import db
+        from src.app.logs_db import db
 
         original_path = db.db_path_main[1]
         db.db_path_main[1] = temp_db
@@ -233,7 +233,7 @@ class TestLogRequest:
 
     def test_log_request_rounds_response_time(self, mock_db):
         """Test that response_time is rounded to 3 decimal places."""
-        from app.logs_db.bot import log_request
+        from src.app.logs_db.bot import log_request
 
         log_request("/api/test", "test_data", "success", 0.123456789)
 
@@ -243,7 +243,7 @@ class TestLogRequest:
 
     def test_log_request_uses_logs_table(self, mock_db):
         """Test that non-list endpoints use the 'logs' table."""
-        from app.logs_db.bot import log_request
+        from src.app.logs_db.bot import log_request
 
         log_request("/api/test", "test_data", "success", 0.1)
 
@@ -253,7 +253,7 @@ class TestLogRequest:
 
     def test_log_request_uses_list_logs_table(self, mock_db):
         """Test that /api/list endpoint uses 'list_logs' table."""
-        from app.logs_db.bot import log_request
+        from src.app.logs_db.bot import log_request
 
         log_request("/api/list", "test_data", "success", 0.1)
 
@@ -262,7 +262,7 @@ class TestLogRequest:
 
     def test_log_request_converts_status_to_string(self, mock_db):
         """Test that response_status is converted to string."""
-        from app.logs_db.bot import log_request
+        from src.app.logs_db.bot import log_request
 
         log_request("/api/test", "test_data", 200, 0.1)
 
@@ -311,7 +311,7 @@ class TestCountAll:
 
     def test_count_all_total(self, temp_db_with_data):
         """Test count_all returns total count without filters."""
-        from app.logs_db import db, bot
+        from src.app.logs_db import db, bot
 
         original_path = db.db_path_main[1]
         db.db_path_main[1] = temp_db_with_data
@@ -324,7 +324,7 @@ class TestCountAll:
 
     def test_count_all_with_status(self, temp_db_with_data):
         """Test count_all with status filter."""
-        from app.logs_db import db, bot
+        from src.app.logs_db import db, bot
 
         original_path = db.db_path_main[1]
         db.db_path_main[1] = temp_db_with_data
@@ -372,7 +372,7 @@ class TestGetLogs:
 
     def test_get_logs_pagination(self, temp_db_for_logs):
         """Test get_logs respects pagination parameters."""
-        from app.logs_db import db, bot
+        from src.app.logs_db import db, bot
 
         original_path = db.db_path_main[1]
         db.db_path_main[1] = temp_db_for_logs
@@ -385,7 +385,7 @@ class TestGetLogs:
 
     def test_get_logs_order_desc(self, temp_db_for_logs):
         """Test get_logs orders DESC by default."""
-        from app.logs_db import db, bot
+        from src.app.logs_db import db, bot
 
         original_path = db.db_path_main[1]
         db.db_path_main[1] = temp_db_for_logs
@@ -400,7 +400,7 @@ class TestGetLogs:
 
     def test_get_logs_order_asc(self, temp_db_for_logs):
         """Test get_logs can order ASC."""
-        from app.logs_db import db, bot
+        from src.app.logs_db import db, bot
 
         original_path = db.db_path_main[1]
         db.db_path_main[1] = temp_db_for_logs
@@ -414,7 +414,7 @@ class TestGetLogs:
 
     def test_get_logs_invalid_order_defaults_to_desc(self, temp_db_for_logs):
         """Test get_logs defaults to DESC for invalid order."""
-        from app.logs_db import db, bot
+        from src.app.logs_db import db, bot
 
         original_path = db.db_path_main[1]
         db.db_path_main[1] = temp_db_for_logs
@@ -470,7 +470,7 @@ class TestSumResponseCount:
 
     def test_sum_response_count_total(self, temp_db_for_sum):
         """Test sum_response_count returns total sum."""
-        from app.logs_db import db, bot
+        from src.app.logs_db import db, bot
 
         original_path = db.db_path_main[1]
         db.db_path_main[1] = temp_db_for_sum
@@ -483,7 +483,7 @@ class TestSumResponseCount:
 
     def test_sum_response_count_with_status(self, temp_db_for_sum):
         """Test sum_response_count with status filter."""
-        from app.logs_db import db, bot
+        from src.app.logs_db import db, bot
 
         original_path = db.db_path_main[1]
         db.db_path_main[1] = temp_db_for_sum
@@ -500,7 +500,7 @@ class TestChangeDbPath:
 
     def test_change_db_path_returns_list_of_dbs(self, tmp_path):
         """Test that change_db_path returns list of .db files."""
-        from app.logs_db import db
+        from src.app.logs_db import db
 
         # Create some test db files
         (tmp_path / "test1.db").touch()

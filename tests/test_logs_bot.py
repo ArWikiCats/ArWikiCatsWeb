@@ -39,7 +39,7 @@ class TestViewLogs:
     @patch("app.logs_bot.logs_db")
     def test_view_logs_returns_dict_with_required_keys(self, mock_logs_db, mock_request):
         """Test that view_logs returns a dict with expected keys."""
-        from app.logs_bot import view_logs
+        from src.app.logs_bot import view_logs
 
         # Setup mocks
         mock_logs_db.get_logs.return_value = []
@@ -57,7 +57,7 @@ class TestViewLogs:
     @patch("app.logs_bot.logs_db")
     def test_view_logs_pagination_defaults(self, mock_logs_db, mock_request):
         """Test that view_logs uses correct pagination defaults."""
-        from app.logs_bot import view_logs
+        from src.app.logs_bot import view_logs
 
         mock_logs_db.get_logs.return_value = []
         mock_logs_db.count_all.return_value = 0
@@ -72,7 +72,7 @@ class TestViewLogs:
     @patch("app.logs_bot.logs_db")
     def test_view_logs_validates_table_name(self, mock_logs_db):
         """Test that view_logs validates table_name parameter."""
-        from app.logs_bot import view_logs
+        from src.app.logs_bot import view_logs
 
         request = MagicMock()
         request.args.get = MagicMock(side_effect=lambda k, d=None, type=None: {
@@ -95,7 +95,7 @@ class TestViewLogs:
     @patch("app.logs_bot.logs_db")
     def test_view_logs_formats_request_data(self, mock_logs_db, mock_request):
         """Test that view_logs replaces underscores in request_data."""
-        from app.logs_bot import view_logs
+        from src.app.logs_bot import view_logs
 
         mock_logs_db.get_logs.return_value = [
             {
@@ -132,7 +132,7 @@ class TestRetrieveLogsByDate:
     @patch("app.logs_bot.logs_db")
     def test_retrieve_logs_by_date_returns_dict(self, mock_logs_db, mock_request):
         """Test that retrieve_logs_by_date returns expected structure."""
-        from app.logs_bot import retrieve_logs_by_date
+        from src.app.logs_bot import retrieve_logs_by_date
 
         mock_logs_db.fetch_logs_by_date.return_value = []
 
@@ -146,7 +146,7 @@ class TestRetrieveLogsByDate:
     @patch("app.logs_bot.logs_db")
     def test_retrieve_logs_by_date_aggregates_data(self, mock_logs_db, mock_request):
         """Test that retrieve_logs_by_date properly aggregates data by date."""
-        from app.logs_bot import retrieve_logs_by_date
+        from src.app.logs_bot import retrieve_logs_by_date
 
         mock_logs_db.fetch_logs_by_date.return_value = [
             {"date_only": "2025-01-27", "status_group": "no_result", "title_count": 5, "count": 10},
@@ -167,7 +167,7 @@ class TestRetrieveLogsByDate:
     @patch("app.logs_bot.logs_db")
     def test_retrieve_logs_by_date_sorts_by_day(self, mock_logs_db, mock_request):
         """Test that logs are sorted by day."""
-        from app.logs_bot import retrieve_logs_by_date
+        from src.app.logs_bot import retrieve_logs_by_date
 
         mock_logs_db.fetch_logs_by_date.return_value = [
             {"date_only": "2025-01-27", "status_group": "no_result", "title_count": 1, "count": 1},
@@ -187,7 +187,7 @@ class TestRetrieveLogsEnToAr:
     @patch("app.logs_bot.logs_db")
     def test_retrieve_logs_en_to_ar_separates_results(self, mock_logs_db):
         """Test that results are separated into no_result and data_result."""
-        from app.logs_bot import retrieve_logs_en_to_ar
+        from src.app.logs_bot import retrieve_logs_en_to_ar
 
         mock_logs_db.all_logs_en2ar.return_value = {
             "Category:Test1": "تصنيف:اختبار1",
@@ -206,7 +206,7 @@ class TestRetrieveLogsEnToAr:
     @patch("app.logs_bot.logs_db")
     def test_retrieve_logs_en_to_ar_tab_counts(self, mock_logs_db):
         """Test that tab contains correct counts."""
-        from app.logs_bot import retrieve_logs_en_to_ar
+        from src.app.logs_bot import retrieve_logs_en_to_ar
 
         mock_logs_db.all_logs_en2ar.return_value = {
             "Category:Test1": "تصنيف:اختبار1",
@@ -223,7 +223,7 @@ class TestRetrieveLogsEnToAr:
     @patch("app.logs_bot.logs_db")
     def test_retrieve_logs_en_to_ar_with_day_parameter(self, mock_logs_db):
         """Test that day parameter is passed to the database function."""
-        from app.logs_bot import retrieve_logs_en_to_ar
+        from src.app.logs_bot import retrieve_logs_en_to_ar
 
         mock_logs_db.all_logs_en2ar.return_value = {}
 
@@ -234,7 +234,7 @@ class TestRetrieveLogsEnToAr:
     @patch("app.logs_bot.logs_db")
     def test_retrieve_logs_en_to_ar_empty_results(self, mock_logs_db):
         """Test handling of empty results."""
-        from app.logs_bot import retrieve_logs_en_to_ar
+        from src.app.logs_bot import retrieve_logs_en_to_ar
 
         mock_logs_db.all_logs_en2ar.return_value = {}
 

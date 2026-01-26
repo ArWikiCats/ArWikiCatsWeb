@@ -13,7 +13,7 @@ class TestJsonify:
 
     def test_jsonify_returns_response(self):
         """Test that jsonify returns a Flask Response."""
-        from app.routes.api import jsonify
+        from src.app.routes.api import jsonify
 
         result = jsonify({"key": "value"})
 
@@ -21,7 +21,7 @@ class TestJsonify:
 
     def test_jsonify_handles_unicode(self):
         """Test that jsonify properly handles Arabic text."""
-        from app.routes.api import jsonify
+        from src.app.routes.api import jsonify
 
         data = {"result": "تصنيف:اختبار"}
         result = jsonify(data)
@@ -31,7 +31,7 @@ class TestJsonify:
 
     def test_jsonify_formats_output(self):
         """Test that jsonify formats JSON with indentation."""
-        from app.routes.api import jsonify
+        from src.app.routes.api import jsonify
 
         data = {"key1": "value1", "key2": "value2"}
         result = jsonify(data)
@@ -55,7 +55,7 @@ class TestCheckUserAgent:
     def test_check_user_agent_missing(self, app_context):
         """Test that missing User-Agent returns error."""
         from flask import request
-        from app.routes.api import check_user_agent
+        from src.app.routes.api import check_user_agent
 
         with patch.object(request, 'headers', {"User-Agent": ""}):
             with patch("app.routes.api.log_request"):
@@ -67,7 +67,7 @@ class TestCheckUserAgent:
     def test_check_user_agent_present(self, app_context):
         """Test that present User-Agent returns None."""
         from flask import request
-        from app.routes.api import check_user_agent
+        from src.app.routes.api import check_user_agent
 
         with patch.object(request, 'headers', {"User-Agent": "TestAgent/1.0"}):
             result = check_user_agent("/api/test", "data", 0)

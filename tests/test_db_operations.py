@@ -37,7 +37,7 @@ class TestFetchLogsEdgeCases:
 
     def test_fetch_all_empty_table(self, temp_db):
         """Test fetch_all on empty table returns empty list."""
-        from app.logs_db import db
+        from src.app.logs_db import db
 
         original_path = db.db_path_main[1]
         db.db_path_main[1] = temp_db
@@ -50,7 +50,7 @@ class TestFetchLogsEdgeCases:
 
     def test_fetch_all_with_special_characters(self, temp_db):
         """Test fetch_all handles special characters in data."""
-        from app.logs_db import db
+        from src.app.logs_db import db
 
         original_path = db.db_path_main[1]
         db.db_path_main[1] = temp_db
@@ -70,7 +70,7 @@ class TestFetchLogsEdgeCases:
 
     def test_fetch_all_with_unicode(self, temp_db):
         """Test fetch_all handles Arabic and other unicode."""
-        from app.logs_db import db
+        from src.app.logs_db import db
 
         original_path = db.db_path_main[1]
         db.db_path_main[1] = temp_db
@@ -94,7 +94,7 @@ class TestDatabaseErrorHandling:
 
     def test_db_commit_invalid_sql(self, tmp_path):
         """Test db_commit handles invalid SQL gracefully."""
-        from app.logs_db import db
+        from src.app.logs_db import db
 
         db_file = tmp_path / "test_error.db"
         conn = sqlite3.connect(str(db_file))
@@ -113,7 +113,7 @@ class TestDatabaseErrorHandling:
 
     def test_fetch_all_handles_missing_table(self, tmp_path):
         """Test fetch_all behavior with missing table."""
-        from app.logs_db import db
+        from src.app.logs_db import db
 
         db_file = tmp_path / "test_missing.db"
         conn = sqlite3.connect(str(db_file))
@@ -174,7 +174,7 @@ class TestAllLogsEn2Ar:
 
     def test_all_logs_en2ar_returns_dict(self, temp_db_with_logs):
         """Test all_logs_en2ar returns dictionary."""
-        from app.logs_db import db, bot
+        from src.app.logs_db import db, bot
 
         original_path = db.db_path_main[1]
         db.db_path_main[1] = temp_db_with_logs
@@ -188,7 +188,7 @@ class TestAllLogsEn2Ar:
 
     def test_all_logs_en2ar_with_day_filter(self, temp_db_with_logs):
         """Test all_logs_en2ar filters by day."""
-        from app.logs_db import db, bot
+        from src.app.logs_db import db, bot
 
         original_path = db.db_path_main[1]
         db.db_path_main[1] = temp_db_with_logs
@@ -201,7 +201,7 @@ class TestAllLogsEn2Ar:
 
     def test_all_logs_en2ar_with_month_filter(self, temp_db_with_logs):
         """Test all_logs_en2ar filters by month."""
-        from app.logs_db import db, bot
+        from src.app.logs_db import db, bot
 
         original_path = db.db_path_main[1]
         db.db_path_main[1] = temp_db_with_logs
@@ -259,7 +259,7 @@ class TestFetchLogsByDate:
 
     def test_fetch_logs_by_date_groups_correctly(self, temp_db_grouped):
         """Test fetch_logs_by_date groups by date and status."""
-        from app.logs_db import db, bot
+        from src.app.logs_db import db, bot
 
         original_path = db.db_path_main[1]
         db.db_path_main[1] = temp_db_grouped
@@ -320,7 +320,7 @@ class TestGetResponseStatus:
 
     def test_get_response_status_returns_list(self, temp_db_status):
         """Test get_response_status returns list of statuses."""
-        from app.logs_db import db, bot
+        from src.app.logs_db import db, bot
 
         original_path = db.db_path_main[1]
         db.db_path_main[1] = temp_db_status
