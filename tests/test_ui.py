@@ -27,7 +27,7 @@ class TestUIRoutes:
 
     def test_logs_page(self, client):
         """Test that logs page renders with mocked data."""
-        with patch("app.routes.ui.view_logs") as mock_view:
+        with patch("src.app.routes.ui.view_logs") as mock_view:
             mock_view.return_value = {
                 "logs": [],
                 "tab": {
@@ -65,7 +65,7 @@ class TestUIRoutes:
 
     def test_logs_by_day_page(self, client):
         """Test that logs_by_day page renders with mocked data."""
-        with patch("app.routes.ui.retrieve_logs_by_date") as mock_retrieve:
+        with patch("src.app.routes.ui.retrieve_logs_by_date") as mock_retrieve:
             mock_retrieve.return_value = {
                 "logs": [],
                 "tab": {"sum_all": "0", "db_path": None, "table_name": "logs"},
@@ -110,7 +110,7 @@ class TestUIWithQueryParams:
 
     def test_logs_page_with_pagination(self, client):
         """Test logs page with pagination parameters."""
-        with patch("app.routes.ui.view_logs") as mock_view:
+        with patch("src.app.routes.ui.view_logs") as mock_view:
             mock_view.return_value = {
                 "logs": [],
                 "tab": {
@@ -143,7 +143,7 @@ class TestUIWithQueryParams:
 
     def test_logs_page_with_status_filter(self, client):
         """Test logs page with status filter."""
-        with patch("app.routes.ui.view_logs") as mock_view:
+        with patch("src.app.routes.ui.view_logs") as mock_view:
             mock_view.return_value = {
                 "logs": [],
                 "tab": {
@@ -175,7 +175,7 @@ class TestUIWithQueryParams:
 
     def test_logs_by_day_with_table_name(self, client):
         """Test logs_by_day page with table_name parameter."""
-        with patch("app.routes.ui.retrieve_logs_by_date") as mock_retrieve:
+        with patch("src.app.routes.ui.retrieve_logs_by_date") as mock_retrieve:
             mock_retrieve.return_value = {
                 "logs": [],
                 "tab": {"sum_all": "0", "db_path": None, "table_name": "list_logs"},

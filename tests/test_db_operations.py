@@ -125,7 +125,7 @@ class TestDatabaseErrorHandling:
         try:
             # This should handle the error gracefully
             # The function may print an error or call init_db
-            with patch("app.logs_db.db.init_db"):
+            with patch("src.app.logs_db.db.init_db"):
                 result = db.fetch_all("SELECT * FROM nonexistent_table")
         finally:
             db.db_path_main[1] = original_path
