@@ -47,7 +47,7 @@ class TestCheckUserAgent:
     @pytest.fixture
     def app_context(self):
         """Create Flask app context for testing."""
-        from app import create_app
+        from src.app import create_app
         app = create_app()
         with app.test_request_context():
             yield app
@@ -81,7 +81,7 @@ class TestApiEndpoints:
     @pytest.fixture
     def client(self):
         """Create Flask test client."""
-        from app import create_app
+        from src.app import create_app
         app = create_app()
         app.config["TESTING"] = True
         with app.test_client() as client:
@@ -182,7 +182,7 @@ class TestTitleEndpoint:
     @pytest.fixture
     def client(self):
         """Create Flask test client."""
-        from app import create_app
+        from src.app import create_app
         app = create_app()
         app.config["TESTING"] = True
         with app.test_client() as client:
@@ -231,7 +231,7 @@ class TestListEndpoint:
     @pytest.fixture
     def client(self):
         """Create Flask test client."""
-        from app import create_app
+        from src.app import create_app
         app = create_app()
         app.config["TESTING"] = True
         with app.test_client() as client:
