@@ -67,7 +67,8 @@ class TestViewLogs:
 
         # Check that get_logs was called with default pagination
         call_args = mock_logs_db.get_logs.call_args
-        assert call_args[1]["per_page"] == 10 or call_args[0][0] == 10
+        # per_page is passed as the first positional argument
+        assert call_args[0][0] == 10
 
     @patch("src.app.logs_bot.logs_db")
     def test_view_logs_validates_table_name(self, mock_logs_db):
