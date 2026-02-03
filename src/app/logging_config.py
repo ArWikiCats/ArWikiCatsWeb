@@ -4,8 +4,10 @@ Logging configuration with colored output.
 
 import functools
 import logging
+import os
 import re
 import sys
+from pathlib import Path
 
 import colorlog
 
@@ -122,13 +124,25 @@ def wrap_color_messages(format_message):
     return wrapper
 
 
+def prepare_log_file(log_file, project_logger):
+    log_file = Path(log_file).expanduser()
+    try:
+        log_file.parent.mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        project_logger.error(f"Failed to create log directory: {e}")
+        log_file = None
+    return log_file
+
+
 def setup_logging(
     level: str = "WARNING",
+    name: str = "app",
+    log_file: str | None = None,
 ) -> None:
     """
     Configure logging for the entire project namespace only.
     """
-    project_logger = logging.getLogger(__name__)
+    project_logger = logging.getLogger(name)
 
     if project_logger.handlers:
         return
@@ -154,6 +168,28 @@ def setup_logging(
     formatter.formatMessage = wrap_color_messages(formatter.formatMessage)
 
     handler.setLevel(numeric_level)
-    handler.propagate = False
 
     project_logger.addHandler(handler)
+
+    if log_file:
+        log_file = prepare_log_file(log_file, project_logger)
+
+        file_formatter = logging.Formatter(
+            fmt="%(asctime)s - %(name)s - %(levelname)-8s - %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+        file_handler = logging.FileHandler(log_file, mode="a", encoding="utf-8")
+        file_handler.setFormatter(file_formatter)
+        file_handler.setLevel(numeric_level)
+        project_logger.addHandler(file_handler)
+
+        # Separate error log file
+        log_file2 = log_file.with_suffix(".err")
+        file_formatter = logging.Formatter(
+            fmt="%(asctime)s - %(name)s - %(levelname)-8s - %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+        file_handler = logging.FileHandler(log_file2, mode="a", encoding="utf-8")
+        file_handler.setFormatter(file_formatter)
+        file_handler.setLevel(logging.WARNING)
+        project_logger.addHandler(file_handler)
