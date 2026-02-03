@@ -1,6 +1,6 @@
 # ArWikiCatsWeb
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/WikiAr/make2-web)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/ArWikiCats/ArWikiCatsWeb)
 
 A Flask-based web service for resolving Arabic Wikipedia category labels. This service provides both a web interface and REST API for working with Arabic Wikipedia categories.
 
@@ -16,7 +16,7 @@ A Flask-based web service for resolving Arabic Wikipedia category labels. This s
 ## Requirements
 
 - Python 3.11+
-- Dependencies listed in `src/requirements.txt`:
+- Dependencies listed in `requirements.txt`:
   - flask
   - flask_cors
   - ArWikiCats
@@ -25,7 +25,7 @@ A Flask-based web service for resolving Arabic Wikipedia category labels. This s
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/WikiAr/ArWikiCatsWeb.git
+git clone https://github.com/ArWikiCats/ArWikiCatsWeb.git
 cd ArWikiCatsWeb
 ```
 
@@ -128,11 +128,12 @@ ArWikiCatsWeb/
 │   ├── logs_db/            # Database logging module
 │   ├── templates/          # HTML templates
 │   ├── static/             # Static assets (CSS, JS)
-│   ├── requirements.txt    # Python dependencies
-│   └── uwsgi.ini          # UWSGI configuration
+│   └── uwsgi.ini           # UWSGI configuration
 ├── service.template        # Toolforge service configuration
-├── run.bat                # Windows run script
-└── README.md              # This file
+├── requirements.txt        # Python dependencies
+├── requirements-dev.txt    # Dev dependencies
+├── run.bat                 # Windows run script
+└── README.md               # This file
 ```
 
 ### Key Components
@@ -148,7 +149,7 @@ All API requests must include a `User-Agent` header. Requests without this heade
 
 ## License
 
-This project is part of the WikiAr organization for Arabic Wikipedia tools and utilities.
+This project is part of the ArWikiCats organization for Arabic Wikipedia tools and utilities.
 
 ## Contributing
 

@@ -1,10 +1,16 @@
 # -*- coding: utf-8 -*-
 import sys
+from pathlib import Path
 
 from flask import Flask, render_template
 from flask_cors import CORS
-
+from .logging_config import setup_logging
 from .routes import api_bp, ui_bp
+
+setup_logging(
+    level="DEBUG",
+    name=Path(__file__).parent.name,
+)
 
 
 def create_app() -> Flask:

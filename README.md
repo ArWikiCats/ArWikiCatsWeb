@@ -1,8 +1,8 @@
 # ArWikiCats Web Service
 
-[![CI/CD](https://github.com/WikiAr/ArWikiCatsWeb/workflows/pytest/badge.svg)](https://github.com/WikiAr/ArWikiCatsWeb/actions)
-[![codecov](https://codecov.io/gh/WikiAr/ArWikiCatsWeb/branch/main/graph/badge.svg)](https://codecov.io/gh/WikiAr/ArWikiCatsWeb)
-<!-- [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/WikiAr/make2-web) -->
+[![CI/CD](https://github.com/ArWikiCats/ArWikiCatsWeb/workflows/pytest/badge.svg)](https://github.com/ArWikiCats/ArWikiCatsWeb/actions)
+[![codecov](https://codecov.io/gh/ArWikiCats/ArWikiCatsWeb/branch/main/graph/badge.svg)](https://codecov.io/gh/ArWikiCats/ArWikiCatsWeb)
+<!-- [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/ArWikiCats/ArWikiCatsWeb) -->
 
 A Flask-based web service for resolving Arabic Wikipedia category labels. Provides both a web interface and REST API for working with Arabic Wikipedia categories.
 
@@ -19,7 +19,7 @@ A Flask-based web service for resolving Arabic Wikipedia category labels. Provid
 ## Requirements
 
 - Python 3.11+
-- Dependencies listed in `src/requirements.txt`:
+- Dependencies listed in `requirements.txt`:
   - flask
   - flask_cors
   - ArWikiCats
@@ -28,13 +28,13 @@ A Flask-based web service for resolving Arabic Wikipedia category labels. Provid
 
 1. **Clone the repository:**
 ```bash
-git clone https://github.com/WikiAr/ArWikiCatsWeb.git
+git clone https://github.com/ArWikiCats/ArWikiCatsWeb.git
 cd ArWikiCatsWeb
 ```
 
 2. **Install dependencies:**
 ```bash
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
 
 3. **Install dev dependencies (optional):**
@@ -88,23 +88,22 @@ ArWikiCatsWeb/
 │   │       └── ui.py          # UI routes
 │   ├── templates/             # HTML templates
 │   ├── static/                # Static assets (CSS, JS)
-│   ├── requirements.txt       # Python dependencies
-│   ├── app.py                # Application entry point
-│   └── app1.py               # Alternative entry point
+│   ├── app.py                 # Application entry point
 ├── tests/                     # Test suite
-│   ├── test_api.py           # API endpoint tests
-│   ├── test_db_operations.py # Database tests
-│   ├── test_logs_bot.py      # Logs bot tests
-│   ├── test_ui.py            # UI route tests
-│   └── test_user_agent.py    # User-Agent validation tests
+│   ├── test_api.py            # API endpoint tests
+│   ├── test_db_operations.py  # Database tests
+│   ├── test_logs_bot.py       # Logs bot tests
+│   ├── test_ui.py             # UI route tests
+│   └── test_user_agent.py     # User-Agent validation tests
 ├── .github/
 │   └── workflows/
-│       └── pytest.yml        # CI/CD configuration
-├── pytest.ini                # Pytest configuration
+│       └── pytest.yml         # CI/CD configuration
+├── pytest.ini                 # Pytest configuration
+├── requirements.txt           # Python dependencies
 ├── requirements-dev.txt       # Development dependencies
-├── service.template          # Toolforge service configuration
-├── run.bat                   # Windows run script
-└── README.md                 # This file
+├── service.template           # Toolforge service configuration
+├── run.bat                    # Windows run script
+└── README.md                  # This file
 ```
 
 ## API Endpoints
@@ -252,7 +251,7 @@ The project uses GitHub Actions for continuous integration. Tests run automatica
 
 ## License
 
-This project is part of the WikiAr organization for Arabic Wikipedia tools and services.
+This project is part of the ArWikiCats organization for Arabic Wikipedia tools and services.
 
 ## Contributing
 

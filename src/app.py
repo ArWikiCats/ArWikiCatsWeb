@@ -11,5 +11,5 @@ app = create_app()
 
 if __name__ == "__main__":
     init_db()
-    debug = "debug" in sys.argv or "DEBUG" in sys.argv
+    debug = any(arg.lower() == "debug" for arg in sys.argv)
     app.run(debug=debug)

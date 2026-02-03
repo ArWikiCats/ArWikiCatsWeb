@@ -6,7 +6,7 @@ BRANCH="${1:-main}"
 
 echo ">>> clone --branch ${BRANCH} ."
 
-REPO_URL="https://github.com/WikiAr/make2-web.git"
+REPO_URL="https://github.com/ArWikiCats/ArWikiCatsWeb.git"
 
 TARGET_DIR="$HOME/www/python/src"
 
@@ -29,6 +29,9 @@ fi
 # Copy the required files to the target directory
 # cp -rf ~/srcx/src/* "$HOME/www/python/src/" -v
 cp -rf "$HOME"/srcx/src/* "$TARGET_DIR/" -v || exit 1
+
+# cp requirements.txt to the target directory
+cp -f "$HOME"/srcx/requirements.txt "$TARGET_DIR"/requirements.txt -v
 
 # Remove the "$CLONE_DIR" directory.
 # rm -rf "$CLONE_DIR"

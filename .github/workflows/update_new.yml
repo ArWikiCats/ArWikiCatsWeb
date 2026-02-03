@@ -37,11 +37,11 @@ jobs:
           key: ${{ secrets.KEY }}
           script: |
             become armake bash -lc "
-              rm -rf ~/make2-web &&
-              cp -r /mnt/nfs/labstore-secondary-tools-home/${{ secrets.USERNAME }}/web_make2_temp ~/make2-web &&
-              chmod -R 770 ~/make2-web &&
-              cp -rf ~/make2-web/web_sh/*.sh ~/web_sh -v &&
-              rm -rf ~/make2-web &&
+              rm -rf ~/ArWikiCatsWeb &&
+              cp -r /mnt/nfs/labstore-secondary-tools-home/${{ secrets.USERNAME }}/web_make2_temp ~/ArWikiCatsWeb &&
+              chmod -R 770 ~/ArWikiCatsWeb &&
+              cp -rf ~/ArWikiCatsWeb/web_sh/*.sh ~/web_sh -v &&
+              rm -rf ~/ArWikiCatsWeb &&
               echo \"Updated on: $(date '+%Y-%m-%d %H:%M:%S')\" > ~/update_from_github &&
               toolforge-jobs run pipup --image python3.11 --command "~/web_sh/pip.sh" --wait &&
               toolforge-webservice python3.11 stop &&
