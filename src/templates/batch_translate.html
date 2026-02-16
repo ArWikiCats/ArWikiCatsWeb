@@ -1,0 +1,308 @@
+{% extends "main.html" %}
+{% block title %}
+<title>Batch Translate</title>
+{% endblock %}
+
+{% block content %}
+<div class="card card_form">
+    <div class="card-header text-center py-2">
+        <h4 class="card-title mb-0 d-flex align-items-center justify-content-center">
+            <i class="bi bi-translate ms-2"></i> Batch Translation
+        </h4>
+    </div>
+    <div class="card-body p-3">
+        <form id="batchForm">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label for="inputData" class="form-label fw-bold mb-0">
+                                <i class="bi bi-input-cursor-text ms-2"></i> Input Data
+                                <small class="text-muted d-block">Format: Q-ID[TAB]English text (one per line)</small>
+                            </label>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="clearInput()">
+                                    <i class="bi bi-trash ms-1"></i> Clear
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="pasteExample()">
+                                    <i class="bi bi-clipboard-data ms-1"></i> Example
+                                </button>
+                            </div>
+                        </div>
+                        <textarea
+                            id="inputData"
+                            name="inputData"
+                            class="form-control ltr_left"
+                            rows="10"
+                            placeholder="Q111737761	alpine skiing at the 2026 Winter Olympics&#10;Q123456789	example text here"
+                            required
+                        ></textarea>
+                        <div class="form-text text-muted mt-1">
+                            <i class="bi bi-info-circle ms-1"></i>
+                            Each line should contain Q-ID followed by a Tab character, then the English text.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-outline-primary btn-lg" id="translateBtn">
+                    <span id="notloading">
+                        <i class="bi bi-translate ms-1"></i> Translate All
+                    </span>
+                    <span id="loading" style="display: none;">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Translating...
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results Section -->
+<div class="row mt-4" id="resultsSection" style="display: none;">
+    <!-- Translated Results -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 border-success">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-check-circle ms-2"></i> Translated
+                    <span class="badge bg-light text-success ms-2" id="translatedCount">0</span>
+                </h5>
+                <button type="button" class="btn btn-sm btn-light" onclick="copyResults('translatedOutput')">
+                    <i class="bi bi-clipboard ms-1"></i> Copy All
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <textarea
+                    id="translatedOutput"
+                    class="form-control border-0"
+                    style="min-height: 300px; resize: vertical;"
+                    readonly
+                ></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Not Translated Results -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 border-warning">
+            <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-exclamation-triangle ms-2"></i> Not Translated
+                    <span class="badge bg-light text-warning ms-2" id="notTranslatedCount">0</span>
+                </h5>
+                <button type="button" class="btn btn-sm btn-light" onclick="copyResults('notTranslatedOutput')">
+                    <i class="bi bi-clipboard ms-1"></i> Copy All
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <textarea
+                    id="notTranslatedOutput"
+                    class="form-control border-0"
+                    style="min-height: 300px; resize: vertical;"
+                    readonly
+                ></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Card -->
+<div class="row" id="statsSection" style="display: none;">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-bar-chart ms-2"></i> Statistics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <h3 class="text-primary" id="totalLines">0</h3>
+                        <p class="text-muted">Total Lines</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h3 class="text-success" id="successCount">0</h3>
+                        <p class="text-muted">Translated</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h3 class="text-warning" id="failedCount">0</h3>
+                        <p class="text-muted">Not Translated</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Example data for demonstration
+function pasteExample() {
+    const example = `Q111737761	alpine skiing at the 2026 Winter Olympics
+Q22273	mountain
+Q3978003	local government area of New South Wales
+Q5	human
+Q30	United States of America`;
+    document.getElementById('inputData').value = example;
+}
+
+// Clear input textarea
+function clearInput() {
+    document.getElementById('inputData').value = '';
+    document.getElementById('resultsSection').style.display = 'none';
+    document.getElementById('statsSection').style.display = 'none';
+}
+
+// Copy textarea content to clipboard
+async function copyResults(elementId) {
+    const textarea = document.getElementById(elementId);
+    try {
+        await navigator.clipboard.writeText(textarea.value);
+        showToast('Copied to clipboard!', 'success');
+    } catch (err) {
+        // Fallback for older browsers
+        textarea.select();
+        document.execCommand('copy');
+        showToast('Copied to clipboard!', 'success');
+    }
+}
+
+// Show toast notification
+function showToast(message, type = 'info') {
+    const toastContainer = document.createElement('div');
+    toastContainer.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    toastContainer.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 200px;';
+    toastContainer.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(toastContainer);
+
+    setTimeout(() => {
+        toastContainer.remove();
+    }, 3000);
+}
+
+// Parse input lines
+function parseInputLines(text) {
+    return text.split('\n').filter(line => line.trim() !== '');
+}
+
+// Process translations
+async function processTranslations(lines) {
+    const translated = [];
+    const notTranslated = [];
+
+    // Show loading state
+    const translateBtn = document.getElementById('translateBtn');
+    const notloading = document.getElementById('notloading');
+    const loading = document.getElementById('loading');
+
+    notloading.style.display = 'none';
+    loading.style.display = 'inline';
+    translateBtn.disabled = true;
+
+    try {
+        // Extract titles (English text after tab)
+        const items = lines.map(line => {
+            const parts = line.split('\t');
+            return {
+                original: line,
+                qid: parts[0].trim(),
+                title: parts.slice(1).join('\t').trim()
+            };
+        });
+
+        const titles = items.map(item => item.title);
+
+        // Call API using existing /api/list endpoint
+        const response = await fetch('/api/list', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ titles: titles })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Process results
+        if (data.results) {
+            Object.entries(data.results).forEach(([key, value]) => {
+                const item = items.find(i => i.title === key);
+                if (item) {
+                    if (value && value.trim() !== '') {
+                        // Format: Q-ID[TAB]Lar[TAB]"Arabic text"
+                        translated.push(`${item.qid}\tLar\t"${value}"`);
+                    } else {
+                        notTranslated.push(item.original);
+                    }
+                }
+            });
+        }
+
+        // Handle any items not in results
+        items.forEach(item => {
+            const key = item.title;
+            if (!data.results || !(key in data.results)) {
+                notTranslated.push(item.original);
+            }
+        });
+
+    } catch (error) {
+        console.error('Translation error:', error);
+        showToast('Error during translation: ' + error.message, 'danger');
+        // Add all to not translated on error
+        lines.forEach(line => notTranslated.push(line));
+    } finally {
+        // Hide loading state
+        notloading.style.display = 'inline';
+        loading.style.display = 'none';
+        translateBtn.disabled = false;
+    }
+
+    return { translated, notTranslated };
+}
+
+// Form submission handler
+document.getElementById('batchForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const inputData = document.getElementById('inputData').value;
+    const lines = parseInputLines(inputData);
+
+    if (lines.length === 0) {
+        showToast('Please enter at least one line of data.', 'warning');
+        return;
+    }
+
+    const { translated, notTranslated } = await processTranslations(lines);
+
+    // Display results
+    document.getElementById('translatedOutput').value = translated.join('\n');
+    document.getElementById('notTranslatedOutput').value = notTranslated.join('\n');
+
+    // Update counts
+    document.getElementById('translatedCount').textContent = translated.length;
+    document.getElementById('notTranslatedCount').textContent = notTranslated.length;
+
+    // Update statistics
+    document.getElementById('totalLines').textContent = lines.length;
+    document.getElementById('successCount').textContent = translated.length;
+    document.getElementById('failedCount').textContent = notTranslated.length;
+
+    // Show sections
+    document.getElementById('resultsSection').style.display = 'flex';
+    document.getElementById('statsSection').style.display = 'block';
+
+    showToast(`Processed ${lines.length} lines successfully!`, 'success');
+});
+</script>
+
+{% endblock %}

@@ -53,3 +53,8 @@ def render_chart() -> str:
 @ui_bp.route("/chart2", methods=["GET"])
 def render_chart2() -> str:
     return render_template("chart2.html")
+
+
+@ui_bp.route("/batch_translate", methods=["GET"])
+def render_batch_translate() -> str:
+    return render_template("batch_translate.html")
