@@ -45,7 +45,7 @@
                 </div>
             </div>
             <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-outline-primary btn-lg" id="translateBtn">
+                <button type="submit" class="btn btn-outline-primary btn-lg" id="qidsTranslateBtn">
                     <span id="notloading">
                         <i class="bi bi-translate ms-1"></i> Translate All
                     </span>
@@ -196,13 +196,13 @@ async function processTranslations(lines) {
     const notTranslated = [];
 
     // Show loading state
-    const translateBtn = document.getElementById('translateBtn');
+    const qidsTranslateBtn = document.getElementById('qidsTranslateBtn');
     const notloading = document.getElementById('notloading');
     const loading = document.getElementById('loading');
 
     notloading.style.display = 'none';
     loading.style.display = 'inline';
-    translateBtn.disabled = true;
+    qidsTranslateBtn.disabled = true;
 
     try {
         // Extract titles (English text after tab)
@@ -264,7 +264,7 @@ async function processTranslations(lines) {
         // Hide loading state
         notloading.style.display = 'inline';
         loading.style.display = 'none';
-        translateBtn.disabled = false;
+        qidsTranslateBtn.disabled = false;
     }
 
     return { translated, notTranslated };
