@@ -8,3 +8,4 @@ src/app copy.py
 *.zip
 .coverage
 /DeepWiki.md
+.claude/settings.local.json
