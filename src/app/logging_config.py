@@ -5,6 +5,7 @@ Logging configuration with colored output.
 import functools
 import logging
 import re
+import os
 import sys
 from pathlib import Path
 
@@ -124,9 +125,8 @@ def wrap_color_messages(format_message):
 
 
 def prepare_log_file(log_file, project_logger):
-    if "$HOME" in str(log_file):
-        import os
-        log_file = str(log_file).replace("$HOME", os.getenv("HOME", ""))
+
+    log_file = os.path.expandvars(str(log_file))
     log_file = Path(log_file).expanduser()
     
     try:
