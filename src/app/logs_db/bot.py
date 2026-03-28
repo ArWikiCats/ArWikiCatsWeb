@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 
-from .logs_db.bot import change_db_path, db_commit, init_db, fetch_all
+from .logs_db.bot import db_commit, init_db, fetch_all
 
 """
 import logging
 import re
 
-from .db import change_db_path as _change_db_path
 from .db import db_commit, fetch_all, init_db
 from ..config import settings
 
@@ -18,10 +17,6 @@ def _validate_table_name(table_name: str) -> None:
     """Validate table name against whitelist to prevent SQL injection."""
     if table_name not in settings.allowed_tables:
         raise ValueError(f"Invalid table name: {table_name}")
-
-
-def change_db_path(file):
-    return _change_db_path(file)
 
 
 def log_request(endpoint, request_data, response_status, response_time):
