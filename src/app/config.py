@@ -18,6 +18,8 @@ class Paths:
 class Settings:
     paths: Paths
     allowed_tables: set[str]
+    pagination_window: int = 2  # Number of pages to show before/after current page
+    max_visible_pages: int = 4  # Maximum number of page links to display
 
 
 def _get_paths() -> Paths:
@@ -44,11 +46,9 @@ def get_settings() -> Settings:
     return Settings(
         paths=_get_paths(),
         allowed_tables={"logs", "list_logs"},
+        pagination_window=2,
+        max_visible_pages=4,
     )
 
 
 settings = get_settings()
-
-# Pagination constants
-PAGINATION_WINDOW = 2  # Number of pages to show before/after current page
-MAX_VISIBLE_PAGES = 4  # Maximum number of page links to display
