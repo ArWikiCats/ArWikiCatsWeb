@@ -5,5 +5,4 @@
 /adminer
 *.zip
 .coverage
-/DeepWiki.md
 .claude/settings.local.json
