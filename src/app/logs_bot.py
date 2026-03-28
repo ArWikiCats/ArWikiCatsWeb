@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from . import logs_db  # logs_db.change_db_path(file)
-from .config import settings
-
-# Pagination constants
-PAGINATION_WINDOW = 2  # Number of pages to show before/after current page
-MAX_VISIBLE_PAGES = 4  # Maximum number of page links to display
+from .config import settings, PAGINATION_WINDOW, MAX_VISIBLE_PAGES
 
 
 def view_logs(request):

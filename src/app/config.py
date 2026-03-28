@@ -48,3 +48,7 @@ def get_settings() -> Settings:
 
 
 settings = get_settings()
+
+# Pagination constants
+PAGINATION_WINDOW = 2  # Number of pages to show before/after current page
+MAX_VISIBLE_PAGES = 4  # Maximum number of page links to display
