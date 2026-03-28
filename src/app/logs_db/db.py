@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 
-from .db import change_db_path, db_commit, init_db, fetch_all
+from .db import db_commit, init_db, fetch_all
 
 """
 import logging
@@ -14,7 +14,7 @@ from ..config import settings
 logger = logging.getLogger(__name__)
 
 main_path = settings.paths.main_path
-db_path_main = {1: settings.paths.db_path_main}
+db_path_main = settings.paths.main_path / "new_logs.db"
 
 
 def _validate_table_name(table_name: str) -> None:
@@ -23,24 +23,9 @@ def _validate_table_name(table_name: str) -> None:
         raise ValueError(f"Invalid table name: {table_name}")
 
 
-def change_db_path(file):
-    # ---
-    db_path = str(main_path / file)
-    # ---
-    dbs_path = Path(main_path)
-    # ---
-    # list of files *.db in dbs_path
-    dbs = [str(f.name) for f in dbs_path.glob("*.db") if f.is_file()]
-    # ---
-    if file in dbs and os.path.exists(db_path):
-        db_path_main[1] = str(db_path)
-    # ---
-    return dbs
-
-
 def db_commit(query, params=[]):
     try:
-        with sqlite3.connect(db_path_main[1]) as conn:
+        with sqlite3.connect(str(db_path_main)) as conn:
             cursor = conn.cursor()
             cursor.execute(query, params)
         conn.commit()
@@ -95,7 +80,7 @@ def fetch_all(query: str, params: list = None, fetch_one: bool = False):
     if params is None:
         params = []
     try:
-        with sqlite3.connect(db_path_main[1]) as conn:
+        with sqlite3.connect(str(db_path_main)) as conn:
             # Set row factory to return rows as dictionaries
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()

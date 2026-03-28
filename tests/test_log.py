@@ -160,65 +160,48 @@ class TestDatabaseOperations:
     def test_fetch_all_returns_list(self, temp_db):
         """Test that fetch_all returns a list of dictionaries."""
         from src.app.logs_db import db
+        from unittest.mock import patch
 
-        # Patch the db_path_main to use our temp database
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = temp_db
-
-        try:
+        with patch.object(db, 'db_path_main', temp_db):
             result = db.fetch_all("SELECT * FROM logs")
             assert isinstance(result, list)
             assert len(result) == 3
             assert all(isinstance(row, dict) for row in result)
-        finally:
-            db.db_path_main[1] = original_path
 
     def test_fetch_all_fetch_one(self, temp_db):
         """Test that fetch_all with fetch_one=True returns single dict."""
         from src.app.logs_db import db
+        from unittest.mock import patch
 
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = temp_db
-
-        try:
+        with patch.object(db, 'db_path_main', temp_db):
             result = db.fetch_all(
                 "SELECT * FROM logs WHERE id = ?", [1], fetch_one=True
             )
             assert isinstance(result, dict)
             assert result["id"] == 1
-        finally:
-            db.db_path_main[1] = original_path
 
     def test_fetch_all_no_result(self, temp_db):
         """Test fetch_all returns empty list when no results."""
         from src.app.logs_db import db
+        from unittest.mock import patch
 
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = temp_db
-
-        try:
+        with patch.object(db, 'db_path_main', temp_db):
             result = db.fetch_all(
                 "SELECT * FROM logs WHERE id = ?", [999]
             )
             assert result == []
-        finally:
-            db.db_path_main[1] = original_path
 
     def test_db_commit_success(self, temp_db):
         """Test that db_commit returns True on success."""
         from src.app.logs_db import db
+        from unittest.mock import patch
 
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = temp_db
-
-        try:
+        with patch.object(db, 'db_path_main', temp_db):
             result = db.db_commit(
                 "INSERT INTO logs (endpoint, request_data, response_status, response_time) VALUES (?, ?, ?, ?)",
                 ["/api/new", "NewData", "success", 0.1]
             )
             assert result is True
-        finally:
-            db.db_path_main[1] = original_path
 
 
 class TestLogRequest:
@@ -312,28 +295,20 @@ class TestCountAll:
     def test_count_all_total(self, temp_db_with_data):
         """Test count_all returns total count without filters."""
         from src.app.logs_db import db, bot
+        from unittest.mock import patch
 
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = temp_db_with_data
-
-        try:
+        with patch.object(db, 'db_path_main', temp_db_with_data):
             result = bot.count_all()
             assert result == 8
-        finally:
-            db.db_path_main[1] = original_path
 
     def test_count_all_with_status(self, temp_db_with_data):
         """Test count_all with status filter."""
         from src.app.logs_db import db, bot
+        from unittest.mock import patch
 
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = temp_db_with_data
-
-        try:
+        with patch.object(db, 'db_path_main', temp_db_with_data):
             result = bot.count_all(status="no_result")
             assert result == 5
-        finally:
-            db.db_path_main[1] = original_path
 
 
 class TestGetLogs:
@@ -373,58 +348,42 @@ class TestGetLogs:
     def test_get_logs_pagination(self, temp_db_for_logs):
         """Test get_logs respects pagination parameters."""
         from src.app.logs_db import db, bot
+        from unittest.mock import patch
 
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = temp_db_for_logs
-
-        try:
+        with patch.object(db, 'db_path_main', temp_db_for_logs):
             result = bot.get_logs(per_page=5, offset=0)
             assert len(result) == 5
-        finally:
-            db.db_path_main[1] = original_path
 
     def test_get_logs_order_desc(self, temp_db_for_logs):
         """Test get_logs orders DESC by default."""
         from src.app.logs_db import db, bot
+        from unittest.mock import patch
 
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = temp_db_for_logs
-
-        try:
+        with patch.object(db, 'db_path_main', temp_db_for_logs):
             result = bot.get_logs(per_page=5, offset=0, order="DESC", order_by="response_count")
             # Should be ordered by response_count descending
             counts = [row["response_count"] for row in result]
             assert counts == sorted(counts, reverse=True)
-        finally:
-            db.db_path_main[1] = original_path
 
     def test_get_logs_order_asc(self, temp_db_for_logs):
         """Test get_logs can order ASC."""
         from src.app.logs_db import db, bot
+        from unittest.mock import patch
 
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = temp_db_for_logs
-
-        try:
+        with patch.object(db, 'db_path_main', temp_db_for_logs):
             result = bot.get_logs(per_page=5, offset=0, order="ASC", order_by="response_count")
             counts = [row["response_count"] for row in result]
             assert counts == sorted(counts)
-        finally:
-            db.db_path_main[1] = original_path
 
     def test_get_logs_invalid_order_defaults_to_desc(self, temp_db_for_logs):
         """Test get_logs defaults to DESC for invalid order."""
         from src.app.logs_db import db, bot
+        from unittest.mock import patch
 
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = temp_db_for_logs
-
-        try:
+        with patch.object(db, 'db_path_main', temp_db_for_logs):
             result = bot.get_logs(per_page=5, offset=0, order="INVALID", order_by="response_count")
             counts = [row["response_count"] for row in result]
             assert counts == sorted(counts, reverse=True)
-        finally:
-            db.db_path_main[1] = original_path
 
 
 class TestSumResponseCount:
@@ -471,26 +430,18 @@ class TestSumResponseCount:
     def test_sum_response_count_total(self, temp_db_for_sum):
         """Test sum_response_count returns total sum."""
         from src.app.logs_db import db, bot
+        from unittest.mock import patch
 
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = temp_db_for_sum
-
-        try:
+        with patch.object(db, 'db_path_main', temp_db_for_sum):
             result = bot.sum_response_count()
             assert result == 35  # 10 + 20 + 5
-        finally:
-            db.db_path_main[1] = original_path
 
     def test_sum_response_count_with_status(self, temp_db_for_sum):
         """Test sum_response_count with status filter."""
         from src.app.logs_db import db, bot
+        from unittest.mock import patch
 
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = temp_db_for_sum
-
-        try:
+        with patch.object(db, 'db_path_main', temp_db_for_sum):
             result = bot.sum_response_count(status="success")
             assert result == 30  # 10 + 20
-        finally:
-            db.db_path_main[1] = original_path
 
