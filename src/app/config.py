@@ -11,6 +11,7 @@ from pathlib import Path
 @dataclass(frozen=True)
 class Paths:
     main_path: str
+    db_path_main: str
 
 
 @dataclass(frozen=True)
@@ -32,8 +33,11 @@ def _get_paths() -> Paths:
 
     main_path.mkdir(parents=True, exist_ok=True)
 
+    db_path_main = str(main_path / "new_logs.db")
+
     return Paths(
         main_path=main_path,
+        db_path_main=db_path_main,
     )
 
 
