@@ -2,6 +2,10 @@
 
 db_tables = ["logs", "list_logs"]
 
+# Pagination constants
+PAGINATION_WINDOW = 2  # Number of pages to show before/after current page
+MAX_VISIBLE_PAGES = 4  # Maximum number of page links to display
+
 from . import logs_db  # logs_db.change_db_path(file)
 
 
@@ -93,9 +97,9 @@ def view_logs(request):
     total_pages = (total_logs + per_page - 1) // per_page
     start_log = (page - 1) * per_page + 1
     end_log = min(page * per_page, total_logs)
-    start_page = max(1, page - 2)
-    end_page = min(start_page + 4, total_pages)
-    start_page = max(1, end_page - 4)
+    start_page = max(1, page - PAGINATION_WINDOW)
+    end_page = min(start_page + MAX_VISIBLE_PAGES, total_pages)
+    start_page = max(1, end_page - MAX_VISIBLE_PAGES)
     # ---
     sum_all = logs_db.sum_response_count(status=status, table_name=table_name, like=like)
     # ---

@@ -78,6 +78,10 @@ def get_status_table() -> str:
 @api_bp.route("/<title>", methods=["GET"])
 def get_title(title) -> str:
     # ---
+    # Validate title parameter
+    if not title or len(title) > 500:
+        return jsonify({"error": "Invalid title"}), 400
+    # ---
     start_time = time.time()
     # ---
     # Check for User-Agent header

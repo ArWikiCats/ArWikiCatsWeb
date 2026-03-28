@@ -128,7 +128,7 @@ def prepare_log_file(log_file, project_logger):
 
     log_file = os.path.expandvars(str(log_file))
     log_file = Path(log_file).expanduser()
-    
+
     try:
         log_file.parent.mkdir(parents=True, exist_ok=True)
     except Exception as e:
