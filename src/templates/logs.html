@@ -103,19 +103,6 @@
                                         placeholder="2025-01-01">
                                 </div>
                             </div>
-                            {% if result.dbs %}
-                            <div class="{{ col_class }}">
-                                <div class="form-group">
-                                    <label for="db_path" class="form-label">Database</label>
-                                    <select name="db_path" id="db_path" class="form-select w-100">
-                                        {% for db in result.dbs %}
-                                        <option value="{{ db }}" {% if result.tab.db_path == db %}selected{% endif %}>
-                                            {{ db }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-                            {% endif %}
                         </div>
                     </div>
                     <div class="col-md-1">
