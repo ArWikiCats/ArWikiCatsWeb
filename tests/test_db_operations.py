@@ -39,23 +39,15 @@ class TestFetchLogsEdgeCases:
         """Test fetch_all on empty table returns empty list."""
         from src.app.logs_db import db
 
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = temp_db
-
-        try:
+        with patch.object(db, 'db_path_main', temp_db):
             result = db.fetch_all("SELECT * FROM logs")
             assert result == []
-        finally:
-            db.db_path_main[1] = original_path
 
     def test_fetch_all_with_special_characters(self, temp_db):
         """Test fetch_all handles special characters in data."""
         from src.app.logs_db import db
 
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = temp_db
-
-        try:
+        with patch.object(db, 'db_path_main', temp_db):
             # Insert data with special characters
             db.db_commit(
                 "INSERT INTO logs (endpoint, request_data, response_status, response_time) VALUES (?, ?, ?, ?)",
@@ -65,17 +57,12 @@ class TestFetchLogsEdgeCases:
             result = db.fetch_all("SELECT * FROM logs")
             assert len(result) == 1
             assert "Quote" in result[0]["request_data"]
-        finally:
-            db.db_path_main[1] = original_path
 
     def test_fetch_all_with_unicode(self, temp_db):
         """Test fetch_all handles Arabic and other unicode."""
         from src.app.logs_db import db
 
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = temp_db
-
-        try:
+        with patch.object(db, 'db_path_main', temp_db):
             # Insert Arabic data
             db.db_commit(
                 "INSERT INTO logs (endpoint, request_data, response_status, response_time) VALUES (?, ?, ?, ?)",
@@ -85,8 +72,6 @@ class TestFetchLogsEdgeCases:
             result = db.fetch_all("SELECT * FROM logs")
             assert len(result) == 1
             assert "عربي" in result[0]["request_data"]
-        finally:
-            db.db_path_main[1] = original_path
 
 
 class TestDatabaseErrorHandling:
@@ -100,16 +85,11 @@ class TestDatabaseErrorHandling:
         conn = sqlite3.connect(str(db_file))
         conn.close()
 
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = str(db_file)
-
-        try:
+        with patch.object(db, 'db_path_main', str(db_file)):
             result = db.db_commit("INVALID SQL STATEMENT")
             # Should return the error, not True
             assert result is not True
             assert isinstance(result, sqlite3.Error)
-        finally:
-            db.db_path_main[1] = original_path
 
     def test_fetch_all_handles_missing_table(self, tmp_path):
         """Test fetch_all behavior with missing table."""
@@ -119,16 +99,11 @@ class TestDatabaseErrorHandling:
         conn = sqlite3.connect(str(db_file))
         conn.close()
 
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = str(db_file)
-
-        try:
+        with patch.object(db, 'db_path_main', str(db_file)):
             # This should handle the error gracefully
             # The function may print an error or call init_db
             with patch("src.app.logs_db.db.init_db"):
                 result = db.fetch_all("SELECT * FROM nonexistent_table")
-        finally:
-            db.db_path_main[1] = original_path
 
 
 class TestAllLogsEn2Ar:
@@ -176,41 +151,26 @@ class TestAllLogsEn2Ar:
         """Test all_logs_en2ar returns dictionary."""
         from src.app.logs_db import db, bot
 
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = temp_db_with_logs
-
-        try:
+        with patch.object(db, 'db_path_main', temp_db_with_logs):
             result = bot.all_logs_en2ar()
             assert isinstance(result, dict)
             assert len(result) == 3
-        finally:
-            db.db_path_main[1] = original_path
 
     def test_all_logs_en2ar_with_day_filter(self, temp_db_with_logs):
         """Test all_logs_en2ar filters by day."""
         from src.app.logs_db import db, bot
 
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = temp_db_with_logs
-
-        try:
+        with patch.object(db, 'db_path_main', temp_db_with_logs):
             result = bot.all_logs_en2ar(day="2025-01-27")
             assert len(result) == 2
-        finally:
-            db.db_path_main[1] = original_path
 
     def test_all_logs_en2ar_with_month_filter(self, temp_db_with_logs):
         """Test all_logs_en2ar filters by month."""
         from src.app.logs_db import db, bot
 
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = temp_db_with_logs
-
-        try:
+        with patch.object(db, 'db_path_main', temp_db_with_logs):
             result = bot.all_logs_en2ar(day="2025-01")
             assert len(result) == 3  # All in January
-        finally:
-            db.db_path_main[1] = original_path
 
 
 class TestFetchLogsByDate:
@@ -261,16 +221,11 @@ class TestFetchLogsByDate:
         """Test fetch_logs_by_date groups by date and status."""
         from src.app.logs_db import db, bot
 
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = temp_db_grouped
-
-        try:
+        with patch.object(db, 'db_path_main', temp_db_grouped):
             result = bot.fetch_logs_by_date()
             assert isinstance(result, list)
             # Should have grouped entries
             assert len(result) > 0
-        finally:
-            db.db_path_main[1] = original_path
 
 
 class TestGetResponseStatus:
@@ -322,18 +277,13 @@ class TestGetResponseStatus:
         """Test get_response_status returns list of statuses."""
         from src.app.logs_db import db, bot
 
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = temp_db_status
-
-        try:
+        with patch.object(db, 'db_path_main', temp_db_status):
             result = bot.get_response_status()
             assert isinstance(result, list)
             assert "no_result" in result
             assert "success" in result
             # rare_status should not appear (only 2 occurrences)
             assert "rare_status" not in result
-        finally:
-            db.db_path_main[1] = original_path
 
 
 class TestInitDb:
@@ -344,10 +294,8 @@ class TestInitDb:
         from src.app.logs_db import db
 
         db_file = tmp_path / "test_init.db"
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = str(db_file)
 
-        try:
+        with patch.object(db, 'db_path_main', str(db_file)):
             # Create a fresh database with no tables
             import sqlite3
             conn = sqlite3.connect(str(db_file))
@@ -375,18 +323,14 @@ class TestInitDb:
             assert "response_status" in log_columns
 
             conn.close()
-        finally:
-            db.db_path_main[1] = original_path
 
     def test_init_db_is_idempotent(self, tmp_path):
         """Test init_db can be called multiple times safely."""
         from src.app.logs_db import db
 
         db_file = tmp_path / "test_idempotent.db"
-        original_path = db.db_path_main[1]
-        db.db_path_main[1] = str(db_file)
 
-        try:
+        with patch.object(db, 'db_path_main', str(db_file)):
             import sqlite3
             conn = sqlite3.connect(str(db_file))
             conn.close()
@@ -404,5 +348,3 @@ class TestInitDb:
 
             assert "logs" in tables
             assert "list_logs" in tables
-        finally:
-            db.db_path_main[1] = original_path
