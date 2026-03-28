@@ -5,7 +5,6 @@ from .db import db_commit, init_db, fetch_all
 
 """
 import logging
-import os
 import sqlite3
 from pathlib import Path
 
