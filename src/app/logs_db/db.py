@@ -25,16 +25,20 @@ def _validate_table_name(table_name: str) -> None:
 
 def db_commit(query, params=[]):
     db_path_main = get_db_path_main()
+    conn = None
     try:
-        with sqlite3.connect(str(db_path_main)) as conn:
-            cursor = conn.cursor()
-            cursor.execute(query, params)
+        conn = sqlite3.connect(str(db_path_main))
+        cursor = conn.cursor()
+        cursor.execute(query, params)
         conn.commit()
         return True
 
     except sqlite3.Error as e:
         logger.error(f"init_db Database error: {e}")
         return e
+    finally:
+        if conn:
+            conn.close()
 
 
 def _create_logs_table(table_name: str) -> None:
@@ -82,27 +86,31 @@ def fetch_all(query: str, params: list = None, fetch_one: bool = False):
 
     if params is None:
         params = []
+    conn = None
     try:
-        with sqlite3.connect(str(db_path_main)) as conn:
-            # Set row factory to return rows as dictionaries
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
+        conn = sqlite3.connect(str(db_path_main))
+        # Set row factory to return rows as dictionaries
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
 
-            # Execute the query
-            cursor.execute(query, params)
+        # Execute the query
+        cursor.execute(query, params)
 
-            # Fetch results
-            if fetch_one:
-                row = cursor.fetchone()
-                logs = dict(row) if row else None  # Convert to dictionary
-            else:
-                rows = cursor.fetchall()
-                logs = [dict(row) for row in rows]  # Convert all rows to dictionaries
+        # Fetch results
+        if fetch_one:
+            row = cursor.fetchone()
+            logs = dict(row) if row else None  # Convert to dictionary
+        else:
+            rows = cursor.fetchall()
+            logs = [dict(row) for row in rows]  # Convert all rows to dictionaries
 
     except sqlite3.Error as e:
         logger.error(f"Database error in view_logs: {e}")
         if "no such table" in str(e):
             init_db()
         logs = [] if not fetch_one else None
+    finally:
+        if conn:
+            conn.close()
 
     return logs
