@@ -1,19 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from . import logs_db  # logs_db.change_db_path(file)
+from . import logs_db
 from .config import settings
 
 
 def view_logs(request):
     # ---
-    db_path = request.args.get("db_path")
-    # ---
     dbs = []
-    # ---
-    if db_path:
-        dbs = logs_db.change_db_path(db_path)
-        # ---
-        db_path = db_path if db_path in dbs else "new_logs.db"
     # ---
     page = request.args.get("page", 1, type=int)
     # ---
@@ -103,7 +96,6 @@ def view_logs(request):
     # ---
     table_new = {
         "sum_all": f"{sum_all:,}",
-        "db_path": db_path,
         "table_name": table_name,
         "total_pages": total_pages,
         "total_logs": f"{total_logs:,}",
@@ -127,7 +119,6 @@ def view_logs(request):
         status_table.append("Category")
     # ---
     result = {
-        "dbs": dbs,
         "logs": log_list,
         "order_by_types": order_by_types,
         "tab": table_new,
@@ -139,14 +130,7 @@ def view_logs(request):
 
 def retrieve_logs_by_date(request):
     # ---
-    db_path = request.args.get("db_path")
-    # ---
     dbs = []
-    # ---
-    if db_path:
-        dbs = logs_db.change_db_path(db_path)
-        # ---
-        db_path = db_path if db_path in dbs else "new_logs.db"
     # ---
     table_name = request.args.get("table_name", "")
     # ---
@@ -187,12 +171,10 @@ def retrieve_logs_by_date(request):
     logs.sort(key=lambda x: x["day"], reverse=False)
     # ---
     data = {
-        "dbs": dbs,
         "logs_data": logs_data,
         "logs": logs,
         "tab": {
             "sum_all": f"{sum_all:,}",
-            "db_path": db_path,
             "table_name": table_name,
             # "order": order,
             # "order_by": order_by,
