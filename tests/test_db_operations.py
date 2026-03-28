@@ -39,7 +39,7 @@ class TestFetchLogsEdgeCases:
         """Test fetch_all on empty table returns empty list."""
         from src.app.logs_db import db
 
-        with patch.object(db, 'db_path_main', temp_db):
+        with patch.object(db, 'get_db_path_main', return_value=temp_db):
             result = db.fetch_all("SELECT * FROM logs")
             assert result == []
 
@@ -47,7 +47,7 @@ class TestFetchLogsEdgeCases:
         """Test fetch_all handles special characters in data."""
         from src.app.logs_db import db
 
-        with patch.object(db, 'db_path_main', temp_db):
+        with patch.object(db, 'get_db_path_main', return_value=temp_db):
             # Insert data with special characters
             db.db_commit(
                 "INSERT INTO logs (endpoint, request_data, response_status, response_time) VALUES (?, ?, ?, ?)",
@@ -62,7 +62,7 @@ class TestFetchLogsEdgeCases:
         """Test fetch_all handles Arabic and other unicode."""
         from src.app.logs_db import db
 
-        with patch.object(db, 'db_path_main', temp_db):
+        with patch.object(db, 'get_db_path_main', return_value=temp_db):
             # Insert Arabic data
             db.db_commit(
                 "INSERT INTO logs (endpoint, request_data, response_status, response_time) VALUES (?, ?, ?, ?)",
@@ -85,7 +85,7 @@ class TestDatabaseErrorHandling:
         conn = sqlite3.connect(str(db_file))
         conn.close()
 
-        with patch.object(db, 'db_path_main', str(db_file)):
+        with patch.object(db, 'get_db_path_main', return_value=str(db_file)):
             result = db.db_commit("INVALID SQL STATEMENT")
             # Should return the error, not True
             assert result is not True
@@ -99,7 +99,7 @@ class TestDatabaseErrorHandling:
         conn = sqlite3.connect(str(db_file))
         conn.close()
 
-        with patch.object(db, 'db_path_main', str(db_file)):
+        with patch.object(db, 'get_db_path_main', return_value=str(db_file)):
             # This should handle the error gracefully
             # The function may print an error or call init_db
             with patch("src.app.logs_db.db.init_db"):
@@ -151,7 +151,7 @@ class TestAllLogsEn2Ar:
         """Test all_logs_en2ar returns dictionary."""
         from src.app.logs_db import db, bot
 
-        with patch.object(db, 'db_path_main', temp_db_with_logs):
+        with patch.object(db, 'get_db_path_main', return_value=temp_db_with_logs):
             result = bot.all_logs_en2ar()
             assert isinstance(result, dict)
             assert len(result) == 3
@@ -160,7 +160,7 @@ class TestAllLogsEn2Ar:
         """Test all_logs_en2ar filters by day."""
         from src.app.logs_db import db, bot
 
-        with patch.object(db, 'db_path_main', temp_db_with_logs):
+        with patch.object(db, 'get_db_path_main', return_value=temp_db_with_logs):
             result = bot.all_logs_en2ar(day="2025-01-27")
             assert len(result) == 2
 
@@ -168,7 +168,7 @@ class TestAllLogsEn2Ar:
         """Test all_logs_en2ar filters by month."""
         from src.app.logs_db import db, bot
 
-        with patch.object(db, 'db_path_main', temp_db_with_logs):
+        with patch.object(db, 'get_db_path_main', return_value=temp_db_with_logs):
             result = bot.all_logs_en2ar(day="2025-01")
             assert len(result) == 3  # All in January
 
@@ -221,7 +221,7 @@ class TestFetchLogsByDate:
         """Test fetch_logs_by_date groups by date and status."""
         from src.app.logs_db import db, bot
 
-        with patch.object(db, 'db_path_main', temp_db_grouped):
+        with patch.object(db, 'get_db_path_main', return_value=temp_db_grouped):
             result = bot.fetch_logs_by_date()
             assert isinstance(result, list)
             # Should have grouped entries
@@ -277,7 +277,7 @@ class TestGetResponseStatus:
         """Test get_response_status returns list of statuses."""
         from src.app.logs_db import db, bot
 
-        with patch.object(db, 'db_path_main', temp_db_status):
+        with patch.object(db, 'get_db_path_main', return_value=temp_db_status):
             result = bot.get_response_status()
             assert isinstance(result, list)
             assert "no_result" in result
@@ -295,7 +295,7 @@ class TestInitDb:
 
         db_file = tmp_path / "test_init.db"
 
-        with patch.object(db, 'db_path_main', str(db_file)):
+        with patch.object(db, 'get_db_path_main', return_value=str(db_file)):
             # Create a fresh database with no tables
             import sqlite3
             conn = sqlite3.connect(str(db_file))
@@ -330,7 +330,7 @@ class TestInitDb:
 
         db_file = tmp_path / "test_idempotent.db"
 
-        with patch.object(db, 'db_path_main', str(db_file)):
+        with patch.object(db, 'get_db_path_main', return_value=str(db_file)):
             import sqlite3
             conn = sqlite3.connect(str(db_file))
             conn.close()
