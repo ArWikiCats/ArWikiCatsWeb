@@ -78,9 +78,7 @@ class TestAddStatus:
 
         query = "SELECT * FROM logs"
         params = []
-        result_query, result_params = add_status(
-            query, params, status="no_result", day="2025-01-27"
-        )
+        result_query, result_params = add_status(query, params, status="no_result", day="2025-01-27")
 
         assert "WHERE" in result_query
         assert "AND" in result_query
@@ -109,7 +107,8 @@ class TestDatabaseOperations:
         cursor = conn.cursor()
 
         # Create logs table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 endpoint TEXT NOT NULL,
@@ -121,10 +120,12 @@ class TestDatabaseOperations:
                 date_only DATE DEFAULT (DATE('now')),
                 UNIQUE(request_data, response_status, date_only)
             );
-        """)
+        """
+        )
 
         # Create list_logs table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS list_logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 endpoint TEXT NOT NULL,
@@ -136,21 +137,28 @@ class TestDatabaseOperations:
                 date_only DATE DEFAULT (DATE('now')),
                 UNIQUE(request_data, response_status, date_only)
             );
-        """)
+        """
+        )
 
         # Insert test data
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO logs (endpoint, request_data, response_status, response_time, response_count, date_only)
             VALUES ('/api/test', 'Category:Test', 'تصنيف:اختبار', 0.5, 10, '2025-01-27')
-        """)
-        cursor.execute("""
+        """
+        )
+        cursor.execute(
+            """
             INSERT INTO logs (endpoint, request_data, response_status, response_time, response_count, date_only)
             VALUES ('/api/test2', 'Category:Another', 'no_result', 0.3, 5, '2025-01-27')
-        """)
-        cursor.execute("""
+        """
+        )
+        cursor.execute(
+            """
             INSERT INTO logs (endpoint, request_data, response_status, response_time, response_count, date_only)
             VALUES ('/api/test3', 'Category:Third', 'success', 0.2, 3, '2025-01-26')
-        """)
+        """
+        )
 
         conn.commit()
         conn.close()
@@ -159,10 +167,11 @@ class TestDatabaseOperations:
 
     def test_fetch_all_returns_list(self, temp_db):
         """Test that fetch_all returns a list of dictionaries."""
-        from src.app.logs_db import db
         from unittest.mock import patch
 
-        with patch.object(db, 'get_db_path_main', return_value=temp_db):
+        from src.app.logs_db import db
+
+        with patch.object(db, "get_db_path_main", return_value=temp_db):
             result = db.fetch_all("SELECT * FROM logs")
             assert isinstance(result, list)
             assert len(result) == 3
@@ -170,36 +179,35 @@ class TestDatabaseOperations:
 
     def test_fetch_all_fetch_one(self, temp_db):
         """Test that fetch_all with fetch_one=True returns single dict."""
-        from src.app.logs_db import db
         from unittest.mock import patch
 
-        with patch.object(db, 'get_db_path_main', return_value=temp_db):
-            result = db.fetch_all(
-                "SELECT * FROM logs WHERE id = ?", [1], fetch_one=True
-            )
+        from src.app.logs_db import db
+
+        with patch.object(db, "get_db_path_main", return_value=temp_db):
+            result = db.fetch_all("SELECT * FROM logs WHERE id = ?", [1], fetch_one=True)
             assert isinstance(result, dict)
             assert result["id"] == 1
 
     def test_fetch_all_no_result(self, temp_db):
         """Test fetch_all returns empty list when no results."""
-        from src.app.logs_db import db
         from unittest.mock import patch
 
-        with patch.object(db, 'get_db_path_main', return_value=temp_db):
-            result = db.fetch_all(
-                "SELECT * FROM logs WHERE id = ?", [999]
-            )
+        from src.app.logs_db import db
+
+        with patch.object(db, "get_db_path_main", return_value=temp_db):
+            result = db.fetch_all("SELECT * FROM logs WHERE id = ?", [999])
             assert result == []
 
     def test_db_commit_success(self, temp_db):
         """Test that db_commit returns True on success."""
-        from src.app.logs_db import db
         from unittest.mock import patch
 
-        with patch.object(db, 'get_db_path_main', return_value=temp_db):
+        from src.app.logs_db import db
+
+        with patch.object(db, "get_db_path_main", return_value=temp_db):
             result = db.db_commit(
                 "INSERT INTO logs (endpoint, request_data, response_status, response_time) VALUES (?, ?, ?, ?)",
-                ["/api/new", "NewData", "success", 0.1]
+                ["/api/new", "NewData", "success", 0.1],
             )
             assert result is True
 
@@ -263,7 +271,8 @@ class TestCountAll:
         conn = sqlite3.connect(str(db_file))
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 endpoint TEXT NOT NULL,
@@ -274,18 +283,19 @@ class TestCountAll:
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                 date_only DATE DEFAULT (DATE('now'))
             );
-        """)
+        """
+        )
 
         # Insert 5 rows with no_result, 3 with success
         for i in range(5):
             cursor.execute(
                 "INSERT INTO logs (endpoint, request_data, response_status, response_time) VALUES (?, ?, ?, ?)",
-                ["/api/test", f"data_{i}", "no_result", 0.1]
+                ["/api/test", f"data_{i}", "no_result", 0.1],
             )
         for i in range(3):
             cursor.execute(
                 "INSERT INTO logs (endpoint, request_data, response_status, response_time) VALUES (?, ?, ?, ?)",
-                ["/api/test", f"success_data_{i}", "success", 0.1]
+                ["/api/test", f"success_data_{i}", "success", 0.1],
             )
 
         conn.commit()
@@ -294,19 +304,21 @@ class TestCountAll:
 
     def test_count_all_total(self, temp_db_with_data):
         """Test count_all returns total count without filters."""
-        from src.app.logs_db import db, bot
         from unittest.mock import patch
 
-        with patch.object(db, 'get_db_path_main', return_value=temp_db_with_data):
+        from src.app.logs_db import bot, db
+
+        with patch.object(db, "get_db_path_main", return_value=temp_db_with_data):
             result = bot.count_all()
             assert result == 8
 
     def test_count_all_with_status(self, temp_db_with_data):
         """Test count_all with status filter."""
-        from src.app.logs_db import db, bot
         from unittest.mock import patch
 
-        with patch.object(db, 'get_db_path_main', return_value=temp_db_with_data):
+        from src.app.logs_db import bot, db
+
+        with patch.object(db, "get_db_path_main", return_value=temp_db_with_data):
             result = bot.count_all(status="no_result")
             assert result == 5
 
@@ -321,7 +333,8 @@ class TestGetLogs:
         conn = sqlite3.connect(str(db_file))
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 endpoint TEXT NOT NULL,
@@ -332,13 +345,14 @@ class TestGetLogs:
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                 date_only DATE DEFAULT (DATE('now'))
             );
-        """)
+        """
+        )
 
         # Insert test data with different response_counts
         for i in range(15):
             cursor.execute(
                 "INSERT INTO logs (endpoint, request_data, response_status, response_time, response_count) VALUES (?, ?, ?, ?, ?)",
-                ["/api/test", f"data_{i}", "success", 0.1, i + 1]
+                ["/api/test", f"data_{i}", "success", 0.1, i + 1],
             )
 
         conn.commit()
@@ -347,19 +361,21 @@ class TestGetLogs:
 
     def test_get_logs_pagination(self, temp_db_for_logs):
         """Test get_logs respects pagination parameters."""
-        from src.app.logs_db import db, bot
         from unittest.mock import patch
 
-        with patch.object(db, 'get_db_path_main', return_value=temp_db_for_logs):
+        from src.app.logs_db import bot, db
+
+        with patch.object(db, "get_db_path_main", return_value=temp_db_for_logs):
             result = bot.get_logs(per_page=5, offset=0)
             assert len(result) == 5
 
     def test_get_logs_order_desc(self, temp_db_for_logs):
         """Test get_logs orders DESC by default."""
-        from src.app.logs_db import db, bot
         from unittest.mock import patch
 
-        with patch.object(db, 'get_db_path_main', return_value=temp_db_for_logs):
+        from src.app.logs_db import bot, db
+
+        with patch.object(db, "get_db_path_main", return_value=temp_db_for_logs):
             result = bot.get_logs(per_page=5, offset=0, order="DESC", order_by="response_count")
             # Should be ordered by response_count descending
             counts = [row["response_count"] for row in result]
@@ -367,20 +383,22 @@ class TestGetLogs:
 
     def test_get_logs_order_asc(self, temp_db_for_logs):
         """Test get_logs can order ASC."""
-        from src.app.logs_db import db, bot
         from unittest.mock import patch
 
-        with patch.object(db, 'get_db_path_main', return_value=temp_db_for_logs):
+        from src.app.logs_db import bot, db
+
+        with patch.object(db, "get_db_path_main", return_value=temp_db_for_logs):
             result = bot.get_logs(per_page=5, offset=0, order="ASC", order_by="response_count")
             counts = [row["response_count"] for row in result]
             assert counts == sorted(counts)
 
     def test_get_logs_invalid_order_defaults_to_desc(self, temp_db_for_logs):
         """Test get_logs defaults to DESC for invalid order."""
-        from src.app.logs_db import db, bot
         from unittest.mock import patch
 
-        with patch.object(db, 'get_db_path_main', return_value=temp_db_for_logs):
+        from src.app.logs_db import bot, db
+
+        with patch.object(db, "get_db_path_main", return_value=temp_db_for_logs):
             result = bot.get_logs(per_page=5, offset=0, order="INVALID", order_by="response_count")
             counts = [row["response_count"] for row in result]
             assert counts == sorted(counts, reverse=True)
@@ -396,7 +414,8 @@ class TestSumResponseCount:
         conn = sqlite3.connect(str(db_file))
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 endpoint TEXT NOT NULL,
@@ -407,20 +426,21 @@ class TestSumResponseCount:
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                 date_only DATE DEFAULT (DATE('now'))
             );
-        """)
+        """
+        )
 
         # Insert test data
         cursor.execute(
             "INSERT INTO logs (endpoint, request_data, response_status, response_count) VALUES (?, ?, ?, ?)",
-            ["/api/test", "data_1", "success", 10]
+            ["/api/test", "data_1", "success", 10],
         )
         cursor.execute(
             "INSERT INTO logs (endpoint, request_data, response_status, response_count) VALUES (?, ?, ?, ?)",
-            ["/api/test", "data_2", "success", 20]
+            ["/api/test", "data_2", "success", 20],
         )
         cursor.execute(
             "INSERT INTO logs (endpoint, request_data, response_status, response_count) VALUES (?, ?, ?, ?)",
-            ["/api/test", "data_3", "no_result", 5]
+            ["/api/test", "data_3", "no_result", 5],
         )
 
         conn.commit()
@@ -429,19 +449,20 @@ class TestSumResponseCount:
 
     def test_sum_response_count_total(self, temp_db_for_sum):
         """Test sum_response_count returns total sum."""
-        from src.app.logs_db import db, bot
         from unittest.mock import patch
 
-        with patch.object(db, 'get_db_path_main', return_value=temp_db_for_sum):
+        from src.app.logs_db import bot, db
+
+        with patch.object(db, "get_db_path_main", return_value=temp_db_for_sum):
             result = bot.sum_response_count()
             assert result == 35  # 10 + 20 + 5
 
     def test_sum_response_count_with_status(self, temp_db_for_sum):
         """Test sum_response_count with status filter."""
-        from src.app.logs_db import db, bot
         from unittest.mock import patch
 
-        with patch.object(db, 'get_db_path_main', return_value=temp_db_for_sum):
+        from src.app.logs_db import bot, db
+
+        with patch.object(db, "get_db_path_main", return_value=temp_db_for_sum):
             result = bot.sum_response_count(status="success")
             assert result == 30  # 10 + 20
-

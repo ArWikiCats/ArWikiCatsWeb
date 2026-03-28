@@ -7,8 +7,8 @@ from .logs_db.bot import db_commit, init_db, fetch_all
 import logging
 import re
 
-from .db import db_commit, fetch_all, init_db
 from ..config import settings
+from .db import db_commit, fetch_all, init_db
 
 logger = logging.getLogger(__name__)
 

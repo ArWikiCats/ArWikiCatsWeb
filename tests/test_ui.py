@@ -14,6 +14,7 @@ class TestUIRoutes:
     def client(self):
         """Create Flask test client."""
         from src.app import create_app
+
         app = create_app()
         app.config["TESTING"] = True
         with app.test_client() as client:
@@ -100,6 +101,7 @@ class TestUIWithQueryParams:
     def client(self):
         """Create Flask test client."""
         from src.app import create_app
+
         app = create_app()
         app.config["TESTING"] = True
         with app.test_client() as client:
@@ -187,6 +189,7 @@ class TestErrorHandling:
     def client(self):
         """Create Flask test client."""
         from src.app import create_app
+
         app = create_app()
         app.config["TESTING"] = True
         with app.test_client() as client:

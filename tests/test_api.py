@@ -48,6 +48,7 @@ class TestCheckUserAgent:
     def app_context(self):
         """Create Flask app context for testing."""
         from src.app import create_app
+
         app = create_app()
         with app.test_request_context():
             yield app
@@ -55,9 +56,10 @@ class TestCheckUserAgent:
     def test_check_user_agent_missing(self, app_context):
         """Test that missing User-Agent returns error."""
         from flask import request
+
         from src.app.routes.api import check_user_agent
 
-        with patch.object(request, 'headers', {"User-Agent": ""}):
+        with patch.object(request, "headers", {"User-Agent": ""}):
             with patch("src.app.routes.api.log_request"):
                 result = check_user_agent("/api/test", "data", 0)
 
@@ -67,9 +69,10 @@ class TestCheckUserAgent:
     def test_check_user_agent_present(self, app_context):
         """Test that present User-Agent returns None."""
         from flask import request
+
         from src.app.routes.api import check_user_agent
 
-        with patch.object(request, 'headers', {"User-Agent": "TestAgent/1.0"}):
+        with patch.object(request, "headers", {"User-Agent": "TestAgent/1.0"}):
             result = check_user_agent("/api/test", "data", 0)
 
         assert result is None
@@ -82,6 +85,7 @@ class TestApiEndpoints:
     def client(self):
         """Create Flask test client."""
         from src.app import create_app
+
         app = create_app()
         app.config["TESTING"] = True
         with app.test_client() as client:
@@ -118,11 +122,7 @@ class TestApiEndpoints:
     def test_all_endpoint_without_day(self, client):
         """Test /api/all endpoint without day parameter."""
         with patch("src.app.logs_bot.retrieve_logs_en_to_ar") as mock_retrieve:
-            mock_retrieve.return_value = {
-                "tab": {"sum_all": "0"},
-                "no_result": [],
-                "data_result": {}
-            }
+            mock_retrieve.return_value = {"tab": {"sum_all": "0"}, "no_result": [], "data_result": {}}
 
             response = client.get("/api/all")
 
@@ -132,11 +132,7 @@ class TestApiEndpoints:
     def test_all_endpoint_with_day(self, client):
         """Test /api/all/<day> endpoint with day parameter."""
         with patch("src.app.logs_bot.retrieve_logs_en_to_ar") as mock_retrieve:
-            mock_retrieve.return_value = {
-                "tab": {"sum_all": "0"},
-                "no_result": [],
-                "data_result": {}
-            }
+            mock_retrieve.return_value = {"tab": {"sum_all": "0"}, "no_result": [], "data_result": {}}
 
             response = client.get("/api/all/2025-01-27")
 
@@ -149,7 +145,7 @@ class TestApiEndpoints:
             mock_retrieve.return_value = {
                 "tab": {"sum_all": "5"},
                 "no_result": ["test"],
-                "data_result": {"key": "value"}
+                "data_result": {"key": "value"},
             }
 
             response = client.get("/api/category")
@@ -165,7 +161,7 @@ class TestApiEndpoints:
             mock_retrieve.return_value = {
                 "tab": {"sum_all": "5"},
                 "no_result": ["test"],
-                "data_result": {"key": "value"}
+                "data_result": {"key": "value"},
             }
 
             response = client.get("/api/no_result")
@@ -183,6 +179,7 @@ class TestTitleEndpoint:
     def client(self):
         """Create Flask test client."""
         from src.app import create_app
+
         app = create_app()
         app.config["TESTING"] = True
         with app.test_client() as client:
@@ -191,10 +188,7 @@ class TestTitleEndpoint:
     def test_title_endpoint_without_user_agent(self, client):
         """Test title endpoint returns 400 without User-Agent."""
         with patch("src.app.routes.api.log_request"):
-            response = client.get(
-                "/api/Category:Test",
-                headers={"User-Agent": ""}
-            )
+            response = client.get("/api/Category:Test", headers={"User-Agent": ""})
 
             assert response.status_code == 400
 
@@ -204,10 +198,7 @@ class TestTitleEndpoint:
             with patch("src.app.routes.api.log_request", return_value="test"):
                 mock_resolve.return_value = "تصنيف:اختبار"
 
-                response = client.get(
-                    "/api/Category:Test",
-                    headers={"User-Agent": "TestAgent/1.0"}
-                )
+                response = client.get("/api/Category:Test", headers={"User-Agent": "TestAgent/1.0"})
 
                 assert response.status_code == 200
                 data = json.loads(response.get_data(as_text=True))
@@ -217,10 +208,7 @@ class TestTitleEndpoint:
         """Test title endpoint handles library not loaded."""
         with patch("src.app.routes.api.resolve_arabic_category_label", None):
             with patch("src.app.routes.api.log_request"):
-                response = client.get(
-                    "/api/Category:Test",
-                    headers={"User-Agent": "TestAgent/1.0"}
-                )
+                response = client.get("/api/Category:Test", headers={"User-Agent": "TestAgent/1.0"})
 
                 assert response.status_code == 500
 
@@ -232,6 +220,7 @@ class TestListEndpoint:
     def client(self):
         """Create Flask test client."""
         from src.app import create_app
+
         app = create_app()
         app.config["TESTING"] = True
         with app.test_client() as client:
@@ -240,22 +229,14 @@ class TestListEndpoint:
     def test_list_endpoint_without_user_agent(self, client):
         """Test list endpoint returns 400 without User-Agent."""
         with patch("src.app.routes.api.log_request"):
-            response = client.post(
-                "/api/list",
-                json={"titles": ["test1", "test2"]},
-                headers={"User-Agent": ""}
-            )
+            response = client.post("/api/list", json={"titles": ["test1", "test2"]}, headers={"User-Agent": ""})
 
             assert response.status_code == 400
 
     def test_list_endpoint_invalid_data(self, client):
         """Test list endpoint handles invalid data."""
         with patch("src.app.routes.api.log_request"):
-            response = client.post(
-                "/api/list",
-                json={"titles": "not_a_list"},
-                headers={"User-Agent": "TestAgent/1.0"}
-            )
+            response = client.post("/api/list", json={"titles": "not_a_list"}, headers={"User-Agent": "TestAgent/1.0"})
 
             assert response.status_code == 400
 
@@ -270,9 +251,7 @@ class TestListEndpoint:
                 mock_batch.return_value = mock_result
 
                 response = client.post(
-                    "/api/list",
-                    json={"titles": ["Category:Test1"]},
-                    headers={"User-Agent": "TestAgent/1.0"}
+                    "/api/list", json={"titles": ["Category:Test1"]}, headers={"User-Agent": "TestAgent/1.0"}
                 )
 
                 assert response.status_code == 200
@@ -293,7 +272,7 @@ class TestListEndpoint:
                 response = client.post(
                     "/api/list",
                     json={"titles": ["Category:Test1", "Category:Test1", "Category:Test1"]},
-                    headers={"User-Agent": "TestAgent/1.0"}
+                    headers={"User-Agent": "TestAgent/1.0"},
                 )
 
                 assert response.status_code == 200
@@ -304,11 +283,7 @@ class TestListEndpoint:
         """Test list endpoint handles library not loaded."""
         with patch("src.app.routes.api.batch_resolve_labels", None):
             with patch("src.app.routes.api.log_request"):
-                response = client.post(
-                    "/api/list",
-                    json={"titles": ["test"]},
-                    headers={"User-Agent": "TestAgent/1.0"}
-                )
+                response = client.post("/api/list", json={"titles": ["test"]}, headers={"User-Agent": "TestAgent/1.0"})
 
                 assert response.status_code == 500
 
@@ -325,7 +300,7 @@ class TestListEndpoint:
                 response = client.post(
                     "/api/list",
                     json={"titles": ["Category:Test1", "Category:NotFound"]},
-                    headers={"User-Agent": "TestAgent/1.0"}
+                    headers={"User-Agent": "TestAgent/1.0"},
                 )
 
                 assert response.status_code == 200

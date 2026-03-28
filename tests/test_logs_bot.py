@@ -76,13 +76,15 @@ class TestViewLogs:
         from src.app.logs_bot import view_logs
 
         request = MagicMock()
-        request.args.get = MagicMock(side_effect=lambda k, d=None, type=None: {
-            "table_name": "invalid_table",
-            "page": 1,
-            "per_page": 10,
-            "order": "desc",
-            "order_by": "response_count",
-        }.get(k, d))
+        request.args.get = MagicMock(
+            side_effect=lambda k, d=None, type=None: {
+                "table_name": "invalid_table",
+                "page": 1,
+                "per_page": 10,
+                "order": "desc",
+                "order_by": "response_count",
+            }.get(k, d)
+        )
 
         mock_logs_db.get_logs.return_value = []
         mock_logs_db.count_all.return_value = 0

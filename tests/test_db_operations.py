@@ -18,7 +18,8 @@ class TestFetchLogsEdgeCases:
         conn = sqlite3.connect(str(db_file))
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 endpoint TEXT NOT NULL,
@@ -29,7 +30,8 @@ class TestFetchLogsEdgeCases:
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                 date_only DATE DEFAULT (DATE('now'))
             );
-        """)
+        """
+        )
 
         conn.commit()
         conn.close()
@@ -39,7 +41,7 @@ class TestFetchLogsEdgeCases:
         """Test fetch_all on empty table returns empty list."""
         from src.app.logs_db import db
 
-        with patch.object(db, 'get_db_path_main', return_value=temp_db):
+        with patch.object(db, "get_db_path_main", return_value=temp_db):
             result = db.fetch_all("SELECT * FROM logs")
             assert result == []
 
@@ -47,11 +49,11 @@ class TestFetchLogsEdgeCases:
         """Test fetch_all handles special characters in data."""
         from src.app.logs_db import db
 
-        with patch.object(db, 'get_db_path_main', return_value=temp_db):
+        with patch.object(db, "get_db_path_main", return_value=temp_db):
             # Insert data with special characters
             db.db_commit(
                 "INSERT INTO logs (endpoint, request_data, response_status, response_time) VALUES (?, ?, ?, ?)",
-                ["/api/test", "Category:Test'Quote\"Double", "تصنيف:اختبار", 0.1]
+                ["/api/test", "Category:Test'Quote\"Double", "تصنيف:اختبار", 0.1],
             )
 
             result = db.fetch_all("SELECT * FROM logs")
@@ -62,11 +64,11 @@ class TestFetchLogsEdgeCases:
         """Test fetch_all handles Arabic and other unicode."""
         from src.app.logs_db import db
 
-        with patch.object(db, 'get_db_path_main', return_value=temp_db):
+        with patch.object(db, "get_db_path_main", return_value=temp_db):
             # Insert Arabic data
             db.db_commit(
                 "INSERT INTO logs (endpoint, request_data, response_status, response_time) VALUES (?, ?, ?, ?)",
-                ["/api/test", "تصنيف:اختبار_عربي", "تصنيف:نتيجة", 0.1]
+                ["/api/test", "تصنيف:اختبار_عربي", "تصنيف:نتيجة", 0.1],
             )
 
             result = db.fetch_all("SELECT * FROM logs")
@@ -85,7 +87,7 @@ class TestDatabaseErrorHandling:
         conn = sqlite3.connect(str(db_file))
         conn.close()
 
-        with patch.object(db, 'get_db_path_main', return_value=str(db_file)):
+        with patch.object(db, "get_db_path_main", return_value=str(db_file)):
             result = db.db_commit("INVALID SQL STATEMENT")
             # Should return the error, not True
             assert result is not True
@@ -99,7 +101,7 @@ class TestDatabaseErrorHandling:
         conn = sqlite3.connect(str(db_file))
         conn.close()
 
-        with patch.object(db, 'get_db_path_main', return_value=str(db_file)):
+        with patch.object(db, "get_db_path_main", return_value=str(db_file)):
             # This should handle the error gracefully
             # The function may print an error or call init_db
             with patch("src.app.logs_db.db.init_db"):
@@ -116,7 +118,8 @@ class TestAllLogsEn2Ar:
         conn = sqlite3.connect(str(db_file))
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 endpoint TEXT NOT NULL,
@@ -127,20 +130,21 @@ class TestAllLogsEn2Ar:
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                 date_only DATE DEFAULT (DATE('now'))
             );
-        """)
+        """
+        )
 
         # Insert test data
         cursor.execute(
             "INSERT INTO logs (endpoint, request_data, response_status, date_only) VALUES (?, ?, ?, ?)",
-            ["/api/test", "Category:Test1", "تصنيف:اختبار1", "2025-01-27"]
+            ["/api/test", "Category:Test1", "تصنيف:اختبار1", "2025-01-27"],
         )
         cursor.execute(
             "INSERT INTO logs (endpoint, request_data, response_status, date_only) VALUES (?, ?, ?, ?)",
-            ["/api/test", "Category:Test2", "no_result", "2025-01-27"]
+            ["/api/test", "Category:Test2", "no_result", "2025-01-27"],
         )
         cursor.execute(
             "INSERT INTO logs (endpoint, request_data, response_status, date_only) VALUES (?, ?, ?, ?)",
-            ["/api/test", "Category:Test3", "تصنيف:اختبار3", "2025-01-26"]
+            ["/api/test", "Category:Test3", "تصنيف:اختبار3", "2025-01-26"],
         )
 
         conn.commit()
@@ -149,26 +153,26 @@ class TestAllLogsEn2Ar:
 
     def test_all_logs_en2ar_returns_dict(self, temp_db_with_logs):
         """Test all_logs_en2ar returns dictionary."""
-        from src.app.logs_db import db, bot
+        from src.app.logs_db import bot, db
 
-        with patch.object(db, 'get_db_path_main', return_value=temp_db_with_logs):
+        with patch.object(db, "get_db_path_main", return_value=temp_db_with_logs):
             result = bot.all_logs_en2ar()
             assert isinstance(result, dict)
             assert len(result) == 3
 
     def test_all_logs_en2ar_with_day_filter(self, temp_db_with_logs):
         """Test all_logs_en2ar filters by day."""
-        from src.app.logs_db import db, bot
+        from src.app.logs_db import bot, db
 
-        with patch.object(db, 'get_db_path_main', return_value=temp_db_with_logs):
+        with patch.object(db, "get_db_path_main", return_value=temp_db_with_logs):
             result = bot.all_logs_en2ar(day="2025-01-27")
             assert len(result) == 2
 
     def test_all_logs_en2ar_with_month_filter(self, temp_db_with_logs):
         """Test all_logs_en2ar filters by month."""
-        from src.app.logs_db import db, bot
+        from src.app.logs_db import bot, db
 
-        with patch.object(db, 'get_db_path_main', return_value=temp_db_with_logs):
+        with patch.object(db, "get_db_path_main", return_value=temp_db_with_logs):
             result = bot.all_logs_en2ar(day="2025-01")
             assert len(result) == 3  # All in January
 
@@ -183,7 +187,8 @@ class TestFetchLogsByDate:
         conn = sqlite3.connect(str(db_file))
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 endpoint TEXT NOT NULL,
@@ -194,23 +199,24 @@ class TestFetchLogsByDate:
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                 date_only DATE DEFAULT (DATE('now'))
             );
-        """)
+        """
+        )
 
         # Insert varied test data
         for i in range(5):
             cursor.execute(
                 "INSERT INTO logs (endpoint, request_data, response_status, response_count, date_only) VALUES (?, ?, ?, ?, ?)",
-                ["/api/test", f"Category:Test{i}", "no_result", 2, "2025-01-27"]
+                ["/api/test", f"Category:Test{i}", "no_result", 2, "2025-01-27"],
             )
         for i in range(3):
             cursor.execute(
                 "INSERT INTO logs (endpoint, request_data, response_status, response_count, date_only) VALUES (?, ?, ?, ?, ?)",
-                ["/api/test", f"Category:Arabic{i}", "تصنيف:نتيجة", 1, "2025-01-27"]
+                ["/api/test", f"Category:Arabic{i}", "تصنيف:نتيجة", 1, "2025-01-27"],
             )
         for i in range(2):
             cursor.execute(
                 "INSERT INTO logs (endpoint, request_data, response_status, response_count, date_only) VALUES (?, ?, ?, ?, ?)",
-                ["/api/test", f"Category:Yesterday{i}", "no_result", 1, "2025-01-26"]
+                ["/api/test", f"Category:Yesterday{i}", "no_result", 1, "2025-01-26"],
             )
 
         conn.commit()
@@ -219,9 +225,9 @@ class TestFetchLogsByDate:
 
     def test_fetch_logs_by_date_groups_correctly(self, temp_db_grouped):
         """Test fetch_logs_by_date groups by date and status."""
-        from src.app.logs_db import db, bot
+        from src.app.logs_db import bot, db
 
-        with patch.object(db, 'get_db_path_main', return_value=temp_db_grouped):
+        with patch.object(db, "get_db_path_main", return_value=temp_db_grouped):
             result = bot.fetch_logs_by_date()
             assert isinstance(result, list)
             # Should have grouped entries
@@ -238,7 +244,8 @@ class TestGetResponseStatus:
         conn = sqlite3.connect(str(db_file))
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 endpoint TEXT NOT NULL,
@@ -249,24 +256,25 @@ class TestGetResponseStatus:
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                 date_only DATE DEFAULT (DATE('now'))
             );
-        """)
+        """
+        )
 
         # Insert data with different statuses (need > 2 of each for it to appear)
         for i in range(5):
             cursor.execute(
                 "INSERT INTO logs (endpoint, request_data, response_status) VALUES (?, ?, ?)",
-                ["/api/test", f"data_{i}", "no_result"]
+                ["/api/test", f"data_{i}", "no_result"],
             )
         for i in range(3):
             cursor.execute(
                 "INSERT INTO logs (endpoint, request_data, response_status) VALUES (?, ?, ?)",
-                ["/api/test", f"success_data_{i}", "success"]
+                ["/api/test", f"success_data_{i}", "success"],
             )
         # Only 2 of this status - should not appear (need > 2)
         for i in range(2):
             cursor.execute(
                 "INSERT INTO logs (endpoint, request_data, response_status) VALUES (?, ?, ?)",
-                ["/api/test", f"rare_data_{i}", "rare_status"]
+                ["/api/test", f"rare_data_{i}", "rare_status"],
             )
 
         conn.commit()
@@ -275,9 +283,9 @@ class TestGetResponseStatus:
 
     def test_get_response_status_returns_list(self, temp_db_status):
         """Test get_response_status returns list of statuses."""
-        from src.app.logs_db import db, bot
+        from src.app.logs_db import bot, db
 
-        with patch.object(db, 'get_db_path_main', return_value=temp_db_status):
+        with patch.object(db, "get_db_path_main", return_value=temp_db_status):
             result = bot.get_response_status()
             assert isinstance(result, list)
             assert "no_result" in result
@@ -295,9 +303,10 @@ class TestInitDb:
 
         db_file = tmp_path / "test_init.db"
 
-        with patch.object(db, 'get_db_path_main', return_value=str(db_file)):
+        with patch.object(db, "get_db_path_main", return_value=str(db_file)):
             # Create a fresh database with no tables
             import sqlite3
+
             conn = sqlite3.connect(str(db_file))
             conn.close()
 
@@ -330,8 +339,9 @@ class TestInitDb:
 
         db_file = tmp_path / "test_idempotent.db"
 
-        with patch.object(db, 'get_db_path_main', return_value=str(db_file)):
+        with patch.object(db, "get_db_path_main", return_value=str(db_file)):
             import sqlite3
+
             conn = sqlite3.connect(str(db_file))
             conn.close()
 
