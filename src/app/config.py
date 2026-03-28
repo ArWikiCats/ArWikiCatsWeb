@@ -17,6 +17,7 @@ class Paths:
 @dataclass(frozen=True)
 class Settings:
     paths: Paths
+    allowed_tables: set[str]
 
 
 def _get_paths() -> Paths:
@@ -42,6 +43,7 @@ def _get_paths() -> Paths:
 def get_settings() -> Settings:
     return Settings(
         paths=_get_paths(),
+        allowed_tables={"logs", "list_logs"},
     )
 
 

@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from . import logs_db  # logs_db.change_db_path(file)
-
-db_tables = ["logs", "list_logs"]
+from .config import settings
 
 # Pagination constants
 PAGINATION_WINDOW = 2  # Number of pages to show before/after current page
@@ -33,7 +32,7 @@ def view_logs(request):
     # ---
     table_name = request.args.get("table_name", "")
     # ---
-    if table_name not in db_tables:
+    if table_name not in settings.allowed_tables:
         table_name = "logs"
     # ---
     # Validate values
@@ -155,7 +154,7 @@ def retrieve_logs_by_date(request):
     # ---
     table_name = request.args.get("table_name", "")
     # ---
-    if table_name not in db_tables:
+    if table_name not in settings.allowed_tables:
         table_name = "logs"
     # ---
     logs_data = logs_db.fetch_logs_by_date(table_name=table_name)

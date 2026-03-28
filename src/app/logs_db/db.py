@@ -13,15 +13,13 @@ from ..config import settings
 
 logger = logging.getLogger(__name__)
 
-ALLOWED_TABLES = {"logs", "list_logs"}
-
 main_path = settings.paths.main_path
 db_path_main = {1: settings.paths.db_path_main}
 
 
 def _validate_table_name(table_name: str) -> None:
     """Validate table name against whitelist to prevent SQL injection."""
-    if table_name not in ALLOWED_TABLES:
+    if table_name not in settings.allowed_tables:
         raise ValueError(f"Invalid table name: {table_name}")
 
 
