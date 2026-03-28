@@ -9,22 +9,14 @@ import os
 import sqlite3
 from pathlib import Path
 
+from ..config import settings
+
 logger = logging.getLogger(__name__)
 
 ALLOWED_TABLES = {"logs", "list_logs"}
 
-# Database path configurable via DATABASE_PATH environment variable
-# Defaults to ~/www/python/dbs for backwards compatibility
-db_path_str = os.getenv("DATABASE_PATH", "")
-if db_path_str:
-    main_path = Path(db_path_str)
-else:
-    main_path = Path.home() / "www" / "python" / "dbs"
-
-if not main_path.exists():
-    main_path.mkdir(parents=True, exist_ok=True)
-
-db_path_main = {1: str(main_path / "new_logs.db")}
+main_path = settings.paths.main_path
+db_path_main = {1: settings.paths.db_path_main}
 
 
 def _validate_table_name(table_name: str) -> None:
