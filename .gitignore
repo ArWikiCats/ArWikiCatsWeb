@@ -1,7 +1,4 @@
 .env
-src/static_old
-src/app copy.py
-src/app1.py
 *.db
 *.pyc
 *.sql
