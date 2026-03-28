@@ -366,7 +366,6 @@ app.config['MAX_CONTENT_LENGTH'] = 1 * 1024 * 1024  # 1MB max
 **Uncovered Areas:**
 
 -   `src/app/logging_config.py` - Custom color formatting functions
--   `src/app/logs_db/bot_update.py` - Database migration scripts
 -   Error paths in database operations
 
 **Fix:** Add tests for:

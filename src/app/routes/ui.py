@@ -14,23 +14,23 @@ def render_index_page() -> str:
 
 @ui_bp.route("/logs", methods=["GET"])
 def render_logs_view() -> str:
-    # ---
+
     result = view_logs(request)
-    # ---
+
     return render_template("logs.html", result=result)
 
 
 @ui_bp.route("/no_result", methods=["GET"])
 def render_no_results_page() -> str:
-    # ---
+
     return render_template("no_result.html")
 
 
 @ui_bp.route("/logs_by_day", methods=["GET"])
 def render_daily_logs() -> str:
-    # ---
+
     result = retrieve_logs_by_date(request)
-    # ---
+
     return render_template(
         "logs_by_day.html",
         logs=result.get("logs", []),
