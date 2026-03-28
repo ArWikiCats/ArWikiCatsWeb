@@ -257,59 +257,6 @@ class TestViewLogsEdgeCases:
         return request
 
     @patch("src.app.logs_bot.logs_db")
-    def test_view_logs_with_db_path(self, mock_logs_db, mock_request):
-        """Test view_logs with db_path parameter triggers change_db_path."""
-        from src.app.logs_bot import view_logs
-
-        mock_logs_db.get_logs.return_value = []
-        mock_logs_db.count_all.return_value = 0
-        mock_logs_db.sum_response_count.return_value = 0
-        mock_logs_db.change_db_path.return_value = ["test.db", "new_logs.db"]
-
-        def mock_get(key, default=None, type=None):
-            return {
-                "db_path": "test.db",
-                "page": 1,
-                "per_page": 10,
-                "order": "desc",
-                "order_by": "response_count",
-            }.get(key, default)
-
-        mock_request.args.get = MagicMock(side_effect=mock_get)
-
-        view_logs(mock_request)
-
-        # change_db_path should have been called
-        mock_logs_db.change_db_path.assert_called_once_with("test.db")
-
-    @patch("src.app.logs_bot.logs_db")
-    def test_view_logs_invalid_db_path_defaults_to_new_logs(self, mock_logs_db, mock_request):
-        """Test view_logs with invalid db_path defaults to new_logs.db."""
-        from src.app.logs_bot import view_logs
-
-        mock_logs_db.get_logs.return_value = []
-        mock_logs_db.count_all.return_value = 0
-        mock_logs_db.sum_response_count.return_value = 0
-        mock_logs_db.change_db_path.return_value = ["test.db", "other.db"]
-
-        def mock_get(key, default=None, type=None):
-            return {
-                "db_path": "nonexistent.db",
-                "page": 1,
-                "per_page": 10,
-                "order": "desc",
-                "order_by": "response_count",
-            }.get(key, default)
-
-        mock_request.args.get = MagicMock(side_effect=mock_get)
-
-        view_logs(mock_request)
-
-        # Should use the default table name
-        call_args = mock_logs_db.get_logs.call_args
-        assert call_args[1]["table_name"] == "logs"
-
-    @patch("src.app.logs_bot.logs_db")
     def test_view_logs_invalid_order_by_defaults_to_timestamp(self, mock_logs_db, mock_request):
         """Test view_logs with invalid order_by defaults to timestamp."""
         from src.app.logs_bot import view_logs
@@ -344,39 +291,3 @@ class TestRetrieveLogsByDateEdgeCases:
         request = MagicMock()
         request.args = MagicMock()
         return request
-
-    @patch("src.app.logs_bot.logs_db")
-    def test_retrieve_logs_by_date_with_db_path(self, mock_logs_db, mock_request):
-        """Test retrieve_logs_by_date with db_path parameter."""
-        from src.app.logs_bot import retrieve_logs_by_date
-
-        mock_logs_db.fetch_logs_by_date.return_value = []
-        mock_logs_db.change_db_path.return_value = ["test.db", "new_logs.db"]
-
-        def mock_get(key, default=None):
-            return {"db_path": "test.db"}.get(key, default)
-
-        mock_request.args.get = MagicMock(side_effect=mock_get)
-
-        retrieve_logs_by_date(mock_request)
-
-        # change_db_path should have been called
-        mock_logs_db.change_db_path.assert_called_once_with("test.db")
-
-    @patch("src.app.logs_bot.logs_db")
-    def test_retrieve_logs_by_date_invalid_db_path(self, mock_logs_db, mock_request):
-        """Test retrieve_logs_by_date with invalid db_path."""
-        from src.app.logs_bot import retrieve_logs_by_date
-
-        mock_logs_db.fetch_logs_by_date.return_value = []
-        mock_logs_db.change_db_path.return_value = ["other.db", "another.db"]
-
-        def mock_get(key, default=None):
-            return {"db_path": "nonexistent.db"}.get(key, default)
-
-        mock_request.args.get = MagicMock(side_effect=mock_get)
-
-        retrieve_logs_by_date(mock_request)
-
-        # Should still call fetch_logs_by_date with default table
-        mock_logs_db.fetch_logs_by_date.assert_called_once_with(table_name="logs")

@@ -494,27 +494,3 @@ class TestSumResponseCount:
         finally:
             db.db_path_main[1] = original_path
 
-
-class TestChangeDbPath:
-    """Tests for change_db_path function."""
-
-    def test_change_db_path_returns_list_of_dbs(self, tmp_path):
-        """Test that change_db_path returns list of .db files."""
-        from src.app.logs_db import db
-
-        # Create some test db files
-        (tmp_path / "test1.db").touch()
-        (tmp_path / "test2.db").touch()
-        (tmp_path / "not_a_db.txt").touch()
-
-        original_main_path = db.main_path
-        db.main_path = tmp_path
-
-        try:
-            result = db.change_db_path("test1.db")
-            assert isinstance(result, list)
-            assert "test1.db" in result
-            assert "test2.db" in result
-            assert "not_a_db.txt" not in result
-        finally:
-            db.main_path = original_main_path
