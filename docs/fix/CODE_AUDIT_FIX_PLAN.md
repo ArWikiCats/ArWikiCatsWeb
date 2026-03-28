@@ -11,7 +11,6 @@
 ### 🔴 Critical Issues (Fix Immediately)
 
 -   [ ] **#1** — SQL Injection Vulnerability (`logs_db/bot.py`, `logs_db/db.py`)
--   [ ] **#2** — Hardcoded Development Path (`app1.py`)
 -   [ ] **#3** — Database File in Source Control (`new_logs.db`)
 
 ### 🟠 High / Medium Priority
@@ -28,7 +27,6 @@
 -   [ ] **#8** — Inconsistent Type Hints
 -   [ ] **#9** — Missing Input Validation on `/api/<title>`
 -   [ ] **#10** — Deprecated `flask.__version__` usage
--   [ ] **#11** — Unused File `src/app1.py`
 -   [ ] **#15** — `HOME` env var issue on Windows
 -   [ ] **#16** — CORS Configuration review
 
@@ -92,25 +90,6 @@
     grep -rn "f\".*{table_name}" src/
     ```
 4. Add unit tests that pass an invalid table name and assert `ValueError` is raised.
-
-#### Step 1.2 — Remove Hardcoded Development Path (#2)
-
-**File:** `src/app1.py:9`
-
-1. Replace the hardcoded path:
-
-    ```python
-    # Before
-    sys.path.insert(0, "D:/categories_bot/make2_new")
-
-    # After
-    import os
-    custom_path = os.getenv("ARWIKICATS_PATH")
-    if custom_path:
-        sys.path.insert(0, custom_path)
-    ```
-
-2. Document `ARWIKICATS_PATH` in the project README and `.env.example` (see Step 5.3).
 
 #### Step 1.3 — Remove Database from Source Control (#3)
 
@@ -242,13 +221,6 @@
     from importlib.metadata import version
     version("flask")
     ```
-
-#### Step 3.3 — Handle Unused File `app1.py` (#11)
-
-**File:** `src/app1.py`
-
-1. If not needed for any deployment: **delete** the file.
-2. If needed locally: add a comment block at the top and add to `.gitignore`.
 
 #### Step 3.4 — Fix `HOME` Environment Variable (#15)
 
