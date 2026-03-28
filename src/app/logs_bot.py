@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-db_tables = ["logs", "list_logs"]
-
 from . import logs_db  # logs_db.change_db_path(file)
+from .config import settings
 
 
 def view_logs(request):
@@ -29,7 +28,7 @@ def view_logs(request):
     # ---
     table_name = request.args.get("table_name", "")
     # ---
-    if table_name not in db_tables:
+    if table_name not in settings.allowed_tables:
         table_name = "logs"
     # ---
     # Validate values
@@ -93,9 +92,9 @@ def view_logs(request):
     total_pages = (total_logs + per_page - 1) // per_page
     start_log = (page - 1) * per_page + 1
     end_log = min(page * per_page, total_logs)
-    start_page = max(1, page - 2)
-    end_page = min(start_page + 4, total_pages)
-    start_page = max(1, end_page - 4)
+    start_page = max(1, page - settings.pagination_window)
+    end_page = min(start_page + settings.max_visible_pages, total_pages)
+    start_page = max(1, end_page - settings.max_visible_pages)
     # ---
     sum_all = logs_db.sum_response_count(status=status, table_name=table_name, like=like)
     # ---
@@ -151,7 +150,7 @@ def retrieve_logs_by_date(request):
     # ---
     table_name = request.args.get("table_name", "")
     # ---
-    if table_name not in db_tables:
+    if table_name not in settings.allowed_tables:
         table_name = "logs"
     # ---
     logs_data = logs_db.fetch_logs_by_date(table_name=table_name)

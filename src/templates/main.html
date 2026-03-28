@@ -1,4 +1,3 @@
-{% set cdn_base = "https://tools-static.wmflabs.org/cdnjs/ajax/libs" %}
 <!DOCTYPE html>
 <html lang="en" dir="ltr" data-bs-theme="light">
 
@@ -11,6 +10,7 @@
     {% block title %}
     <title>Categories titles</title>
     {% endblock %}
+    {% set cdn_base = config.CDN_BASE %}
     <link href="{{ cdn_base }}/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ cdn_base }}/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel='stylesheet' type='text/css'>
     <link href="{{ cdn_base }}/jqueryui/1.13.2/themes/base/jquery-ui.min.css" rel="stylesheet">
@@ -50,12 +50,14 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav flex-row flex-wrap bd-navbar-nav">
                     <li class="nav-item col-6 col-lg-auto">
-                        <a class="nav-link" href="{{ url_for('ui.render_title_list') }}"><i class="bi bi-braces-asterisk ms-1"></i>
+                        <a class="nav-link" href="{{ url_for('ui.render_title_list') }}"><i
+                                class="bi bi-braces-asterisk ms-1"></i>
                             List
                         </a>
                     </li>
                     <li class="nav-item col-6 col-lg-auto">
-                        <a class="nav-link" href="{{ url_for('ui.render_qids_batch_translate') }}"><i class="bi bi-translate ms-1"></i>
+                        <a class="nav-link" href="{{ url_for('ui.render_qids_batch_translate') }}"><i
+                                class="bi bi-translate ms-1"></i>
                             QIDs
                         </a>
                     </li>
@@ -76,7 +78,8 @@
                         </a>
                     </li> -->
                     <li class="nav-item col-6 col-lg-auto">
-                        <a class="nav-link" href="{{ url_for('ui.render_chart') }}"><i class="bi bi-journal-text ms-1"></i>
+                        <a class="nav-link" href="{{ url_for('ui.render_chart') }}"><i
+                                class="bi bi-journal-text ms-1"></i>
                             Chart
                         </a>
                     </li>
@@ -87,7 +90,8 @@
                         </a>
                     </li>
                     <li class="nav-item col-6 col-lg-auto">
-                        <a class="nav-link" href="{{ url_for('ui.render_no_results_page') }}"><i class="bi bi-journal-text ms-1"></i>
+                        <a class="nav-link" href="{{ url_for('ui.render_no_results_page') }}"><i
+                                class="bi bi-journal-text ms-1"></i>
                             no_result
                         </a>
                     </li>

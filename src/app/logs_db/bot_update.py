@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 from bot import db_commit, init_db
+
+logger = logging.getLogger(__name__)
 
 
 def update_existing_records():
@@ -13,12 +17,12 @@ def update_existing_tables():
     try:
         db_commit("ALTER TABLE logs ADD COLUMN date_only DATE")
     except Exception as e:
-        print(f"تخطي إضافة العمود 'date_only' إلى جدول logs: {e}")
+        logger.debug("Skipping adding date_only column to logs table: %s", e)
 
     try:
         db_commit("ALTER TABLE list_logs ADD COLUMN date_only DATE")
     except Exception as e:
-        print(f"تخطي إضافة العمود 'date_only' إلى جدول list_logs: {e}")
+        logger.debug("Skipping adding date_only column to list_logs table: %s", e)
 
 
 if __name__ == "__main__":

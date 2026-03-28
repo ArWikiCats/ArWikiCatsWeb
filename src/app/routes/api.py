@@ -78,6 +78,10 @@ def get_status_table() -> str:
 @api_bp.route("/<title>", methods=["GET"])
 def get_title(title) -> str:
     # ---
+    # Validate title parameter
+    if not title or len(title) > 500:
+        return jsonify({"error": "Invalid title"}), 400
+    # ---
     start_time = time.time()
     # ---
     # Check for User-Agent header
@@ -123,9 +127,6 @@ def get_titles():
     len_titles = len(titles)
     titles = list(set(titles))
     duplicates = len_titles - len(titles)
-
-    # print("get_titles:")
-    # print(titles)
 
     if batch_resolve_labels is None:
         log_request("/api/list", titles, "error", delta)

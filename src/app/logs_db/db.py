@@ -4,22 +4,28 @@
 from .db import change_db_path, db_commit, init_db, fetch_all
 
 """
+import logging
 import os
 import sqlite3
 from pathlib import Path
 
-HOME = os.getenv("HOME")
-main_path = Path(HOME + "/www/python/dbs") if HOME else Path(__file__).parent.parent.parent
+from ..config import settings
 
-if not main_path.exists():
-    main_path.mkdir(parents=True, exist_ok=True)
+logger = logging.getLogger(__name__)
 
-db_path_main = {1: f"{str(main_path)}/new_logs.db"}
+main_path = settings.paths.main_path
+db_path_main = {1: settings.paths.db_path_main}
+
+
+def _validate_table_name(table_name: str) -> None:
+    """Validate table name against whitelist to prevent SQL injection."""
+    if table_name not in settings.allowed_tables:
+        raise ValueError(f"Invalid table name: {table_name}")
 
 
 def change_db_path(file):
     # ---
-    db_path = str(main_path) + f"/{file}"
+    db_path = str(main_path / file)
     # ---
     dbs_path = Path(main_path)
     # ---
@@ -41,43 +47,53 @@ def db_commit(query, params=[]):
         return True
 
     except sqlite3.Error as e:
-        print(f"init_db Database error: {e}")
+        logger.error(f"init_db Database error: {e}")
         return e
 
 
+def _create_logs_table(table_name: str) -> None:
+    """Create a logs table with the standard schema.
+
+    Note: All timestamps are stored in UTC using SQLite's CURRENT_TIMESTAMP.
+    The date_only field is derived from the timestamp using DATE('now') in UTC.
+    """
+    _validate_table_name(table_name)
+    query = f"""
+        CREATE TABLE IF NOT EXISTS {table_name} (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            endpoint TEXT NOT NULL,
+            request_data TEXT NOT NULL,
+            response_status TEXT NOT NULL,
+            response_time REAL,
+            response_count INTEGER DEFAULT 1,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            date_only DATE DEFAULT (DATE('now')),
+            UNIQUE(request_data, response_status, date_only)
+        );
+        """
+    db_commit(query)
+
+
 def init_db():
-    query = """
-        CREATE TABLE IF NOT EXISTS logs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            endpoint TEXT NOT NULL,
-            request_data TEXT NOT NULL,
-            response_status TEXT NOT NULL,
-            response_time REAL,
-            response_count INTEGER DEFAULT 1,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-            date_only DATE DEFAULT (DATE('now')),
-            UNIQUE(request_data, response_status, date_only)
-        );
-        """
-    db_commit(query)
-
-    query = """
-        CREATE TABLE IF NOT EXISTS list_logs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            endpoint TEXT NOT NULL,
-            request_data TEXT NOT NULL,
-            response_status TEXT NOT NULL,
-            response_time REAL,
-            response_count INTEGER DEFAULT 1,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-            date_only DATE DEFAULT (DATE('now')),
-            UNIQUE(request_data, response_status, date_only)
-        );
-        """
-    db_commit(query)
+    """Initialize the database by creating logs and list_logs tables."""
+    _create_logs_table("logs")
+    _create_logs_table("list_logs")
 
 
-def fetch_all(query, params=[], fetch_one=False):
+def fetch_all(query: str, params: list = None, fetch_one: bool = False):
+    """Execute a query and fetch results.
+
+    Args:
+        query: SQL query to execute
+        params: Query parameters (default: empty list)
+        fetch_one: If True, fetch single row; otherwise fetch all rows
+
+    Returns:
+        When fetch_one=True: dict with row data, or None if no rows
+        When fetch_one=False: list of dicts (empty list if no rows)
+    """
+    if params is None:
+        params = []
     try:
         with sqlite3.connect(db_path_main[1]) as conn:
             # Set row factory to return rows as dictionaries
@@ -96,9 +112,9 @@ def fetch_all(query, params=[], fetch_one=False):
                 logs = [dict(row) for row in rows]  # Convert all rows to dictionaries
 
     except sqlite3.Error as e:
-        print(f"Database error in view_logs: {e}")
+        logger.error(f"Database error in view_logs: {e}")
         if "no such table" in str(e):
             init_db()
-        logs = []
+        logs = [] if not fetch_one else None
 
     return logs

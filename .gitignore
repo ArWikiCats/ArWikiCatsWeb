@@ -1,11 +1,8 @@
 .env
-src/static_old
-src/app copy.py
 *.db
 *.pyc
 *.sql
 /adminer
 *.zip
 .coverage
-/DeepWiki.md
 .claude/settings.local.json

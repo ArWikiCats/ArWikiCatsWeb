@@ -1,5 +1,4 @@
 {% extends "main.html" %}
-{% set cdn_base = "https://tools-static.wmflabs.org/cdnjs/ajax/libs" %}
 
 {% block title %}
 <title>Logs Charts</title>
@@ -7,7 +6,7 @@
 
 {% block content2 %}
 <div class="container">
-    <script src="{{ cdn_base }}/Chart.js/4.5.0/chart.min.js"></script>
+    <script src="{{ config.CDN_BASE }}/Chart.js/4.5.0/chart.umd.js"></script>
 
     <div class="card card_form">
         <div class="card-header text-center py-2">

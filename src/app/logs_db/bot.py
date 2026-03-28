@@ -4,14 +4,20 @@
 from .logs_db.bot import change_db_path, db_commit, init_db, fetch_all
 
 """
+import logging
 import re
 
-try:
-    from .db import change_db_path as _change_db_path
-    from .db import db_commit, fetch_all, init_db
-except ImportError:
-    from db import change_db_path as _change_db_path
-    from db import db_commit, fetch_all, init_db
+from .db import change_db_path as _change_db_path
+from .db import db_commit, fetch_all, init_db
+from ..config import settings
+
+logger = logging.getLogger(__name__)
+
+
+def _validate_table_name(table_name: str) -> None:
+    """Validate table name against whitelist to prevent SQL injection."""
+    if table_name not in settings.allowed_tables:
+        raise ValueError(f"Invalid table name: {table_name}")
 
 
 def change_db_path(file):
@@ -41,7 +47,7 @@ def log_request(endpoint, request_data, response_status, response_time):
     )
     # ---
     if result is not True:
-        print(f"Error logging request: {result}")
+        logger.error(f"Error logging request: {result}")
         if "no such table" in str(result):
             init_db()
     # ---
@@ -82,6 +88,8 @@ def add_status(query, params, status="", like="", day=""):
 
 def sum_response_count(status="", table_name="logs", like=""):
     # ---
+    _validate_table_name(table_name)
+    # ---
     query = f"select sum(response_count) as count_all from {table_name}"
     # ---
     params = []
@@ -90,7 +98,10 @@ def sum_response_count(status="", table_name="logs", like=""):
     # ---
     result = fetch_all(query, params, fetch_one=True)
     # ---
-    print("result", result)
+    if result is None:
+        return 0
+    # ---
+    logger.debug("result: %s", result)
     # ---
     result = result["count_all"] or 0
     # ---
@@ -98,6 +109,8 @@ def sum_response_count(status="", table_name="logs", like=""):
 
 
 def get_response_status(table_name="logs"):
+    # ---
+    _validate_table_name(table_name)
     # ---
     query = f"select response_status, count(response_status) as numbers from {table_name} group by response_status having count(*) > 2"
     # ---
@@ -109,6 +122,8 @@ def get_response_status(table_name="logs"):
 
 
 def count_all(status="", table_name="logs", like=""):
+    # ---
+    _validate_table_name(table_name)
     # ---
     query = f"SELECT COUNT(*) FROM {table_name}"
     # ---
@@ -131,6 +146,8 @@ def count_all(status="", table_name="logs", like=""):
 
 def get_logs(per_page=10, offset=0, order="DESC", order_by="timestamp", status="", table_name="logs", like="", day=""):
     # ---
+    _validate_table_name(table_name)
+    # ---
     if order not in ["ASC", "DESC"]:
         order = "DESC"
     # ---
@@ -152,6 +169,8 @@ def get_logs(per_page=10, offset=0, order="DESC", order_by="timestamp", status="
 
 
 def fetch_logs_by_date(table_name="logs"):
+    # ---
+    _validate_table_name(table_name)
     # ---
     query_by_day = """
         SELECT
@@ -197,7 +216,7 @@ def all_logs_en2ar(day=None):
         ORDER BY request_data;
     """
     # ---
-    print(query_by_day, day)
+    logger.debug("Query for day: %s, day param: %s", query_by_day, day)
     # ---
     data = fetch_all(query_by_day, params)
     # ---
