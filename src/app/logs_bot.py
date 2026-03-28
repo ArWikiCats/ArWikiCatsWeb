@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from . import logs_db  # logs_db.change_db_path(file)
-from .config import settings, PAGINATION_WINDOW, MAX_VISIBLE_PAGES
+from .config import settings
 
 
 def view_logs(request):
@@ -92,9 +92,9 @@ def view_logs(request):
     total_pages = (total_logs + per_page - 1) // per_page
     start_log = (page - 1) * per_page + 1
     end_log = min(page * per_page, total_logs)
-    start_page = max(1, page - PAGINATION_WINDOW)
-    end_page = min(start_page + MAX_VISIBLE_PAGES, total_pages)
-    start_page = max(1, end_page - MAX_VISIBLE_PAGES)
+    start_page = max(1, page - settings.pagination_window)
+    end_page = min(start_page + settings.max_visible_pages, total_pages)
+    start_page = max(1, end_page - settings.max_visible_pages)
     # ---
     sum_all = logs_db.sum_response_count(status=status, table_name=table_name, like=like)
     # ---
