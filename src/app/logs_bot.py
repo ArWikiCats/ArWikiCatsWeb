@@ -6,8 +6,6 @@ from .config import settings
 
 def view_logs(request):
 
-    dbs = []
-
     page = request.args.get("page", 1, type=int)
 
     per_page = request.args.get("per_page", 10, type=int)
@@ -45,14 +43,19 @@ def view_logs(request):
     if order_by not in order_by_types:
         order_by = "timestamp"
 
-    # [{'response_status': 'no_result', 'numbers': 10066}, {'response_status': 'success', 'numbers': 12}
-    # status_table = logs_db.get_response_status(table_name=table_name)
     status_table = ["no_result"]
 
     status = status if (status in status_table or status == "Category") else ""
 
     logs = logs_db.get_logs(
-        per_page, offset, order, order_by=order_by, status=status, table_name=table_name, like=like, day=day
+        per_page,
+        offset,
+        order,
+        order_by=order_by,
+        status=status,
+        table_name=table_name,
+        like=like,
+        day=day
     )
 
     # Convert to list of dicts
@@ -129,8 +132,6 @@ def view_logs(request):
 
 
 def retrieve_logs_by_date(request):
-
-    dbs = []
 
     table_name = request.args.get("table_name", "")
 

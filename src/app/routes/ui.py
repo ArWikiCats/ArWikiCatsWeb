@@ -36,7 +36,6 @@ def render_daily_logs() -> str:
         logs=result.get("logs", []),
         tab=result.get("tab", []),
         status_table=result.get("status_table", []),
-        dbs=result.get("dbs", []),
     )
 
 

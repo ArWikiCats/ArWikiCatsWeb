@@ -14,10 +14,6 @@
 
 {% set col_class = "col-md-4" %}
 
-{% if result.dbs %}
-{% set col_class = "col-md-3" %}
-{% endif %}
-
 {% block content %}
 </div>
 <div class="col-11">
@@ -39,7 +35,8 @@
                                     <label for="per_page" class="form-label">Per Page</label>
                                     <select name="per_page" id="per_page" class="form-select w-100">
                                         {% for n in [10, 20, 50, 100, 150, 200] %}
-                                        <option value="{{ n }}" {% if result.tab.per_page == n %}selected{% endif %}>{{ n }}
+                                        <option value="{{ n }}" {% if result.tab.per_page == n %}selected{% endif %}>
+                                            {{ n }}
                                         </option>
                                         {% endfor %}
                                     </select>
@@ -83,7 +80,8 @@
                                     <label for="status" class="form-label">Result</label>
                                     <select name="status" id="status" class="form-select w-100">
                                         {% for st in result.status_table %}
-                                        <option value="{{ st }}" {% if result.tab.status == st %}selected{% endif %}>{{ st }}
+                                        <option value="{{ st }}" {% if result.tab.status == st %}selected{% endif %}>
+                                            {{ st }}
                                         </option>
                                         {% endfor %}
                                     </select>
@@ -92,15 +90,15 @@
                             <div class="{{ col_class }}">
                                 <div class="form-group">
                                     <label for="like" class="form-label">Like:</label>
-                                    <input type="text" name="like" id="like" class="form-control" value="{{ result.tab.like }}"
-                                        placeholder="%movie%">
+                                    <input type="text" name="like" id="like" class="form-control"
+                                        value="{{ result.tab.like }}" placeholder="%movie%">
                                 </div>
                             </div>
                             <div class="{{ col_class }}">
                                 <div class="form-group">
                                     <label for="like" class="form-label">Day:</label>
-                                    <input type="text" name="day" id="day" class="form-control" value="{{ result.tab.day }}"
-                                        placeholder="2025-01-01">
+                                    <input type="text" name="day" id="day" class="form-control"
+                                        value="{{ result.tab.day }}" placeholder="2025-01-01">
                                 </div>
                             </div>
                         </div>
@@ -125,7 +123,8 @@
 
                             <!-- Previous page -->
                             <li class="page-item {% if result.tab.page == 1 %}disabled{% endif %}">
-                                <a class="page-link" href="{{ url_for('ui.render_logs_view', page=result.tab.page-1, **common_args) }}"
+                                <a class="page-link"
+                                    href="{{ url_for('ui.render_logs_view', page=result.tab.page-1, **common_args) }}"
                                     aria-label="Previous Page">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
@@ -142,7 +141,8 @@
 
                             <!-- Next page -->
                             <li class="page-item {% if result.tab.page == result.tab.total_pages %}disabled{% endif %}">
-                                <a class="page-link" href="{{ url_for('ui.render_logs_view', page=result.tab.page+1, **common_args) }}"
+                                <a class="page-link"
+                                    href="{{ url_for('ui.render_logs_view', page=result.tab.page+1, **common_args) }}"
                                     aria-label="Next Page">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
@@ -163,7 +163,8 @@
                 <!-- Page info -->
                 <div class="col-12 text-center text-muted">
                     <small>Page {{ result.tab.page }} of {{ result.tab.total_pages }}
-                        ({{ result.tab.start_log }} - {{ result.tab.end_log }} out of {{ result.tab.total_logs }} records)</small>
+                        ({{ result.tab.start_log }} - {{ result.tab.end_log }} out of {{ result.tab.total_logs }}
+                        records)</small>
                 </div>
             </div>
             <div class="row">
