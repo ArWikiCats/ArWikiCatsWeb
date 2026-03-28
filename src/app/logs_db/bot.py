@@ -98,6 +98,9 @@ def sum_response_count(status="", table_name="logs", like=""):
     # ---
     result = fetch_all(query, params, fetch_one=True)
     # ---
+    if result is None:
+        return 0
+    # ---
     logger.debug("result: %s", result)
     # ---
     result = result["count_all"] or 0
