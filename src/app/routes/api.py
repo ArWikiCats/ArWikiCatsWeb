@@ -124,9 +124,6 @@ def get_titles():
     titles = list(set(titles))
     duplicates = len_titles - len(titles)
 
-    # print("get_titles:")
-    # print(titles)
-
     if batch_resolve_labels is None:
         log_request("/api/list", titles, "error", delta)
         return jsonify({"error": "حدث خطأ أثناء تحميل المكتبة"}), 500
