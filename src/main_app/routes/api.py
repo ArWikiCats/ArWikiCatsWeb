@@ -11,7 +11,7 @@ except ImportError:
     resolve_arabic_category_label = None
 
 from ..handler import view_logs_request_handler
-from ..loader import load_logs_view, load_data_manager
+from ..loader import load_data_manager, load_logs_view
 
 
 def jsonify(data: dict) -> str:

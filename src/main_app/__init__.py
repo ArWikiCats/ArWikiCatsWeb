@@ -8,11 +8,9 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
 from .config import settings
-
+from .loader import load_database
 from .logging_config import setup_logging
 from .routes import Api_Blueprint, Ui_Blueprint
-
-from .loader import load_database
 
 # Default log level can be overridden via LOG_LEVEL environment variable
 log_level = os.getenv("LOG_LEVEL", "INFO")

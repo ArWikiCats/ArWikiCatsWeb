@@ -42,6 +42,7 @@ class TestFetchLogsEdgeCases:
     @pytest.fixture
     def temp_db_instance(self, temp_db) -> Database:
         from src.main_app.logs_db.db import Database
+
         db_instance = Database(temp_db)
         return db_instance
 

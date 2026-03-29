@@ -22,7 +22,7 @@ def _format_log_row(log: dict) -> dict:
         "response_status": log["response_status"],
         "response_time": log["response_time"],
         "response_count": log["response_count"],
-        "timestamp": log["timestamp"].split(" ")[1],   # keep HH:MM:SS only
+        "timestamp": log["timestamp"].split(" ")[1],  # keep HH:MM:SS only
         "date_only": log["date_only"],
     }
 
@@ -55,6 +55,7 @@ def _build_date_index(logs_data: list[dict]) -> list[dict]:
 
 
 # ── main class ──────────────────────────────────────────────────────────────
+
 
 class LogsView:
     """

@@ -8,8 +8,8 @@ from unittest.mock import patch
 
 import pytest
 
-from src.main_app.logs_db.db import Database
 from src.main_app.logs_db.bot import LogsManager
+from src.main_app.logs_db.db import Database
 
 # Get the _apply_filters static method for testing
 _apply_filters = LogsManager._apply_filters
