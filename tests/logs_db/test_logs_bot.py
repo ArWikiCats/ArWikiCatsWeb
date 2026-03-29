@@ -69,7 +69,7 @@ class TestViewLogs:
         result = view_logs(mock_request)
 
         # Check that get_logs was called with default pagination
-        call_args = mock_logs_db.get_logs.call_args
+        call_args = mock_get_logs.call_args
         # per_page is passed as the first positional argument
         assert call_args[0][0] == 10
 
