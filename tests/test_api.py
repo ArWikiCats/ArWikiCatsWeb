@@ -95,8 +95,9 @@ class TestApiEndpoints:
 
     def test_logs_by_day_endpoint(self, client):
         """Test /api/logs_by_day endpoint."""
-        with patch("src.app.routes.api.view_logs_by_date") as mock_retrieve:
-            mock_retrieve.return_value = {"logs": []}
+        with patch("src.app.routes.api.load_logs_view") as mock_load_view:
+            mock_viewer = mock_load_view.return_value
+            mock_viewer.view_logs_by_date.return_value = {"logs": []}
 
             response = client.get("/api/logs_by_day")
 
@@ -115,10 +116,11 @@ class TestApiEndpoints:
 
     def test_logs_endpoint(self, client):
         """Test /api/logs endpoint."""
-        with patch("src.app.routes.api.view_logs") as mock_view_logs:
+        with patch("src.app.routes.api.load_logs_view") as mock_load_view:
             with patch("src.app.routes.api.view_logs_request_handler") as mock_handler:
                 mock_handler.return_value = MagicMock()
-                mock_view_logs.return_value = {"logs": [], "tab": {}, "status_table": [], "order_by_types": []}
+                mock_viewer = mock_load_view.return_value
+                mock_viewer.view_logs.return_value = {"logs": [], "tab": {}, "status_table": [], "order_by_types": []}
 
                 response = client.get("/api/logs")
 
@@ -148,8 +150,9 @@ class TestApiEndpoints:
 
     def test_category_endpoint(self, client):
         """Test /api/category endpoint."""
-        with patch("src.app.routes.api.view_logs_en2ar") as mock_retrieve:
-            mock_retrieve.return_value = {
+        with patch("src.app.routes.api.load_logs_view") as mock_load_view:
+            mock_viewer = mock_load_view.return_value
+            mock_viewer.view_logs_en2ar.return_value = {
                 "tab": {"sum_all": "5"},
                 "no_result": ["test"],
                 "data_result": {"key": "value"},
@@ -164,8 +167,9 @@ class TestApiEndpoints:
 
     def test_no_result_endpoint(self, client):
         """Test /api/no_result endpoint."""
-        with patch("src.app.routes.api.view_logs_en2ar") as mock_retrieve:
-            mock_retrieve.return_value = {
+        with patch("src.app.routes.api.load_logs_view") as mock_load_view:
+            mock_viewer = mock_load_view.return_value
+            mock_viewer.view_logs_en2ar.return_value = {
                 "tab": {"sum_all": "5"},
                 "no_result": ["test"],
                 "data_result": {"key": "value"},

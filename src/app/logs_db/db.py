@@ -5,7 +5,7 @@ from .db import Database, init_db
 import logging
 import sqlite3
 from contextlib import contextmanager
-from typing import Any, Optional
+from typing import Any
 
 from ..config import settings
 
@@ -18,8 +18,8 @@ class Database:
     Handles connections, table creation, commits, and fetching.
     """
 
-    def __init__(self, db_path: Optional[str] = None):
-        self.db_path = str(db_path or settings.paths.db_path_main)
+    def __init__(self, db_path: str):
+        self.db_path = str(db_path)
 
     # ─────────────────────────── connection ────────────────────────────
 
