@@ -11,13 +11,8 @@ Run individual tests (recommended for rate limit tests):
 
 import pytest
 from flask_testing import TestCase
-import sys
-from pathlib import Path
 
-# Add src to path
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-
-from app import app
+from src.app import app
 
 
 class TestARateLimiterNormalRequests(TestCase):
