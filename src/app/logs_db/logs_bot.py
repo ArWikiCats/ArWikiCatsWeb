@@ -35,6 +35,12 @@ def view_logs(request):
     # Offset for pagination
     offset = (page - 1) * per_page
 
+    result = _view_logs(page, per_page, order, order_by, day, status, like, table_name, offset)
+
+    return result
+
+
+def _view_logs(page, per_page, order, order_by, day, status, like, table_name, offset):
     order_by_types = [
         "id",
         "endpoint",
@@ -69,7 +75,6 @@ def view_logs(request):
 
     for log in logs:
         # {'id': 1, 'endpoint': 'api', 'request_data': 'Category:1934-35 in Bulgarian football', 'response_status': 'true', 'response_time': 123123.0, 'response_count': 6, 'timestamp': '2025-04-10 01:08:58'}
-
         request_data = log["request_data"].replace("_", " ")
 
         # 2025-04-23 21:13:18
