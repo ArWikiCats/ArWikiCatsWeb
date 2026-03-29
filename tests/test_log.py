@@ -4,93 +4,80 @@
 Tests for the logs database functionality.
 """
 import sqlite3
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
+from src.main_app.logs_db.db import Database
+from src.main_app.logs_db.bot import LogsManager
+
+# Get the _apply_filters static method for testing
+_apply_filters = LogsManager._apply_filters
+
 
 class TestAddStatus:
-    """Tests for the add_status function."""
+    """Tests for the _apply_filters function."""
 
     def test_add_status_with_status(self):
-        """Test add_status adds correct WHERE clause for status."""
-        from src.app.logs_db.bot import add_status
+        """Test _apply_filters adds correct WHERE clause for status."""
 
         query = "SELECT * FROM logs"
         params = []
-        result_query, result_params = add_status(query, params, status="no_result")
+        result_query, result_params = _apply_filters(query, params, status="no_result")
 
         assert "WHERE" in result_query
         assert "response_status = ?" in result_query
         assert "no_result" in result_params
 
     def test_add_status_with_category(self):
-        """Test add_status handles 'Category' status specially."""
-        from src.app.logs_db.bot import add_status
+        """Test _apply_filters handles 'Category' status specially."""
 
         query = "SELECT * FROM logs"
         params = []
-        result_query, result_params = add_status(query, params, status="Category")
+        result_query, result_params = _apply_filters(query, params, status="Category")
 
         assert "WHERE" in result_query
-        assert "response_status like 'تصنيف%'" in result_query
+        assert "response_status LIKE 'تصنيف%'" in result_query
         assert len(result_params) == 0  # No params added for Category
 
-    def test_add_status_with_like(self):
-        """Test add_status adds LIKE clause correctly."""
-        from src.app.logs_db.bot import add_status
-
-        query = "SELECT * FROM logs"
-        params = []
-        result_query, result_params = add_status(query, params, like="test%")
-
-        assert "WHERE" in result_query
-        assert "response_status like ?" in result_query
-        assert "test%" in result_params
-
     def test_add_status_with_valid_day(self):
-        """Test add_status adds date filter for valid day format."""
-        from src.app.logs_db.bot import add_status
+        """Test _apply_filters adds date filter for valid day format."""
 
         query = "SELECT * FROM logs"
         params = []
-        result_query, result_params = add_status(query, params, day="2025-01-27")
+        result_query, result_params = _apply_filters(query, params, day="2025-01-27")
 
         assert "WHERE" in result_query
         assert "date_only = ?" in result_query
         assert "2025-01-27" in result_params
 
     def test_add_status_with_invalid_day(self):
-        """Test add_status ignores invalid day format."""
-        from src.app.logs_db.bot import add_status
+        """Test _apply_filters ignores invalid day format."""
 
         query = "SELECT * FROM logs"
         params = []
-        result_query, result_params = add_status(query, params, day="invalid-date")
+        result_query, result_params = _apply_filters(query, params, day="invalid-date")
 
         assert "date_only" not in result_query
         assert len(result_params) == 0
 
     def test_add_status_with_multiple_conditions(self):
-        """Test add_status combines multiple conditions with AND."""
-        from src.app.logs_db.bot import add_status
+        """Test _apply_filters combines multiple conditions with AND."""
 
         query = "SELECT * FROM logs"
         params = []
-        result_query, result_params = add_status(query, params, status="no_result", day="2025-01-27")
+        result_query, result_params = _apply_filters(query, params, status="no_result", day="2025-01-27")
 
         assert "WHERE" in result_query
         assert "AND" in result_query
         assert len(result_params) == 2
 
-    def test_add_status_with_tuple_params(self):
-        """Test add_status converts tuple params to list."""
-        from src.app.logs_db.bot import add_status
+    def test_add_status_with_empty_list_params(self):
+        """Test _apply_filters works with empty list params."""
 
         query = "SELECT * FROM logs"
-        params = ()  # tuple instead of list
-        result_query, result_params = add_status(query, params, status="no_result")
+        params = []
+        result_query, result_params = _apply_filters(query, params, status="no_result")
 
         assert isinstance(result_params, list)
         assert "no_result" in result_params
@@ -166,50 +153,42 @@ class TestDatabaseOperations:
         yield str(db_file)
 
     def test_fetch_all_returns_list(self, temp_db):
-        """Test that fetch_all returns a list of dictionaries."""
-        from unittest.mock import patch
+        """Test that fetch returns a list of dictionaries."""
+        from src.main_app.logs_db.db import Database
 
-        from src.app.logs_db import db
-
-        with patch.object(db, "_get_db_path_main", return_value=temp_db):
-            result = db.fetch_all("SELECT * FROM logs")
-            assert isinstance(result, list)
-            assert len(result) == 3
-            assert all(isinstance(row, dict) for row in result)
+        db_instance = Database(temp_db)
+        result = db_instance.fetch("SELECT * FROM logs")
+        assert isinstance(result, list)
+        assert len(result) == 3
+        assert all(isinstance(row, dict) for row in result)
 
     def test_fetch_all_fetch_one(self, temp_db):
-        """Test that fetch_all with fetch_one=True returns single dict."""
-        from unittest.mock import patch
+        """Test that fetch with one=True returns single dict."""
+        from src.main_app.logs_db.db import Database
 
-        from src.app.logs_db import db
-
-        with patch.object(db, "_get_db_path_main", return_value=temp_db):
-            result = db.fetch_all("SELECT * FROM logs WHERE id = ?", [1], fetch_one=True)
-            assert isinstance(result, dict)
-            assert result["id"] == 1
+        db_instance = Database(temp_db)
+        result = db_instance.fetch("SELECT * FROM logs WHERE id = ?", [1], one=True)
+        assert isinstance(result, dict)
+        assert result["id"] == 1
 
     def test_fetch_all_no_result(self, temp_db):
-        """Test fetch_all returns empty list when no results."""
-        from unittest.mock import patch
+        """Test fetch returns empty list when no results."""
+        from src.main_app.logs_db.db import Database
 
-        from src.app.logs_db import db
-
-        with patch.object(db, "_get_db_path_main", return_value=temp_db):
-            result = db.fetch_all("SELECT * FROM logs WHERE id = ?", [999])
-            assert result == []
+        db_instance = Database(temp_db)
+        result = db_instance.fetch("SELECT * FROM logs WHERE id = ?", [999])
+        assert result == []
 
     def test_db_commit_success(self, temp_db):
-        """Test that db_commit returns True on success."""
-        from unittest.mock import patch
+        """Test that commit returns True on success."""
+        from src.main_app.logs_db.db import Database
 
-        from src.app.logs_db import db
-
-        with patch.object(db, "_get_db_path_main", return_value=temp_db):
-            result = db.db_commit(
-                "INSERT INTO logs (endpoint, request_data, response_status, response_time) VALUES (?, ?, ?, ?)",
-                ["/api/new", "NewData", "success", 0.1],
-            )
-            assert result is True
+        db_instance = Database(temp_db)
+        result = db_instance.commit(
+            "INSERT INTO logs (endpoint, request_data, response_status, response_time) VALUES (?, ?, ?, ?)",
+            ["/api/new", "NewData", "success", 0.1],
+        )
+        assert result is True
 
 
 class TestLogRequest:
@@ -217,48 +196,61 @@ class TestLogRequest:
 
     @pytest.fixture
     def mock_db(self):
-        """Mock database functions."""
-        with patch("src.app.logs_db.bot.db_commit") as mock_commit:
+        """Mock database commit method."""
+        with patch.object(Database, "commit") as mock_commit:
             mock_commit.return_value = True
             yield mock_commit
 
-    def test_log_request_rounds_response_time(self, mock_db):
-        """Test that response_time is rounded to 3 decimal places."""
-        from src.app.logs_db.bot import log_request
+    @pytest.fixture
+    def manager(self, mock_db):
+        """Create a LogsManager instance with mocked database."""
+        # Create a mock Database that delegates commit to our mock
+        db_instance = Database(":memory:")
+        # Patch the db instance's commit method to use our mock
+        with patch.object(db_instance, "commit", mock_db):
+            manager = LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
+            yield manager
 
-        log_request("/api/test", "test_data", "success", 0.123456789)
+    def test_log_request_rounds_response_time(self, manager, mock_db):
+        """Test that response_time is rounded to 3 decimal places."""
+
+        manager.log_request("/api/test", "test_data", "success", 0.123456789)
 
         # Check that the call was made with rounded time
+        # call_args[0] = (query, params_tuple)
+        # params_tuple = (endpoint, request_data, response_status, response_time)
         call_args = mock_db.call_args
-        assert call_args[0][1][3] == 0.123  # 4th param is response_time
+        params = call_args[0][1]  # Second argument is the params tuple
+        assert params[3] == 0.123  # 4th param is response_time
 
-    def test_log_request_uses_logs_table(self, mock_db):
+    def test_log_request_uses_logs_table(self, manager, mock_db):
         """Test that non-list endpoints use the 'logs' table."""
-        from src.app.logs_db.bot import log_request
 
-        log_request("/api/test", "test_data", "success", 0.1)
+        manager.log_request("/api/test", "test_data", "success", 0.1)
 
         call_args = mock_db.call_args
         assert "logs" in call_args[0][0]
         assert "list_logs" not in call_args[0][0]
 
-    def test_log_request_uses_list_logs_table(self, mock_db):
+    def test_log_request_uses_list_logs_table(self, manager, mock_db):
         """Test that /api/list endpoint uses 'list_logs' table."""
-        from src.app.logs_db.bot import log_request
 
-        log_request("/api/list", "test_data", "success", 0.1)
+        manager.log_request("/api/list", "test_data", "success", 0.1)
 
         call_args = mock_db.call_args
         assert "list_logs" in call_args[0][0]
 
-    def test_log_request_converts_status_to_string(self, mock_db):
+    def test_log_request_converts_status_to_string(self, manager, mock_db):
         """Test that response_status is converted to string."""
-        from src.app.logs_db.bot import log_request
 
-        log_request("/api/test", "test_data", 200, 0.1)
+        manager.log_request("/api/test", "test_data", 200, 0.1)
 
+        # Check that the call was made with string status
+        # call_args[0] = (query, params_tuple)
+        # params_tuple = (endpoint, request_data, response_status, response_time)
         call_args = mock_db.call_args
-        assert call_args[0][1][2] == "200"  # 3rd param is response_status
+        params = call_args[0][1]  # Second argument is the params tuple
+        assert params[2] == "200"  # 3rd param is response_status
 
 
 class TestCountAll:
@@ -302,25 +294,24 @@ class TestCountAll:
         conn.close()
         yield str(db_file)
 
-    def test_count_all_total(self, temp_db_with_data):
+    @pytest.fixture
+    def manager(self, temp_db_with_data):
+        """Create LogsManager instance for testing."""
+        from src.main_app.logs_db.bot import LogsManager
+        from src.main_app.logs_db.db import Database
+
+        db_instance = Database(temp_db_with_data)
+        return LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
+
+    def test_count_all_total(self, manager):
         """Test count_all returns total count without filters."""
-        from unittest.mock import patch
+        result = manager.count_all()
+        assert result == 8
 
-        from src.app.logs_db import bot, db
-
-        with patch.object(db, "_get_db_path_main", return_value=temp_db_with_data):
-            result = bot.count_all()
-            assert result == 8
-
-    def test_count_all_with_status(self, temp_db_with_data):
+    def test_count_all_with_status(self, manager):
         """Test count_all with status filter."""
-        from unittest.mock import patch
-
-        from src.app.logs_db import bot, db
-
-        with patch.object(db, "_get_db_path_main", return_value=temp_db_with_data):
-            result = bot.count_all(status="no_result")
-            assert result == 5
+        result = manager.count_all(status="no_result")
+        assert result == 5
 
 
 class TestGetLogs:
@@ -359,49 +350,38 @@ class TestGetLogs:
         conn.close()
         yield str(db_file)
 
-    def test_get_logs_pagination(self, temp_db_for_logs):
+    @pytest.fixture
+    def manager(self, temp_db_for_logs):
+        """Create LogsManager instance for testing."""
+        from src.main_app.logs_db.bot import LogsManager
+        from src.main_app.logs_db.db import Database
+
+        db_instance = Database(temp_db_for_logs)
+        return LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
+
+    def test_get_logs_pagination(self, manager):
         """Test get_logs respects pagination parameters."""
-        from unittest.mock import patch
+        result = manager.get_logs(per_page=5, offset=0)
+        assert len(result) == 5
 
-        from src.app.logs_db import bot, db
-
-        with patch.object(db, "_get_db_path_main", return_value=temp_db_for_logs):
-            result = bot.get_logs(per_page=5, offset=0)
-            assert len(result) == 5
-
-    def test_get_logs_order_desc(self, temp_db_for_logs):
+    def test_get_logs_order_desc(self, manager):
         """Test get_logs orders DESC by default."""
-        from unittest.mock import patch
+        result = manager.get_logs(per_page=5, offset=0, order="DESC", order_by="response_count")
+        # Should be ordered by response_count descending
+        counts = [row["response_count"] for row in result]
+        assert counts == sorted(counts, reverse=True)
 
-        from src.app.logs_db import bot, db
-
-        with patch.object(db, "_get_db_path_main", return_value=temp_db_for_logs):
-            result = bot.get_logs(per_page=5, offset=0, order="DESC", order_by="response_count")
-            # Should be ordered by response_count descending
-            counts = [row["response_count"] for row in result]
-            assert counts == sorted(counts, reverse=True)
-
-    def test_get_logs_order_asc(self, temp_db_for_logs):
+    def test_get_logs_order_asc(self, manager):
         """Test get_logs can order ASC."""
-        from unittest.mock import patch
+        result = manager.get_logs(per_page=5, offset=0, order="ASC", order_by="response_count")
+        counts = [row["response_count"] for row in result]
+        assert counts == sorted(counts)
 
-        from src.app.logs_db import bot, db
-
-        with patch.object(db, "_get_db_path_main", return_value=temp_db_for_logs):
-            result = bot.get_logs(per_page=5, offset=0, order="ASC", order_by="response_count")
-            counts = [row["response_count"] for row in result]
-            assert counts == sorted(counts)
-
-    def test_get_logs_invalid_order_defaults_to_desc(self, temp_db_for_logs):
+    def test_get_logs_invalid_order_defaults_to_desc(self, manager):
         """Test get_logs defaults to DESC for invalid order."""
-        from unittest.mock import patch
-
-        from src.app.logs_db import bot, db
-
-        with patch.object(db, "_get_db_path_main", return_value=temp_db_for_logs):
-            result = bot.get_logs(per_page=5, offset=0, order="INVALID", order_by="response_count")
-            counts = [row["response_count"] for row in result]
-            assert counts == sorted(counts, reverse=True)
+        result = manager.get_logs(per_page=5, offset=0, order="INVALID", order_by="response_count")
+        counts = [row["response_count"] for row in result]
+        assert counts == sorted(counts, reverse=True)
 
 
 class TestSumResponseCount:
@@ -447,22 +427,21 @@ class TestSumResponseCount:
         conn.close()
         yield str(db_file)
 
-    def test_sum_response_count_total(self, temp_db_for_sum):
+    @pytest.fixture
+    def manager(self, temp_db_for_sum):
+        """Create LogsManager instance for testing."""
+        from src.main_app.logs_db.bot import LogsManager
+        from src.main_app.logs_db.db import Database
+
+        db_instance = Database(temp_db_for_sum)
+        return LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
+
+    def test_sum_response_count_total(self, manager):
         """Test sum_response_count returns total sum."""
-        from unittest.mock import patch
+        result = manager.sum_response_count()
+        assert result == 35  # 10 + 20 + 5
 
-        from src.app.logs_db import bot, db
-
-        with patch.object(db, "_get_db_path_main", return_value=temp_db_for_sum):
-            result = bot.sum_response_count()
-            assert result == 35  # 10 + 20 + 5
-
-    def test_sum_response_count_with_status(self, temp_db_for_sum):
+    def test_sum_response_count_with_status(self, manager):
         """Test sum_response_count with status filter."""
-        from unittest.mock import patch
-
-        from src.app.logs_db import bot, db
-
-        with patch.object(db, "_get_db_path_main", return_value=temp_db_for_sum):
-            result = bot.sum_response_count(status="success")
-            assert result == 30  # 10 + 20
+        result = manager.sum_response_count(status="success")
+        assert result == 30  # 10 + 20

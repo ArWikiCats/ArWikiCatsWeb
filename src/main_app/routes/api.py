@@ -4,18 +4,14 @@ import time
 
 from flask import Blueprint, Response, request
 
-from ..logs_db import logs_bot
-from ..logs_db import get_response_status, log_request
-from ..config import settings
-
 try:
     from ArWikiCats import batch_resolve_labels, resolve_arabic_category_label  # type: ignore
 except ImportError:
     batch_resolve_labels = None
     resolve_arabic_category_label = None
 
-# Create the API Blueprint
-api_bp = Blueprint("api", __name__, url_prefix="/api")
+from ..handler import view_logs_request_handler
+from ..loader import load_logs_view, load_data_manager
 
 
 def jsonify(data: dict) -> str:
@@ -24,39 +20,32 @@ def jsonify(data: dict) -> str:
 
 
 def check_user_agent(endpoint, data, start_time):
+    _manager = load_data_manager()
     if not request.headers.get("User-Agent"):
         response_status = "User-Agent missing"
-        log_request(endpoint, data, response_status, time.time() - start_time)
+        _manager.log_request(endpoint, data, response_status, time.time() - start_time)
         return jsonify({"error": "User-Agent header is required"}), 400
     return None
 
 
-@api_bp.route("/logs_by_day", methods=["GET"])
-def get_logs_by_day() -> str:
+def get_logs_by_day(table_name) -> str:
+    _viewer = load_logs_view()
 
-    table_name = request.args.get("table_name", "")
-
-    if table_name not in settings.allowed_tables:
-        table_name = "logs"
-
-    result = logs_bot.retrieve_logs_by_date(table_name)
+    result = _viewer.view_logs_by_date(table_name)
     result = result.get("logs", [])
 
     return jsonify(result)
 
 
-@api_bp.route("/all", methods=["GET"])
-@api_bp.route("/all/<day>", methods=["GET"])
 def get_logs_all(day=None) -> str:
-    result = logs_bot.retrieve_logs_en_to_ar(day)
-
+    _viewer = load_logs_view()
+    result = _viewer.view_logs_en2ar(day)
     return jsonify(result)
 
 
-@api_bp.route("/category", methods=["GET"])
-@api_bp.route("/category/<day>", methods=["GET"])
 def get_logs_category(day=None) -> str:
-    result = logs_bot.retrieve_logs_en_to_ar(day)
+    _viewer = load_logs_view()
+    result = _viewer.view_logs_en2ar(day)
 
     if "no_result" in result:
         del result["no_result"]
@@ -64,10 +53,9 @@ def get_logs_category(day=None) -> str:
     return jsonify(result)
 
 
-@api_bp.route("/no_result", methods=["GET"])
-@api_bp.route("/no_result/<day>", methods=["GET"])
 def get_logs_no_result(day=None) -> str:
-    result = logs_bot.retrieve_logs_en_to_ar(day)
+    _viewer = load_logs_view()
+    result = _viewer.view_logs_en2ar(day)
 
     if "data_result" in result:
         del result["data_result"]
@@ -75,14 +63,12 @@ def get_logs_no_result(day=None) -> str:
     return jsonify(result)
 
 
-@api_bp.route("/status", methods=["GET"])
 def get_status_table() -> str:
-    result = get_response_status()
-
+    _manager = load_data_manager()
+    result = _manager.get_response_status()
     return jsonify(result)
 
 
-@api_bp.route("/<title>", methods=["GET"])
 def get_title(title) -> str:
 
     # Validate title parameter
@@ -91,13 +77,15 @@ def get_title(title) -> str:
 
     start_time = time.time()
 
+    _manager = load_data_manager()
+
     # Check for User-Agent header
     ua_check = check_user_agent("/api/<title>", title, start_time)
     if ua_check:
         return ua_check
 
     if resolve_arabic_category_label is None:
-        log_request("/api/<title>", title, "error", time.time() - start_time)
+        _manager.log_request("/api/<title>", title, "error", time.time() - start_time)
         return jsonify({"error": "حدث خطأ أثناء تحميل المكتبة"}), 500
 
     label = resolve_arabic_category_label(title)
@@ -106,19 +94,18 @@ def get_title(title) -> str:
 
     delta = time.time() - start_time
 
-    data["sql"] = log_request("/api/<title>", title, label or "no_result", delta)
+    data["sql"] = _manager.log_request("/api/<title>", title, label or "no_result", delta)
 
     return jsonify(data)
 
 
-@api_bp.route("/list", methods=["POST"])
-def get_titles():
+def get_titles(data):
     start_time = time.time()
 
-    data = request.get_json(silent=True)
+    _manager = load_data_manager()
     if not isinstance(data, dict):
         delta = time.time() - start_time
-        log_request("/api/list", None, "error", delta)
+        _manager.log_request("/api/list", None, "error", delta)
         return jsonify({"error": "No valid JSON payload provided"}), 400
 
     titles = data.get("titles", [])
@@ -130,7 +117,7 @@ def get_titles():
     # تأكد أن البيانات قائمة
     if not isinstance(titles, list):
         delta = time.time() - start_time
-        log_request("/api/list", titles, "error", delta)
+        _manager.log_request("/api/list", titles, "error", delta)
         return jsonify({"error": "بيانات غير صالحة"}), 400
 
     delta = time.time() - start_time
@@ -140,7 +127,7 @@ def get_titles():
     duplicates = len_titles - len(titles)
 
     if batch_resolve_labels is None:
-        log_request("/api/list", titles, "error", delta)
+        _manager.log_request("/api/list", titles, "error", delta)
         return jsonify({"error": "حدث خطأ أثناء تحميل المكتبة"}), 500
 
     result = batch_resolve_labels(titles)
@@ -163,14 +150,60 @@ def get_titles():
 
     # تحديد حالة الاستجابة
     response_status = "success" if len_result > 0 else "no_result"
-    log_request("/api/list", titles, response_status, delta2)
+    _manager.log_request("/api/list", titles, response_status, delta2)
 
     return jsonify(response_data)
 
 
-@api_bp.route("/logs", methods=["GET"])
-def logs_api():
-
-    result = logs_bot.view_logs(request)
-
+def logs_api(data) -> str:
+    _viewer = load_logs_view()
+    result = _viewer.view_logs(data)
     return jsonify(result)
+
+
+class Api_Blueprint:
+    def __init__(self, api_bp: Blueprint, allowed_tables):
+        self.allowed_tables = allowed_tables
+
+        @api_bp.route("/logs", methods=["GET"])
+        def _logs_api():
+            data = view_logs_request_handler(request, self.allowed_tables)
+            return logs_api(data)
+
+        @api_bp.route("/list", methods=["POST"])
+        def _get_titles():
+            data = request.get_json(silent=True)
+            return get_titles(data)
+
+        @api_bp.route("/<title>", methods=["GET"])
+        def _get_title(title) -> str:
+            return get_title(title)
+
+        @api_bp.route("/status", methods=["GET"])
+        def _get_status_table() -> str:
+            return get_status_table()
+
+        @api_bp.route("/no_result", methods=["GET"])
+        @api_bp.route("/no_result/<day>", methods=["GET"])
+        def _get_logs_no_result(day=None) -> str:
+            return get_logs_no_result(day=day)
+
+        @api_bp.route("/logs_by_day", methods=["GET"])
+        def _get_logs_by_day() -> str:
+
+            table_name = request.args.get("table_name", "")
+
+            if table_name not in self.allowed_tables:
+                table_name = "logs"
+
+            return get_logs_by_day(table_name)
+
+        @api_bp.route("/all", methods=["GET"])
+        @api_bp.route("/all/<day>", methods=["GET"])
+        def _get_logs_all(day=None) -> str:
+            return get_logs_all(day=day)
+
+        @api_bp.route("/category", methods=["GET"])
+        @api_bp.route("/category/<day>", methods=["GET"])
+        def _get_logs_category(day=None) -> str:
+            return get_logs_category(day=day)

@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 import os
-import sys
 from pathlib import Path
 
-from flask import Flask, render_template
+from flask import Blueprint, Flask, render_template
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
+from .config import settings
+
 from .logging_config import setup_logging
-from .routes import api_bp, ui_bp
+from .routes import Api_Blueprint, Ui_Blueprint
+
+from .loader import load_database
 
 # Default log level can be overridden via LOG_LEVEL environment variable
 log_level = os.getenv("LOG_LEVEL", "INFO")
@@ -21,12 +24,17 @@ setup_logging(
 
 def create_app() -> Flask:
     """Instantiate and configure the Flask application."""
+    # Create all required tables
+    _db = load_database()
+    _db.init_tables()
 
+    # Create the Flask app
     app = Flask(
         __name__,
         template_folder="../templates",
         static_folder="../static",
     )
+
     # Allow cross-origin requests (needed when calling this API from pages like https://ar.wikipedia.org)
     CORS(
         app,
@@ -50,8 +58,16 @@ def create_app() -> Flask:
         "https://tools-static.wmflabs.org/cdnjs/ajax/libs",
     )
 
+    # Create the API Blueprint
+    api_bp = Blueprint("api", __name__, url_prefix="/api")
+    Api_Blueprint(api_bp, settings.allowed_tables)
+
     # Register the API Blueprint
     app.register_blueprint(api_bp)
+
+    # Create the UI Blueprint
+    ui_bp = Blueprint("ui", __name__)
+    Ui_Blueprint(ui_bp, settings.allowed_tables)
 
     # Register the UI Blueprint
     app.register_blueprint(ui_bp)

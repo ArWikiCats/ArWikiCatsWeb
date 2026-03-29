@@ -6,13 +6,12 @@
 {% set common_args = {
     'per_page': result.tab.per_page,
     'order': result.tab.order,
-    'like': result.tab.like,
     'table_name': result.tab.table_name,
     'status': result.tab.status,
     'day': result.tab.day
 } %}
 
-{% set col_class = "col-md-4" %}
+{% set col_class = "col-md-6" %}
 
 {% block content %}
 </div>
@@ -85,13 +84,6 @@
                                         </option>
                                         {% endfor %}
                                     </select>
-                                </div>
-                            </div>
-                            <div class="{{ col_class }}">
-                                <div class="form-group">
-                                    <label for="like" class="form-label">Like:</label>
-                                    <input type="text" name="like" id="like" class="form-control"
-                                        value="{{ result.tab.like }}" placeholder="%movie%">
                                 </div>
                             </div>
                             <div class="{{ col_class }}">

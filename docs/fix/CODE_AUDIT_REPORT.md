@@ -176,7 +176,6 @@ def get_logs(
     order_by: str = "timestamp",
     status: str = "",
     table_name: str = "logs",
-    like: str = "",
     day: str = ""
 ) -> list[dict]:
 ```
