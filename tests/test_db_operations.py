@@ -227,7 +227,7 @@ class TestFetchLogsByDate:
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db_grouped)
-        manager = LogsManager(db=db_instance)
+        manager = LogsManager(db=db_instance, allowed_tables={})
         result = manager.fetch_logs_by_date()
         assert isinstance(result, list)
         # Should have grouped entries
@@ -287,7 +287,7 @@ class TestGetResponseStatus:
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db_status)
-        manager = LogsManager(db=db_instance)
+        manager = LogsManager(db=db_instance, allowed_tables={})
         result = manager.get_response_status()
         assert isinstance(result, list)
         assert "no_result" in result
