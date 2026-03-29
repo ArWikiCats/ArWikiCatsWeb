@@ -4,15 +4,22 @@ import time
 
 from flask import Blueprint, Response, request
 
-from ..logs_db import logs_bot
-from ..logs_db import get_response_status, log_request
-from ..config import settings
+from ..handler import view_logs_request_handler
 
 try:
     from ArWikiCats import batch_resolve_labels, resolve_arabic_category_label  # type: ignore
 except ImportError:
     batch_resolve_labels = None
     resolve_arabic_category_label = None
+
+from ..logs_db import Database, LogsManager
+from ..logs_db.logs_bot import retrieve_logs_by_date, retrieve_logs_en_to_ar, view_logs_new
+from ..config import settings
+
+_manager = LogsManager(db=Database(settings.paths.db_path_main))
+
+log_request = _manager.log_request
+get_response_status = _manager.get_response_status
 
 # Create the API Blueprint
 api_bp = Blueprint("api", __name__, url_prefix="/api")
@@ -39,7 +46,7 @@ def get_logs_by_day() -> str:
     if table_name not in settings.allowed_tables:
         table_name = "logs"
 
-    result = logs_bot.retrieve_logs_by_date(table_name)
+    result = retrieve_logs_by_date(table_name)
     result = result.get("logs", [])
 
     return jsonify(result)
@@ -48,7 +55,7 @@ def get_logs_by_day() -> str:
 @api_bp.route("/all", methods=["GET"])
 @api_bp.route("/all/<day>", methods=["GET"])
 def get_logs_all(day=None) -> str:
-    result = logs_bot.retrieve_logs_en_to_ar(day)
+    result = retrieve_logs_en_to_ar(day)
 
     return jsonify(result)
 
@@ -56,7 +63,7 @@ def get_logs_all(day=None) -> str:
 @api_bp.route("/category", methods=["GET"])
 @api_bp.route("/category/<day>", methods=["GET"])
 def get_logs_category(day=None) -> str:
-    result = logs_bot.retrieve_logs_en_to_ar(day)
+    result = retrieve_logs_en_to_ar(day)
 
     if "no_result" in result:
         del result["no_result"]
@@ -67,7 +74,7 @@ def get_logs_category(day=None) -> str:
 @api_bp.route("/no_result", methods=["GET"])
 @api_bp.route("/no_result/<day>", methods=["GET"])
 def get_logs_no_result(day=None) -> str:
-    result = logs_bot.retrieve_logs_en_to_ar(day)
+    result = retrieve_logs_en_to_ar(day)
 
     if "data_result" in result:
         del result["data_result"]
@@ -170,7 +177,6 @@ def get_titles():
 
 @api_bp.route("/logs", methods=["GET"])
 def logs_api():
-
-    result = logs_bot.view_logs(request)
-
+    data = view_logs_request_handler(request)
+    result = view_logs_new(data)
     return jsonify(result)

@@ -1,116 +1,168 @@
 # -*- coding: utf-8 -*-
 """
-
-from .db import db_commit, init_db, fetch_all
-
+from .db import Database, init_db
 """
 import logging
 import sqlite3
-
+from contextlib import contextmanager
+from typing import Any, Optional
 from ..config import settings
 
 logger = logging.getLogger(__name__)
 
 
-def _get_db_path_main() -> str:
-    db_path_main = settings.paths.db_path_main
-    return db_path_main
-
-
-def _create_logs_table(table_name: str) -> None:
-    """Create a logs table with the standard schema.
-
-    Note: All timestamps are stored in UTC using SQLite's CURRENT_TIMESTAMP.
-    The date_only field is derived from the timestamp using DATE('now') in UTC.
+class Database:
     """
-    query = f"""
-        CREATE TABLE IF NOT EXISTS {table_name} (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            endpoint TEXT NOT NULL,
-            request_data TEXT NOT NULL,
-            response_status TEXT NOT NULL,
-            response_time REAL,
-            response_count INTEGER DEFAULT 1,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-            date_only DATE DEFAULT (DATE('now')),
-            UNIQUE(request_data, response_status, date_only)
-        );
+    Professional SQLite database manager.
+    Handles connections, table creation, commits, and fetching.
+    """
+
+    def __init__(self, db_path: Optional[str] = None):
+        self.db_path = str(db_path or settings.paths.db_path_main)
+
+    # ─────────────────────────── connection ────────────────────────────
+
+    @contextmanager
+    def _connect(self, row_as_dict: bool = False):
+        """Context manager: opens a connection and guarantees closure."""
+        conn = None
+        try:
+            conn = sqlite3.connect(self.db_path)
+            if row_as_dict:
+                conn.row_factory = sqlite3.Row
+            yield conn
+        except sqlite3.Error as e:
+            logger.error(f"[Database] Connection error: {e}")
+            raise
+        finally:
+            if conn:
+                conn.close()
+
+    # ──────────────────────────── commit ───────────────────────────────
+
+    def commit(self, query: str, params: list | tuple = ()) -> bool:
         """
-    db_commit(query)
+        Execute a write query (INSERT / UPDATE / DELETE / CREATE …).
+
+        Returns:
+            True on success, False on failure.
+        """
+        try:
+            with self._connect() as conn:
+                conn.execute(query, params)
+                conn.commit()
+                return True
+        except sqlite3.Error as e:
+            logger.error(f"[Database] Commit error: {e}")
+            return False
+
+    def commit_many(self, query: str, params_seq: list[list | tuple]) -> bool:
+        """
+        Execute a write query for multiple rows in a single transaction.
+
+        Returns:
+            True on success, False on failure.
+        """
+        try:
+            with self._connect() as conn:
+                conn.executemany(query, params_seq)
+                conn.commit()
+                return True
+        except sqlite3.Error as e:
+            logger.error(f"[Database] Commit-many error: {e}")
+            return False
+
+    # ──────────────────────────── fetch ────────────────────────────────
+
+    def fetch(
+        self,
+        query: str,
+        params: list | tuple = (),
+        one: bool = False,
+    ) -> list[dict[str, Any]] | dict[str, Any] | None:
+        """
+        Execute a SELECT query and return results as plain dicts.
+
+        Args:
+            query:  SQL SELECT statement.
+            params: Bind parameters.
+            one:    If True return a single dict (or None); otherwise a list.
+
+        Returns:
+            dict | None   when one=True
+            list[dict]    when one=False  (empty list if no rows)
+        """
+        try:
+            with self._connect(row_as_dict=True) as conn:
+                cursor = conn.execute(query, params)
+                if one:
+                    row = cursor.fetchone()
+                    return dict(row) if row else None
+                return [dict(row) for row in cursor.fetchall()]
+        except sqlite3.Error as e:
+            logger.error(f"[Database] Fetch error: {e}")
+            if "no such table" in str(e):
+                logger.warning("[Database] Table missing — re-initialising schema.")
+                self.init_tables()
+            return None if one else []
+
+    # ────────────────────────── table creation ─────────────────────────
+
+    def _create_logs_table(self, table_name: str) -> bool:
+        """
+        Create a standard logs table if it does not already exist.
+        All timestamps are stored in UTC via SQLite's CURRENT_TIMESTAMP.
+        """
+        query = f"""
+            CREATE TABLE IF NOT EXISTS {table_name} (
+                id               INTEGER  PRIMARY KEY AUTOINCREMENT,
+                endpoint         TEXT     NOT NULL,
+                request_data     TEXT     NOT NULL,
+                response_status  TEXT     NOT NULL,
+                response_time    REAL,
+                response_count   INTEGER  DEFAULT 1,
+                timestamp        DATETIME DEFAULT CURRENT_TIMESTAMP,
+                date_only        DATE     DEFAULT (DATE('now')),
+                UNIQUE(request_data, response_status, date_only)
+            );
+        """
+        return self.commit(query)
+
+    def init_tables(self) -> None:
+        """Create all required tables (idempotent — safe to call repeatedly)."""
+        self._create_logs_table("logs")
+        self._create_logs_table("list_logs")
+        logger.info("[Database] Tables initialised.")
+
+    # ───────────────────────── dunder helpers ──────────────────────────
+
+    def __repr__(self) -> str:
+        return f"Database(path={self.db_path!r})"
 
 
-def db_commit(query, params=[]):
-    db_path_main = _get_db_path_main()
-    conn = None
-    try:
-        conn = sqlite3.connect(str(db_path_main))
-        cursor = conn.cursor()
-        cursor.execute(query, params)
-        conn.commit()
-        return True
+# ── module-level singleton ──────────────────────────────────────────────────
 
-    except sqlite3.Error as e:
-        logger.error(f"init_db Database error: {e}")
-        return e
-    finally:
-        if conn:
-            conn.close()
+_db = Database(settings.paths.db_path_main)
 
 
-def init_db():
-    """Initialize the database by creating logs and list_logs tables."""
-    _create_logs_table("logs")
-    _create_logs_table("list_logs")
+def init_db() -> None:
+    _db.init_tables()
 
 
-def fetch_all(query: str, params: list = None, fetch_one: bool = False):
-    """Execute a query and fetch results.
+def db_commit(query: str, params: list | tuple = ()) -> bool:
+    return _db.commit(query, params)
 
-    Args:
-        query: SQL query to execute
-        params: Query parameters (default: empty list)
-        fetch_one: If True, fetch single row; otherwise fetch all rows
 
-    Returns:
-        When fetch_one=True: dict with row data, or None if no rows
-        When fetch_one=False: list of dicts (empty list if no rows)
-    """
-    db_path_main = _get_db_path_main()
-
-    if params is None:
-        params = []
-    conn = None
-    try:
-        conn = sqlite3.connect(str(db_path_main))
-        # Set row factory to return rows as dictionaries
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-
-        # Execute the query
-        cursor.execute(query, params)
-
-        # Fetch results
-        if fetch_one:
-            row = cursor.fetchone()
-            logs = dict(row) if row else None  # Convert to dictionary
-        else:
-            rows = cursor.fetchall()
-            logs = [dict(row) for row in rows]  # Convert all rows to dictionaries
-
-    except sqlite3.Error as e:
-        logger.error(f"Database error in view_logs: {e}")
-        if "no such table" in str(e):
-            init_db()
-        logs = [] if not fetch_one else None
-    finally:
-        if conn:
-            conn.close()
-
-    return logs
+def fetch_all(
+    query: str,
+    params: list | tuple = (),
+    fetch_one: bool = False,
+) -> list[dict] | dict | None:
+    return _db.fetch(query, params, one=fetch_one)
 
 
 __all__ = [
+    "Database",
     "db_commit",
-    "init_db",
     "fetch_all",
 ]

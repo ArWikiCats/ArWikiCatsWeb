@@ -1,220 +1,240 @@
 # -*- coding: utf-8 -*-
 """
-
-from .logs_db.bot import db_commit, init_db, fetch_all
-
+from .logs_db.bot import LogsManager
 """
 import logging
 import re
 
 from ..config import settings
-from .db import db_commit, fetch_all, init_db
+from .db import Database
 
 logger = logging.getLogger(__name__)
 
 
-def _validate_table_name(table_name: str) -> None:
-    """Validate table name against whitelist to prevent SQL injection."""
-    if table_name not in settings.allowed_tables:
-        raise ValueError(f"Invalid table name: {table_name}")
+class LogsManager:
+    """
+    Professional logs manager.
+    Handles logging requests, querying, and aggregating log data.
+    """
 
+    ALLOWED_ORDERS = {"ASC", "DESC"}
 
-def log_request(endpoint, request_data, response_status, response_time):
+    def __init__(self, db: Database = None):
+        self._db = db or Database(settings.paths.db_path_main)
 
-    response_time = round(response_time, 3)
+    # ─────────────────────────── validation ────────────────────────────
 
-    response_status = str(response_status)
+    def _validate_table(self, table_name: str) -> None:
+        """Whitelist check to prevent SQL injection via table names."""
+        if table_name not in settings.allowed_tables:
+            raise ValueError(f"Invalid table name: {table_name!r}")
 
-    table_name = "logs" if endpoint != "/api/list" else "list_logs"
+    @staticmethod
+    def _validate_order(order: str) -> str:
+        """Normalize ORDER direction — fallback to DESC if invalid."""
+        return order if order in LogsManager.ALLOWED_ORDERS else "DESC"
 
-    result = db_commit(
-        f"""
-        INSERT INTO {table_name} (
-            endpoint, request_data, response_status, response_time, date_only
+    @staticmethod
+    def _resolve_table(endpoint: str) -> str:
+        return "list_logs" if endpoint == "/api/list" else "logs"
+
+    # ──────────────────────────── write ────────────────────────────────
+
+    def log_request(
+        self,
+        endpoint: str,
+        request_data: str,
+        response_status,
+        response_time: float,
+    ) -> bool:
+        """
+        Insert or update a log record for a given request.
+        Uses UPSERT (ON CONFLICT) to increment counters on duplicates.
+        """
+        table_name = self._resolve_table(endpoint)
+        response_time = round(response_time, 3)
+        response_status = str(response_status)
+
+        query = f"""
+            INSERT INTO {table_name} (
+                endpoint, request_data, response_status, response_time, date_only
             )
-        VALUES (?, ?, ?, ?, DATE('now'))
-        ON CONFLICT(request_data, response_status, date_only) DO UPDATE SET
-            response_count = response_count + 1,
-            response_time = excluded.response_time,
-            timestamp = CURRENT_TIMESTAMP
-    """,
-        (endpoint, str(request_data), response_status, response_time),
-    )
-
-    if result is not True:
-        logger.error(f"Error logging request: {result}")
-        if "no such table" in str(result):
-            init_db()
-
-    return result
-
-
-def add_status(query, params, status="", like="", day=""):
-
-    if not isinstance(params, list):
-        params = list(params)
-
-    added = []
-
-    if status:
-        if status == "Category":
-            added.append("response_status like 'تصنيف%'")
-        else:
-            added.append("response_status = ?")
-            params.append(status)
-    elif like:
-        added.append("response_status like ?")
-        params.append(like)
-
-    # 2025-04-23
-    pattern = r"\d{4}-\d{2}-\d{2}"
-
-    if day and re.match(pattern, day):
-        added.append("date_only = ?")
-        params.append(day)
-
-    if added:
-        query += " WHERE " + " AND ".join(added)
-
-    # params = tuple(params)
-
-    return query, params
-
-
-def sum_response_count(status="", table_name="logs", like=""):
-
-    _validate_table_name(table_name)
-
-    query = f"select sum(response_count) as count_all from {table_name}"
-
-    params = []
-
-    query, params = add_status(query, params, status=status, like=like)
-
-    result = fetch_all(query, params, fetch_one=True)
-
-    if result is None:
-        return 0
-
-    logger.debug("result: %s", result)
-
-    result = result["count_all"] or 0
-
-    return result
-
-
-def get_response_status(table_name="logs"):
-
-    _validate_table_name(table_name)
-
-    query = f"select response_status, count(response_status) as numbers from {table_name} group by response_status having count(*) > 2"
-
-    result = fetch_all(query, ())
-
-    result = [row["response_status"] for row in result]
-
-    return result
-
-
-def count_all(status="", table_name="logs", like=""):
-
-    _validate_table_name(table_name)
-
-    query = f"SELECT COUNT(*) FROM {table_name}"
-
-    params = []
-
-    query, params = add_status(query, params, status=status, like=like)
-
-    result = fetch_all(query, params, fetch_one=True)
-
-    if not result:
-        return 0
-
-    if isinstance(result, list):
-        result = result[0]
-
-    total_logs = result["COUNT(*)"]
-
-    return total_logs
-
-
-def get_logs(per_page=10, offset=0, order="DESC", order_by="timestamp", status="", table_name="logs", like="", day=""):
-
-    _validate_table_name(table_name)
-
-    if order not in ["ASC", "DESC"]:
-        order = "DESC"
-
-    query = f"SELECT * FROM {table_name} "
-
-    params = []
-
-    query, params = add_status(query, params, status=status, like=like, day=day)
-
-    query += f"ORDER BY {order_by} {order} LIMIT ? OFFSET ?"
-
-    # {'id': 1, 'endpoint': 'api', 'request_data': 'Category:1934-35 in Bulgarian football', 'response_status': 'true', 'response_time': 123123.0, 'response_count': 6, 'timestamp': '2025-04-10 01:08:58'}
-
-    params.extend([per_page, offset])
-
-    logs = fetch_all(query, params)
-
-    return logs
-
-
-def fetch_logs_by_date(table_name="logs"):
-
-    _validate_table_name(table_name)
-
-    query_by_day = """
-        SELECT
-            date_only,
-            CASE
-                WHEN response_status LIKE 'تصنيف%' THEN 'Category'
-                ELSE response_status
-            END AS status_group,
-            COUNT(request_data) AS title_count,
-            sum(response_count) AS count
-        FROM {table_name}
-        GROUP BY date_only, status_group
-        ORDER BY date_only;
-        """.format(
-        table_name=table_name
-    )
-
-    result = fetch_all(query_by_day, ())
-
-    return result
-
-
-def all_logs_en2ar(day=None):
-
-    query_by_day = """
-        SELECT request_data, response_status
-        FROM logs
-    """
-
-    params = []
-
-    if day:
-        if re.match(r"\d{4}-\d{2}-\d{2}", day):
-            query_by_day += " \n where date_only = ? \n "
+            VALUES (?, ?, ?, ?, DATE('now'))
+            ON CONFLICT(request_data, response_status, date_only) DO UPDATE SET
+                response_count = response_count + 1,
+                response_time  = excluded.response_time,
+                timestamp      = CURRENT_TIMESTAMP
+        """
+        success = self._db.commit(
+            query, (endpoint, str(request_data), response_status, response_time)
+        )
+
+        if not success:
+            logger.error("[LogsManager] Failed to log request: %s %s", endpoint, request_data)
+            self._db.init_tables()
+
+        return success
+
+    # ──────────────────────── query builder ────────────────────────────
+
+    @staticmethod
+    def _apply_filters(
+        query: str,
+        params: list,
+        *,
+        status: str = "",
+        like: str = "",
+        day: str = "",
+    ) -> tuple[str, list]:
+        """
+        Append WHERE clauses for status / like / day filters.
+        Mutates and returns (query, params).
+        """
+        conditions = []
+
+        if status:
+            if status == "Category":
+                conditions.append("response_status LIKE 'تصنيف%'")
+            else:
+                conditions.append("response_status = ?")
+                params.append(status)
+        elif like:
+            conditions.append("response_status LIKE ?")
+            params.append(like)
+
+        if day and re.match(r"\d{4}-\d{2}-\d{2}", day):
+            conditions.append("date_only = ?")
             params.append(day)
 
-        elif re.match(r"\d{4}-\d{2}", day):
-            query_by_day += " \n where strftime('%Y-%m', date_only) = ? \n "
-            params.append(day)
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
 
-    query_by_day += """
-        GROUP BY request_data, response_status
-        ORDER BY request_data;
-    """
+        return query, params
 
-    logger.debug("Query for day: %s, day param: %s", query_by_day, day)
+    # ──────────────────────────── read ─────────────────────────────────
 
-    data = fetch_all(query_by_day, params)
+    def sum_response_count(
+        self,
+        status: str = "",
+        table_name: str = "logs",
+        like: str = "",
+    ) -> int:
+        """Return the total sum of response_count matching the given filters."""
+        self._validate_table(table_name)
+        query, params = self._apply_filters(
+            f"SELECT SUM(response_count) AS count_all FROM {table_name}",
+            [],
+            status=status,
+            like=like,
+        )
+        result = self._db.fetch(query, params, one=True)
+        return (result or {}).get("count_all") or 0
 
-    result = {x["request_data"]: x["response_status"] for x in data}
+    def count_all(
+        self,
+        status: str = "",
+        table_name: str = "logs",
+        like: str = "",
+    ) -> int:
+        """Return the number of rows matching the given filters."""
+        self._validate_table(table_name)
+        query, params = self._apply_filters(
+            f"SELECT COUNT(*) AS total FROM {table_name}",
+            [],
+            status=status,
+            like=like,
+        )
+        result = self._db.fetch(query, params, one=True)
+        return (result or {}).get("total") or 0
 
-    return result
+    def get_response_status(self, table_name: str = "logs") -> list[str]:
+        """Return distinct response statuses that appear more than twice."""
+        self._validate_table(table_name)
+        query = f"""
+            SELECT response_status
+            FROM   {table_name}
+            GROUP  BY response_status
+            HAVING COUNT(*) > 2
+        """
+        rows = self._db.fetch(query, ())
+        return [row["response_status"] for row in rows]
+
+    def get_logs(
+        self,
+        per_page: int = 10,
+        offset: int = 0,
+        order: str = "DESC",
+        order_by: str = "timestamp",
+        status: str = "",
+        table_name: str = "logs",
+        like: str = "",
+        day: str = "",
+    ) -> list[dict]:
+        """Return a paginated, optionally-filtered page of log rows."""
+        self._validate_table(table_name)
+        order = self._validate_order(order)
+
+        query, params = self._apply_filters(
+            f"SELECT * FROM {table_name} ",
+            [],
+            status=status,
+            like=like,
+            day=day,
+        )
+        query += f" ORDER BY {order_by} {order} LIMIT ? OFFSET ?"
+        params.extend([per_page, offset])
+
+        return self._db.fetch(query, params)
+
+    def fetch_logs_by_date(self, table_name: str = "logs") -> list[dict]:
+        """
+        Return daily aggregated counts grouped by date and status.
+        Arabic statuses starting with 'تصنيف' are normalised to 'Category'.
+        """
+        self._validate_table(table_name)
+        query = f"""
+            SELECT
+                date_only,
+                CASE
+                    WHEN response_status LIKE 'تصنيف%' THEN 'Category'
+                    ELSE response_status
+                END AS status_group,
+                COUNT(request_data)   AS title_count,
+                SUM(response_count)   AS count
+            FROM   {table_name}
+            GROUP  BY date_only, status_group
+            ORDER  BY date_only
+        """
+        return self._db.fetch(query, ())
+
+    def all_logs_en2ar(self, day: str = None) -> dict[str, str]:
+        """
+        Return a {request_data: response_status} mapping, optionally filtered
+        by a full date (YYYY-MM-DD) or year-month (YYYY-MM).
+        """
+        query = "SELECT request_data, response_status FROM logs"
+        params: list = []
+
+        if day:
+            if re.match(r"\d{4}-\d{2}-\d{2}", day):
+                query += " WHERE date_only = ?"
+                params.append(day)
+            elif re.match(r"\d{4}-\d{2}", day):
+                query += " WHERE strftime('%Y-%m', date_only) = ?"
+                params.append(day)
+
+        query += " GROUP BY request_data, response_status ORDER BY request_data"
+
+        logger.debug("[LogsManager] all_logs_en2ar query=%s params=%s", query, params)
+        rows = self._db.fetch(query, params)
+        return {row["request_data"]: row["response_status"] for row in rows}
+
+    # ───────────────────────── dunder helpers ──────────────────────────
+
+    def __repr__(self) -> str:
+        return f"LogsManager(db={self._db!r})"
+
+
+__all__ = [
+    "LogsManager",
+]

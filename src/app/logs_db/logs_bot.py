@@ -1,73 +1,32 @@
 # -*- coding: utf-8 -*-
 
+import functools
 from ..config import settings
-from .bot import (
-    get_logs,
-    count_all,
-    all_logs_en2ar,
-    fetch_logs_by_date,
-    sum_response_count,
-)
+from .bot import LogsManager
+from .db import Database
+from ..handler import ViewLogsRequestHandler
 
 
-def view_logs(request):
-
-    page = request.args.get("page", 1, type=int)
-
-    per_page = request.args.get("per_page", 10, type=int)
-    order = request.args.get("order", "desc").upper()
-    order_by = request.args.get("order_by", "response_count")
-
-    day = request.args.get("day", "")
-
-    status = request.args.get("status", "")
-    like = request.args.get("like", "")
-
-    table_name = request.args.get("table_name", "")
-
-    if table_name not in settings.allowed_tables:
-        table_name = "logs"
-
-    # Validate values
-    page = max(1, page)
-    per_page = max(1, min(200, per_page))
-
-    # Offset for pagination
-    offset = (page - 1) * per_page
-
-    result = _view_logs(page, per_page, order, order_by, day, status, like, table_name, offset)
-
-    return result
+@functools.lru_cache(maxsize=1)
+def load_data_manager() -> LogsManager:
+    _manager = LogsManager(db=Database(settings.paths.db_path_main))
+    return _manager
 
 
-def _view_logs(page, per_page, order, order_by, day, status, like, table_name, offset):
-    order_by_types = [
-        "id",
-        "endpoint",
-        "request_data",
-        "response_status",
-        "response_time",
-        "response_count",
-        "timestamp",
-        "date_only",
-    ]
+def view_logs_new(data: ViewLogsRequestHandler):
 
-    if order_by not in order_by_types:
-        order_by = "timestamp"
+    _manager = load_data_manager()
+    status_table = ["no_result", "All", "Category"]
 
-    status_table = ["no_result"]
-
-    status = status if (status in status_table or status == "Category") else ""
-
-    logs = get_logs(
-        per_page,
-        offset,
-        order,
-        order_by=order_by,
-        status=status,
-        table_name=table_name,
-        like=like,
-        day=day
+    logs = _manager.get_logs(
+        data.per_page,
+        data.offset,
+        data.order,
+        order_by=data.order_by,
+        status=data.status,
+        table_name=data.table_name,
+        like=data.like,
+        day=data.day
     )
 
     # Convert to list of dicts
@@ -93,48 +52,41 @@ def _view_logs(page, per_page, order, order_by, day, status, like, table_name, o
             }
         )
 
-    total_logs = count_all(status=status, table_name=table_name, like=like)
+    total_logs = _manager.count_all(status=data.status, table_name=data.table_name, like=data.like)
 
     # Pagination calculations
-    total_pages = (total_logs + per_page - 1) // per_page
-    start_log = (page - 1) * per_page + 1
-    end_log = min(page * per_page, total_logs)
-    start_page = max(1, page - settings.pagination_window)
+    total_pages = (total_logs + data.per_page - 1) // data.per_page
+    start_log = (data.page - 1) * data.per_page + 1
+    end_log = min(data.page * data.per_page, total_logs)
+    start_page = max(1, data.page - settings.pagination_window)
     end_page = min(start_page + settings.max_visible_pages, total_pages)
     start_page = max(1, end_page - settings.max_visible_pages)
 
-    sum_all = sum_response_count(status=status, table_name=table_name, like=like)
+    sum_all = _manager.sum_response_count(status=data.status, table_name=data.table_name, like=data.like)
 
-    if status == "":
-        status = "All"
+    status = data.status or "All"
 
     table_new = {
         "sum_all": f"{sum_all:,}",
-        "table_name": table_name,
+        "table_name": data.table_name,
         "total_pages": total_pages,
         "total_logs": f"{total_logs:,}",
         "start_log": start_log,
         "end_log": end_log,
         "start_page": start_page,
         "end_page": end_page,
-        "order": order,
-        "order_by": order_by,
-        "per_page": per_page,
-        "page": page,
+        "order": data.order,
+        "order_by": data.order_by,
+        "per_page": data.per_page,
+        "page": data.page,
         "status": status,
-        "like": like,
-        "day": day,
+        "like": data.like,
+        "day": data.day,
     }
-
-    if "All" not in status_table:
-        status_table.append("All")
-
-    if "Category" not in status_table:
-        status_table.append("Category")
 
     result = {
         "logs": log_list,
-        "order_by_types": order_by_types,
+        "order_by_types": data.order_by_types,
         "tab": table_new,
         "status_table": status_table,
     }
@@ -144,7 +96,9 @@ def _view_logs(page, per_page, order, order_by, day, status, like, table_name, o
 
 def retrieve_logs_by_date(table_name):
 
-    logs_data = fetch_logs_by_date(table_name=table_name)
+    _manager = load_data_manager()
+
+    logs_data = _manager.fetch_logs_by_date(table_name=table_name)
 
     data_logs = {}
 
@@ -193,7 +147,9 @@ def retrieve_logs_by_date(table_name):
 
 def retrieve_logs_en_to_ar(day=None):
 
-    logs_data = all_logs_en2ar(day=day)
+    _manager = load_data_manager()
+
+    logs_data = _manager.all_logs_en2ar(day=day)
 
     data_no_result = [x for x, v in logs_data.items() if v == "no_result"]
     data_result = {x: v for x, v in logs_data.items() if v != "no_result"}

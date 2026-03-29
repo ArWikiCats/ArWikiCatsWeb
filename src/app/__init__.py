@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import sys
 from pathlib import Path
 
 from flask import Flask, render_template
