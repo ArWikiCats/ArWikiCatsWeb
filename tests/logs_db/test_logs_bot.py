@@ -132,21 +132,14 @@ class TestViewLogs:
 class TestRetrieveLogsByDate:
     """Tests for retrieve_logs_by_date function."""
 
-    @pytest.fixture
-    def mock_request(self):
-        """Create a mock Flask request object."""
-        request = MagicMock()
-        request.args.get = MagicMock(return_value=None)
-        return request
-
     @patch("src.app.logs_db.logs_bot.fetch_logs_by_date")
-    def test_retrieve_logs_by_date_returns_dict(self, mock_fetch_logs_by_date, mock_request):
+    def test_retrieve_logs_by_date_returns_dict(self, mock_fetch_logs_by_date):
         """Test that retrieve_logs_by_date returns expected structure."""
         from src.app.logs_db.logs_bot import retrieve_logs_by_date
 
         mock_fetch_logs_by_date.return_value = []
 
-        result = retrieve_logs_by_date(mock_request)
+        result = retrieve_logs_by_date(table_name="logs")
 
         assert isinstance(result, dict)
         assert "logs" in result
@@ -154,7 +147,7 @@ class TestRetrieveLogsByDate:
         assert "logs_data" in result
 
     @patch("src.app.logs_db.logs_bot.fetch_logs_by_date")
-    def test_retrieve_logs_by_date_aggregates_data(self, mock_fetch_logs_by_date, mock_request):
+    def test_retrieve_logs_by_date_aggregates_data(self, mock_fetch_logs_by_date):
         """Test that retrieve_logs_by_date properly aggregates data by date."""
         from src.app.logs_db.logs_bot import retrieve_logs_by_date
 
@@ -164,7 +157,7 @@ class TestRetrieveLogsByDate:
             {"date_only": "2025-01-26", "status_group": "no_result", "title_count": 2, "count": 3},
         ]
 
-        result = retrieve_logs_by_date(mock_request)
+        result = retrieve_logs_by_date(table_name="logs")
 
         assert len(result["logs"]) == 2  # Two unique days
 
@@ -175,7 +168,7 @@ class TestRetrieveLogsByDate:
         assert day_27["total"] == 15  # 10 + 5
 
     @patch("src.app.logs_db.logs_bot.fetch_logs_by_date")
-    def test_retrieve_logs_by_date_sorts_by_day(self, mock_fetch_logs_by_date, mock_request):
+    def test_retrieve_logs_by_date_sorts_by_day(self, mock_fetch_logs_by_date):
         """Test that logs are sorted by day."""
         from src.app.logs_db.logs_bot import retrieve_logs_by_date
 
@@ -185,7 +178,7 @@ class TestRetrieveLogsByDate:
             {"date_only": "2025-01-26", "status_group": "no_result", "title_count": 1, "count": 1},
         ]
 
-        result = retrieve_logs_by_date(mock_request)
+        result = retrieve_logs_by_date(table_name="logs")
 
         days = [log["day"] for log in result["logs"]]
         assert days == sorted(days)
