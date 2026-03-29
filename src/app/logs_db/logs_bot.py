@@ -117,14 +117,19 @@ def _view_logs(page, per_page, order, order_by, day, status, like, table_name, o
         "sum_all": f"{sum_all:,}",
         "table_name": table_name,
         "total_pages": total_pages,
+
+        # summary
         "total_logs": f"{total_logs:,}",
         "start_log": start_log,
         "end_log": end_log,
+
+        # pagination
         "start_page": start_page,
         "end_page": end_page,
+        "per_page": per_page,
+
         "order": order,
         "order_by": order_by,
-        "per_page": per_page,
         "page": page,
         "status": status,
         "like": like,
@@ -204,14 +209,19 @@ def view_logs_new(data: ViewLogsRequestHandler):
         "sum_all": f"{sum_all:,}",
         "table_name": data.table_name,
         "total_pages": total_pages,
+
+        # summary
         "total_logs": f"{total_logs:,}",
         "start_log": start_log,
         "end_log": end_log,
+
+        # pagination
         "start_page": start_page,
         "end_page": end_page,
+        "per_page": data.per_page,
+
         "order": data.order,
         "order_by": data.order_by,
-        "per_page": data.per_page,
         "page": data.page,
         "status": status,
         "like": data.like,
