@@ -7,18 +7,13 @@ from unittest.mock import MagicMock, patch
 from src.app.logs_db.logs_view import LogsView, _build_date_index
 
 
-class TestViewLogs:
-    """Tests for the view_logs function."""
+@pytest.fixture
+def mock_request():
+    """Create a mock Flask request object with default args."""
+    request = MagicMock()
+    request.args = MagicMock()
 
-    @pytest.fixture
-    def mock_request(self):
-        """Create a mock Flask request object."""
-        request = MagicMock()
-        request.args = MagicMock()
-        request.args.get = MagicMock(side_effect=self._mock_args_get)
-        return request
-
-    def _mock_args_get(self, key, default=None, type=None):
+    def _mock_args_get(key, default=None, type=None):
         """Default mock implementation for request.args.get."""
         defaults = {
             "db_path": None,
@@ -35,9 +30,14 @@ class TestViewLogs:
             return type(value)
         return value
 
-    def test_view_logs_returns_dict_with_required_keys(
-        self, mock_request
-    ):
+    request.args.get = MagicMock(side_effect=_mock_args_get)
+    return request
+
+
+class TestViewLogs:
+    """Tests for the view_logs function."""
+
+    def test_view_logs_returns_dict_with_required_keys(self, mock_request):
         """Test that view_logs returns a dict with expected keys."""
         from src.app.handler import view_logs_request_handler
 
@@ -48,9 +48,6 @@ class TestViewLogs:
         mock_manager.sum_response_count.return_value = 0
 
         viewer = LogsView(manager=mock_manager)
-
-        # Create a mock request with args
-        mock_request.args.get.side_effect = self._mock_args_get
 
         result = viewer.view_logs(view_logs_request_handler(mock_request, ["logs", "list_logs"]))
 
@@ -70,8 +67,6 @@ class TestViewLogs:
         mock_manager.sum_response_count.return_value = 0
 
         viewer = LogsView(manager=mock_manager)
-
-        mock_request.args.get.side_effect = self._mock_args_get
 
         viewer.view_logs(view_logs_request_handler(mock_request, ["logs", "list_logs"]))
 
@@ -141,13 +136,6 @@ class TestViewLogs:
 class TestViewLogsEdgeCases:
     """Tests for edge cases in view_logs function."""
 
-    @pytest.fixture
-    def mock_request(self):
-        """Create a mock Flask request object."""
-        request = MagicMock()
-        request.args = MagicMock()
-        return request
-
     def test_view_logs_invalid_order_by_defaults_to_timestamp(
         self, mock_request
     ):
@@ -182,10 +170,3 @@ class TestViewLogsEdgeCases:
 
 class TestRetrieveLogsByDateEdgeCases:
     """Tests for edge cases in view_logs_by_date function."""
-
-    @pytest.fixture
-    def mock_request(self):
-        """Create a mock Flask request object."""
-        request = MagicMock()
-        request.args = MagicMock()
-        return request
