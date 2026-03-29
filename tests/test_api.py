@@ -95,7 +95,7 @@ class TestApiEndpoints:
 
     def test_logs_by_day_endpoint(self, client):
         """Test /api/logs_by_day endpoint."""
-        with patch("src.app.routes.api.retrieve_logs_by_date") as mock_retrieve:
+        with patch("src.app.routes.api.view_logs_by_date") as mock_retrieve:
             mock_retrieve.return_value = {"logs": []}
 
             response = client.get("/api/logs_by_day")

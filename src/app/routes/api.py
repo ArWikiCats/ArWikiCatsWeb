@@ -15,7 +15,7 @@ from ..config import settings
 from ..handler import view_logs_request_handler
 from ..logs_db import Database, LogsManager, LogsView
 from ..logs_db.logs_bot import view_logs_new
-from ..logs_db.logs_bot2 import retrieve_logs_by_date, view_logs_en2ar
+from ..logs_db.logs_bot2 import view_logs_by_date, view_logs_en2ar
 
 
 @functools.lru_cache(maxsize=1)
@@ -47,7 +47,7 @@ def check_user_agent(endpoint, data, start_time):
 
 def get_logs_by_day(table_name) -> str:
 
-    result = retrieve_logs_by_date(table_name)
+    result = view_logs_by_date(table_name)
     result = result.get("logs", [])
 
     return jsonify(result)
@@ -60,7 +60,8 @@ def get_logs_all(day=None) -> str:
 
 
 def get_logs_category(day=None) -> str:
-    result = view_logs_en2ar(day)
+    _viewer = load_logs_view()
+    result = _viewer.view_logs_en2ar(day)
 
     if "no_result" in result:
         del result["no_result"]
@@ -69,7 +70,8 @@ def get_logs_category(day=None) -> str:
 
 
 def get_logs_no_result(day=None) -> str:
-    result = view_logs_en2ar(day)
+    _viewer = load_logs_view()
+    result = _viewer.view_logs_en2ar(day)
 
     if "data_result" in result:
         del result["data_result"]

@@ -65,7 +65,7 @@ class TestUIRoutes:
 
     def test_logs_by_day_page(self, client):
         """Test that logs_by_day page renders with mocked data."""
-        with patch("src.app.routes.ui.retrieve_logs_by_date") as mock_retrieve:
+        with patch("src.app.routes.ui.view_logs_by_date") as mock_retrieve:
             mock_retrieve.return_value = {
                 "logs": [],
                 "tab": {"sum_all": "0", "table_name": "logs"},
@@ -173,7 +173,7 @@ class TestUIWithQueryParams:
 
     def test_logs_by_day_with_table_name(self, client):
         """Test logs_by_day page with table_name parameter."""
-        with patch("src.app.routes.ui.retrieve_logs_by_date") as mock_retrieve:
+        with patch("src.app.routes.ui.view_logs_by_date") as mock_retrieve:
             mock_retrieve.return_value = {
                 "logs": [],
                 "tab": {"sum_all": "0", "table_name": "list_logs"},

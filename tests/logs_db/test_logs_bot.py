@@ -181,7 +181,7 @@ class TestViewLogsEdgeCases:
 
 
 class TestRetrieveLogsByDateEdgeCases:
-    """Tests for edge cases in retrieve_logs_by_date function."""
+    """Tests for edge cases in view_logs_by_date function."""
 
     @pytest.fixture
     def mock_request(self):

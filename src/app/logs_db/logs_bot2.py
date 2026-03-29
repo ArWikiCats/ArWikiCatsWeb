@@ -13,7 +13,7 @@ def load_data_manager() -> LogsManager:
     return _manager
 
 
-def retrieve_logs_by_date(table_name):
+def view_logs_by_date(table_name):
 
     _manager = load_data_manager()
 

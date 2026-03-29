@@ -3,20 +3,24 @@
 Tests for the logs_bot2 module.
 """
 from unittest.mock import patch
+from src.app.routes.api import load_logs_view
+_viewer = load_logs_view()
+
+view_logs_en2ar = _viewer.view_logs_en2ar
 
 
 class TestRetrieveLogsByDate:
-    """Tests for retrieve_logs_by_date function."""
+    """Tests for view_logs_by_date function."""
 
     @patch("src.app.logs_db.logs_bot2.load_data_manager")
-    def test_retrieve_logs_by_date_returns_dict(self, mock_load_data_manager):
-        """Test that retrieve_logs_by_date returns expected structure."""
-        from src.app.logs_db.logs_bot2 import retrieve_logs_by_date
+    def test_view_logs_by_date_returns_dict(self, mock_load_data_manager):
+        """Test that view_logs_by_date returns expected structure."""
+        from src.app.logs_db.logs_bot2 import view_logs_by_date
 
         mock_manager = mock_load_data_manager.return_value
         mock_manager.fetch_logs_by_date.return_value = []
 
-        result = retrieve_logs_by_date(table_name="logs")
+        result = view_logs_by_date(table_name="logs")
 
         assert isinstance(result, dict)
         assert "logs" in result
@@ -24,9 +28,9 @@ class TestRetrieveLogsByDate:
         assert "logs_data" in result
 
     @patch("src.app.logs_db.logs_bot2.load_data_manager")
-    def test_retrieve_logs_by_date_aggregates_data(self, mock_load_data_manager):
-        """Test that retrieve_logs_by_date properly aggregates data by date."""
-        from src.app.logs_db.logs_bot2 import retrieve_logs_by_date
+    def test_view_logs_by_date_aggregates_data(self, mock_load_data_manager):
+        """Test that view_logs_by_date properly aggregates data by date."""
+        from src.app.logs_db.logs_bot2 import view_logs_by_date
 
         mock_manager = mock_load_data_manager.return_value
         mock_manager.fetch_logs_by_date.return_value = [
@@ -35,7 +39,7 @@ class TestRetrieveLogsByDate:
             {"date_only": "2025-01-26", "status_group": "no_result", "title_count": 2, "count": 3},
         ]
 
-        result = retrieve_logs_by_date(table_name="logs")
+        result = view_logs_by_date(table_name="logs")
 
         assert len(result["logs"]) == 2  # Two unique days
 
@@ -46,9 +50,9 @@ class TestRetrieveLogsByDate:
         assert day_27["total"] == 15  # 10 + 5
 
     @patch("src.app.logs_db.logs_bot2.load_data_manager")
-    def test_retrieve_logs_by_date_sorts_by_day(self, mock_load_data_manager):
+    def test_view_logs_by_date_sorts_by_day(self, mock_load_data_manager):
         """Test that logs are sorted by day."""
-        from src.app.logs_db.logs_bot2 import retrieve_logs_by_date
+        from src.app.logs_db.logs_bot2 import view_logs_by_date
 
         mock_manager = mock_load_data_manager.return_value
         mock_manager.fetch_logs_by_date.return_value = [
@@ -57,7 +61,7 @@ class TestRetrieveLogsByDate:
             {"date_only": "2025-01-26", "status_group": "no_result", "title_count": 1, "count": 1},
         ]
 
-        result = retrieve_logs_by_date(table_name="logs")
+        result = view_logs_by_date(table_name="logs")
 
         days = [log["day"] for log in result["logs"]]
         assert days == sorted(days)
@@ -69,7 +73,6 @@ class TestRetrieveLogsEnToAr:
     @patch("src.app.logs_db.logs_bot2.load_data_manager")
     def test_view_logs_en2ar_separates_results(self, mock_load_data_manager):
         """Test that results are separated into no_result and data_result."""
-        from src.app.logs_db.logs_bot2 import view_logs_en2ar
 
         mock_manager = mock_load_data_manager.return_value
         mock_manager.all_logs_en2ar.return_value = {
@@ -89,7 +92,6 @@ class TestRetrieveLogsEnToAr:
     @patch("src.app.logs_db.logs_bot2.load_data_manager")
     def test_view_logs_en2ar_tab_counts(self, mock_load_data_manager):
         """Test that tab contains correct counts."""
-        from src.app.logs_db.logs_bot2 import view_logs_en2ar
 
         mock_manager = mock_load_data_manager.return_value
         mock_manager.all_logs_en2ar.return_value = {
@@ -107,7 +109,6 @@ class TestRetrieveLogsEnToAr:
     @patch("src.app.logs_db.logs_bot2.load_data_manager")
     def test_view_logs_en2ar_with_day_parameter(self, mock_load_data_manager):
         """Test that day parameter is passed to the database function."""
-        from src.app.logs_db.logs_bot2 import view_logs_en2ar
 
         mock_manager = mock_load_data_manager.return_value
         mock_manager.all_logs_en2ar.return_value = {}
@@ -119,7 +120,6 @@ class TestRetrieveLogsEnToAr:
     @patch("src.app.logs_db.logs_bot2.load_data_manager")
     def test_view_logs_en2ar_empty_results(self, mock_load_data_manager):
         """Test handling of empty results."""
-        from src.app.logs_db.logs_bot2 import view_logs_en2ar
 
         mock_manager = mock_load_data_manager.return_value
         mock_manager.all_logs_en2ar.return_value = {}
