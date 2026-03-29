@@ -99,11 +99,14 @@ class Database:
                     return dict(row) if row else None
                 return [dict(row) for row in cursor.fetchall()]
         except sqlite3.Error as e:
-            logger.error(f"[Database] Fetch error: {e}")
-            if "no such table" in str(e):
+            error_msg = str(e)
+            if "no such table" in error_msg:
                 logger.warning("[Database] Table missing — re-initialising schema.")
                 self.init_tables()
-            return None if one else []
+                return None if one else []
+            # Re-raise other SQLite errors (database locked, permissions, malformed SQL, etc.)
+            logger.error(f"[Database] Fetch error: {e}")
+            raise
 
     # ────────────────────────── table creation ─────────────────────────
 

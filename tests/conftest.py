@@ -2,15 +2,28 @@
 """
 Pytest configuration for the tests directory.
 """
+import functools
 import os
 import pytest
 
 
 @pytest.fixture(scope="session", autouse=True)
-def set_database_path(tmp_path_factory):
-    """Set DATABASE_PATH environment variable for testing."""
+def set_database_path_and_clear_cache(tmp_path_factory):
+    """Set DATABASE_PATH environment variable for testing and clear loader cache."""
     db_file = tmp_path_factory.mktemp("db") / "test.db"
     os.environ["DATABASE_PATH"] = str(db_file)
+
+    # Clear the lru_cache for load_database, load_data_manager, and load_logs_view
+    # This must happen BEFORE any import of src.app to ensure fresh DB binding
+    from src.app import loader
+    loader.load_database.cache_clear()
+    loader.load_data_manager.cache_clear()
+    loader.load_logs_view.cache_clear()
+
+    # Also clear the settings cache to pick up the new DATABASE_PATH
+    from src.app import config
+    config.get_settings.cache_clear()
+    config.settings = config.get_settings()
 
 
 @pytest.fixture
