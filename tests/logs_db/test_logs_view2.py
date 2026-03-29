@@ -35,12 +35,12 @@ class TestViewLogs:
             return type(value)
         return value
 
-    @patch("src.app.logs_db.logs_bot.load_data_manager")
+    @patch("src.app.logs_db.logs_view.load_data_manager")
     def test_view_logs_returns_dict_with_required_keys(
         self, mock_load_data_manager, mock_request
     ):
         """Test that view_logs returns a dict with expected keys."""
-        from src.app.logs_db.logs_bot import view_logs
+        from src.app.logs_db.logs_view import view_logs
         from src.app.handler import view_logs_request_handler
 
         # Setup mock manager
@@ -59,10 +59,10 @@ class TestViewLogs:
         assert "tab" in result
         assert "status_table" in result
 
-    @patch("src.app.logs_db.logs_bot.load_data_manager")
+    @patch("src.app.logs_db.logs_view.load_data_manager")
     def test_view_logs_pagination_defaults(self, mock_load_data_manager, mock_request):
         """Test that view_logs uses correct pagination defaults."""
-        from src.app.logs_db.logs_bot import view_logs
+        from src.app.logs_db.logs_view import view_logs
         from src.app.handler import view_logs_request_handler
 
         # Setup mock manager
@@ -79,10 +79,10 @@ class TestViewLogs:
         call_args = mock_manager.get_logs.call_args
         assert call_args[0][0] == 10  # per_page
 
-    @patch("src.app.logs_db.logs_bot.load_data_manager")
+    @patch("src.app.logs_db.logs_view.load_data_manager")
     def test_view_logs_validates_table_name(self, mock_load_data_manager):
         """Test that view_logs validates table_name parameter."""
-        from src.app.logs_db.logs_bot import view_logs
+        from src.app.logs_db.logs_view import view_logs
         from src.app.handler import view_logs_request_handler
 
         request = MagicMock()
@@ -109,10 +109,10 @@ class TestViewLogs:
         # Should default to "logs" table
         assert result["tab"]["table_name"] == "logs"
 
-    @patch("src.app.logs_db.logs_bot.load_data_manager")
+    @patch("src.app.logs_db.logs_view.load_data_manager")
     def test_view_logs_formats_request_data(self, mock_load_data_manager, mock_request):
         """Test that view_logs replaces underscores in request_data."""
-        from src.app.logs_db.logs_bot import view_logs
+        from src.app.logs_db.logs_view import view_logs
         from src.app.handler import view_logs_request_handler
 
         mock_manager = mock_load_data_manager.return_value
@@ -148,12 +148,12 @@ class TestViewLogsEdgeCases:
         request.args = MagicMock()
         return request
 
-    @patch("src.app.logs_db.logs_bot.load_data_manager")
+    @patch("src.app.logs_db.logs_view.load_data_manager")
     def test_view_logs_invalid_order_by_defaults_to_timestamp(
         self, mock_load_data_manager, mock_request
     ):
         """Test view_logs with invalid order_by defaults to timestamp."""
-        from src.app.logs_db.logs_bot import view_logs
+        from src.app.logs_db.logs_view import view_logs
         from src.app.handler import view_logs_request_handler
 
         mock_manager = mock_load_data_manager.return_value
