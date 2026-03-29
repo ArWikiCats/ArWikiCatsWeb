@@ -28,10 +28,11 @@ class TestUIRoutes:
 
     def test_logs_page(self, client):
         """Test that logs page renders with mocked data."""
-        with patch("src.app.routes.ui.view_logs_new") as mock_view:
+        with patch("src.app.routes.ui.load_logs_view") as mock_load_view:
             with patch("src.app.routes.ui.view_logs_request_handler") as mock_handler:
                 mock_handler.return_value = MagicMock()
-                mock_view.return_value = {
+                mock_viewer = MagicMock()
+                mock_viewer.view_logs.return_value = {
                     "logs": [],
                     "tab": {
                         "sum_all": "0",
@@ -52,6 +53,7 @@ class TestUIRoutes:
                     "order_by_types": ["id", "timestamp"],
                     "status_table": ["All"],
                 }
+                mock_load_view.return_value = mock_viewer
 
                 response = client.get("/logs")
 
