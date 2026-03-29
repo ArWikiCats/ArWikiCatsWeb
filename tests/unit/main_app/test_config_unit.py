@@ -51,10 +51,10 @@ class TestGetPaths:
 
     def test_custom_database_path_via_env(self):
         """Custom DATABASE_PATH environment variable is respected."""
-        with patch.dict(os.environ, {"DATABASE_PATH": "/custom/path/db.sqlite"}):
+        with patch.dict(os.environ, {"DATABASE_PATH": "/tmp/custom/path/db.sqlite"}):
             path = _get_paths()
             # Use Path for cross-platform comparison
-            assert Path(path) == Path("/custom/path/db.sqlite")
+            assert Path(path) == Path("/tmp/custom/path/db.sqlite")
 
     def test_env_var_expands_user_home(self):
         """Environment variable with ~ expands correctly."""
