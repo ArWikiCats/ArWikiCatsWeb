@@ -294,23 +294,22 @@ class TestCountAll:
         conn.close()
         yield str(db_file)
 
-    def test_count_all_total(self, temp_db_with_data):
-        """Test count_all returns total count without filters."""
+    @pytest.fixture
+    def manager(self, temp_db_with_data):
+        """Create LogsManager instance for testing."""
         from src.app.logs_db.bot import LogsManager
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db_with_data)
-        manager = LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
+        return LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
+
+    def test_count_all_total(self, manager):
+        """Test count_all returns total count without filters."""
         result = manager.count_all()
         assert result == 8
 
-    def test_count_all_with_status(self, temp_db_with_data):
+    def test_count_all_with_status(self, manager):
         """Test count_all with status filter."""
-        from src.app.logs_db.bot import LogsManager
-        from src.app.logs_db.db import Database
-
-        db_instance = Database(temp_db_with_data)
-        manager = LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
         result = manager.count_all(status="no_result")
         assert result == 5
 
@@ -351,46 +350,35 @@ class TestGetLogs:
         conn.close()
         yield str(db_file)
 
-    def test_get_logs_pagination(self, temp_db_for_logs):
-        """Test get_logs respects pagination parameters."""
+    @pytest.fixture
+    def manager(self, temp_db_for_logs):
+        """Create LogsManager instance for testing."""
         from src.app.logs_db.bot import LogsManager
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db_for_logs)
-        manager = LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
+        return LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
+
+    def test_get_logs_pagination(self, manager):
+        """Test get_logs respects pagination parameters."""
         result = manager.get_logs(per_page=5, offset=0)
         assert len(result) == 5
 
-    def test_get_logs_order_desc(self, temp_db_for_logs):
+    def test_get_logs_order_desc(self, manager):
         """Test get_logs orders DESC by default."""
-        from src.app.logs_db.bot import LogsManager
-        from src.app.logs_db.db import Database
-
-        db_instance = Database(temp_db_for_logs)
-        manager = LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
         result = manager.get_logs(per_page=5, offset=0, order="DESC", order_by="response_count")
         # Should be ordered by response_count descending
         counts = [row["response_count"] for row in result]
         assert counts == sorted(counts, reverse=True)
 
-    def test_get_logs_order_asc(self, temp_db_for_logs):
+    def test_get_logs_order_asc(self, manager):
         """Test get_logs can order ASC."""
-        from src.app.logs_db.bot import LogsManager
-        from src.app.logs_db.db import Database
-
-        db_instance = Database(temp_db_for_logs)
-        manager = LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
         result = manager.get_logs(per_page=5, offset=0, order="ASC", order_by="response_count")
         counts = [row["response_count"] for row in result]
         assert counts == sorted(counts)
 
-    def test_get_logs_invalid_order_defaults_to_desc(self, temp_db_for_logs):
+    def test_get_logs_invalid_order_defaults_to_desc(self, manager):
         """Test get_logs defaults to DESC for invalid order."""
-        from src.app.logs_db.bot import LogsManager
-        from src.app.logs_db.db import Database
-
-        db_instance = Database(temp_db_for_logs)
-        manager = LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
         result = manager.get_logs(per_page=5, offset=0, order="INVALID", order_by="response_count")
         counts = [row["response_count"] for row in result]
         assert counts == sorted(counts, reverse=True)
@@ -439,22 +427,21 @@ class TestSumResponseCount:
         conn.close()
         yield str(db_file)
 
-    def test_sum_response_count_total(self, temp_db_for_sum):
-        """Test sum_response_count returns total sum."""
+    @pytest.fixture
+    def manager(self, temp_db_for_sum):
+        """Create LogsManager instance for testing."""
         from src.app.logs_db.bot import LogsManager
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db_for_sum)
-        manager = LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
+        return LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
+
+    def test_sum_response_count_total(self, manager):
+        """Test sum_response_count returns total sum."""
         result = manager.sum_response_count()
         assert result == 35  # 10 + 20 + 5
 
-    def test_sum_response_count_with_status(self, temp_db_for_sum):
+    def test_sum_response_count_with_status(self, manager):
         """Test sum_response_count with status filter."""
-        from src.app.logs_db.bot import LogsManager
-        from src.app.logs_db.db import Database
-
-        db_instance = Database(temp_db_for_sum)
-        manager = LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
         result = manager.sum_response_count(status="success")
         assert result == 30  # 10 + 20

@@ -220,13 +220,17 @@ class TestFetchLogsByDate:
         conn.close()
         yield str(db_file)
 
-    def test_fetch_logs_by_date_groups_correctly(self, temp_db_grouped):
-        """Test fetch_logs_by_date groups by date and status."""
+    @pytest.fixture
+    def manager(self, temp_db_grouped):
+        """Create LogsManager instance for testing."""
         from src.app.logs_db.bot import LogsManager
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db_grouped)
-        manager = LogsManager(db=db_instance, allowed_tables={"logs"})
+        return LogsManager(db=db_instance, allowed_tables={"logs"})
+
+    def test_fetch_logs_by_date_groups_correctly(self, manager):
+        """Test fetch_logs_by_date groups by date and status."""
         result = manager.fetch_logs_by_date()
         assert isinstance(result, list)
         # Should have grouped entries
@@ -280,13 +284,17 @@ class TestGetResponseStatus:
         conn.close()
         yield str(db_file)
 
-    def test_get_response_status_returns_list(self, temp_db_status):
-        """Test get_response_status returns list of statuses."""
+    @pytest.fixture
+    def manager(self, temp_db_status):
+        """Create LogsManager instance for testing."""
         from src.app.logs_db.bot import LogsManager
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db_status)
-        manager = LogsManager(db=db_instance, allowed_tables={"logs"})
+        return LogsManager(db=db_instance, allowed_tables={"logs"})
+
+    def test_get_response_status_returns_list(self, manager):
+        """Test get_response_status returns list of statuses."""
         result = manager.get_response_status()
         assert isinstance(result, list)
         assert "no_result" in result
