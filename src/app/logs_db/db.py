@@ -12,7 +12,7 @@ from ..config import settings
 logger = logging.getLogger(__name__)
 
 
-def get_db_path_main() -> str:
+def _get_db_path_main() -> str:
     db_path_main = settings.paths.db_path_main
     return db_path_main
 
@@ -24,7 +24,7 @@ def _validate_table_name(table_name: str) -> None:
 
 
 def db_commit(query, params=[]):
-    db_path_main = get_db_path_main()
+    db_path_main = _get_db_path_main()
     conn = None
     try:
         conn = sqlite3.connect(str(db_path_main))
@@ -82,7 +82,7 @@ def fetch_all(query: str, params: list = None, fetch_one: bool = False):
         When fetch_one=True: dict with row data, or None if no rows
         When fetch_one=False: list of dicts (empty list if no rows)
     """
-    db_path_main = get_db_path_main()
+    db_path_main = _get_db_path_main()
 
     if params is None:
         params = []
@@ -114,3 +114,10 @@ def fetch_all(query: str, params: list = None, fetch_one: bool = False):
             conn.close()
 
     return logs
+
+
+__all__ = [
+    "db_commit",
+    "init_db",
+    "fetch_all",
+]

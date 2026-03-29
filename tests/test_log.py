@@ -171,7 +171,7 @@ class TestDatabaseOperations:
 
         from src.app.logs_db import db
 
-        with patch.object(db, "get_db_path_main", return_value=temp_db):
+        with patch.object(db, "_get_db_path_main", return_value=temp_db):
             result = db.fetch_all("SELECT * FROM logs")
             assert isinstance(result, list)
             assert len(result) == 3
@@ -183,7 +183,7 @@ class TestDatabaseOperations:
 
         from src.app.logs_db import db
 
-        with patch.object(db, "get_db_path_main", return_value=temp_db):
+        with patch.object(db, "_get_db_path_main", return_value=temp_db):
             result = db.fetch_all("SELECT * FROM logs WHERE id = ?", [1], fetch_one=True)
             assert isinstance(result, dict)
             assert result["id"] == 1
@@ -194,7 +194,7 @@ class TestDatabaseOperations:
 
         from src.app.logs_db import db
 
-        with patch.object(db, "get_db_path_main", return_value=temp_db):
+        with patch.object(db, "_get_db_path_main", return_value=temp_db):
             result = db.fetch_all("SELECT * FROM logs WHERE id = ?", [999])
             assert result == []
 
@@ -204,7 +204,7 @@ class TestDatabaseOperations:
 
         from src.app.logs_db import db
 
-        with patch.object(db, "get_db_path_main", return_value=temp_db):
+        with patch.object(db, "_get_db_path_main", return_value=temp_db):
             result = db.db_commit(
                 "INSERT INTO logs (endpoint, request_data, response_status, response_time) VALUES (?, ?, ?, ?)",
                 ["/api/new", "NewData", "success", 0.1],
@@ -308,7 +308,7 @@ class TestCountAll:
 
         from src.app.logs_db import bot, db
 
-        with patch.object(db, "get_db_path_main", return_value=temp_db_with_data):
+        with patch.object(db, "_get_db_path_main", return_value=temp_db_with_data):
             result = bot.count_all()
             assert result == 8
 
@@ -318,7 +318,7 @@ class TestCountAll:
 
         from src.app.logs_db import bot, db
 
-        with patch.object(db, "get_db_path_main", return_value=temp_db_with_data):
+        with patch.object(db, "_get_db_path_main", return_value=temp_db_with_data):
             result = bot.count_all(status="no_result")
             assert result == 5
 
@@ -365,7 +365,7 @@ class TestGetLogs:
 
         from src.app.logs_db import bot, db
 
-        with patch.object(db, "get_db_path_main", return_value=temp_db_for_logs):
+        with patch.object(db, "_get_db_path_main", return_value=temp_db_for_logs):
             result = bot.get_logs(per_page=5, offset=0)
             assert len(result) == 5
 
@@ -375,7 +375,7 @@ class TestGetLogs:
 
         from src.app.logs_db import bot, db
 
-        with patch.object(db, "get_db_path_main", return_value=temp_db_for_logs):
+        with patch.object(db, "_get_db_path_main", return_value=temp_db_for_logs):
             result = bot.get_logs(per_page=5, offset=0, order="DESC", order_by="response_count")
             # Should be ordered by response_count descending
             counts = [row["response_count"] for row in result]
@@ -387,7 +387,7 @@ class TestGetLogs:
 
         from src.app.logs_db import bot, db
 
-        with patch.object(db, "get_db_path_main", return_value=temp_db_for_logs):
+        with patch.object(db, "_get_db_path_main", return_value=temp_db_for_logs):
             result = bot.get_logs(per_page=5, offset=0, order="ASC", order_by="response_count")
             counts = [row["response_count"] for row in result]
             assert counts == sorted(counts)
@@ -398,7 +398,7 @@ class TestGetLogs:
 
         from src.app.logs_db import bot, db
 
-        with patch.object(db, "get_db_path_main", return_value=temp_db_for_logs):
+        with patch.object(db, "_get_db_path_main", return_value=temp_db_for_logs):
             result = bot.get_logs(per_page=5, offset=0, order="INVALID", order_by="response_count")
             counts = [row["response_count"] for row in result]
             assert counts == sorted(counts, reverse=True)
@@ -453,7 +453,7 @@ class TestSumResponseCount:
 
         from src.app.logs_db import bot, db
 
-        with patch.object(db, "get_db_path_main", return_value=temp_db_for_sum):
+        with patch.object(db, "_get_db_path_main", return_value=temp_db_for_sum):
             result = bot.sum_response_count()
             assert result == 35  # 10 + 20 + 5
 
@@ -463,6 +463,6 @@ class TestSumResponseCount:
 
         from src.app.logs_db import bot, db
 
-        with patch.object(db, "get_db_path_main", return_value=temp_db_for_sum):
+        with patch.object(db, "_get_db_path_main", return_value=temp_db_for_sum):
             result = bot.sum_response_count(status="success")
             assert result == 30  # 10 + 20
