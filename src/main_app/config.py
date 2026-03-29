@@ -26,9 +26,12 @@ def _get_paths() -> Paths:
     # Defaults to ~/www/python/dbs for backwards compatibility
     db_path_str = os.getenv("DATABASE_PATH", "")
     if db_path_str:
+        db_path_str = os.path.expandvars(db_path_str)
         db_path = Path(db_path_str)
     else:
-        db_path = Path("~").expanduser() / "ArWikiCatsWeb.db"
+        db_path = Path("~") / "ArWikiCatsWeb.db"
+
+    db_path = db_path.expanduser()
 
     db_path.parent.mkdir(parents=True, exist_ok=True)
     if not db_path.exists():
