@@ -10,8 +10,7 @@ from pathlib import Path
 
 @dataclass(frozen=True)
 class Paths:
-    main_path: str
-    db_path_main: str
+    db_path: str
 
 
 @dataclass(frozen=True)
@@ -27,17 +26,14 @@ def _get_paths() -> Paths:
     # Defaults to ~/www/python/dbs for backwards compatibility
     db_path_str = os.getenv("DATABASE_PATH", "")
     if db_path_str:
-        main_path = Path(db_path_str)
+        db_path = Path(db_path_str)
     else:
-        main_path = Path.home() / "www" / "python" / "dbs"
+        db_path = Path("~").expanduser() / "ArWikiCatsWeb.db"
 
-    main_path.mkdir(parents=True, exist_ok=True)
-
-    db_path_main = str(main_path / "new_logs.db")
+    db_path.parent.mkdir(parents=True, exist_ok=True)
 
     return Paths(
-        main_path=main_path,
-        db_path_main=db_path_main,
+        db_path=str(db_path),
     )
 
 

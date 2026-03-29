@@ -7,7 +7,7 @@ from .logs_db import Database, LogsManager, LogsView
 
 @functools.lru_cache(maxsize=1)
 def load_database() -> Database:
-    _db = Database(settings.paths.db_path_main)
+    _db = Database(settings.paths.db_path)
     return _db
 
 
