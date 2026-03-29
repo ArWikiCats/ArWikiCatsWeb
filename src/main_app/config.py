@@ -19,6 +19,7 @@ class Settings:
     allowed_tables: set[str]
     pagination_window: int = 2  # Number of pages to show before/after current page
     max_visible_pages: int = 4  # Maximum number of page links to display
+    rate_limit: str = "200 per minute"  # Default rate limit for API requests
 
 
 def _get_paths() -> Paths:
@@ -49,6 +50,7 @@ def get_settings() -> Settings:
         allowed_tables={"logs", "list_logs"},
         pagination_window=2,
         max_visible_pages=4,
+        rate_limit=os.getenv("RATE_LIMIT", "200 per minute"),
     )
 
 
