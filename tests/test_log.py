@@ -461,20 +461,24 @@ class TestSumResponseCount:
 
     def test_sum_response_count_total(self, temp_db_for_sum):
         """Test sum_response_count returns total sum."""
-        from unittest.mock import patch
+        from src.app.logs_db.bot import LogsManager
+        from src.app.logs_db.db import Database
 
-        from src.app.logs_db import bot, db
-
-        with patch.object(db, "_get_db_path_main", return_value=temp_db_for_sum):
-            result = bot.sum_response_count()
+        with patch.object(Database, "__init__", return_value=None):
+            db_instance = Database()
+            db_instance.db_path = temp_db_for_sum
+            manager = LogsManager(db=db_instance)
+            result = manager.sum_response_count()
             assert result == 35  # 10 + 20 + 5
 
     def test_sum_response_count_with_status(self, temp_db_for_sum):
         """Test sum_response_count with status filter."""
-        from unittest.mock import patch
+        from src.app.logs_db.bot import LogsManager
+        from src.app.logs_db.db import Database
 
-        from src.app.logs_db import bot, db
-
-        with patch.object(db, "_get_db_path_main", return_value=temp_db_for_sum):
-            result = bot.sum_response_count(status="success")
+        with patch.object(Database, "__init__", return_value=None):
+            db_instance = Database()
+            db_instance.db_path = temp_db_for_sum
+            manager = LogsManager(db=db_instance)
+            result = manager.sum_response_count(status="success")
             assert result == 30  # 10 + 20
