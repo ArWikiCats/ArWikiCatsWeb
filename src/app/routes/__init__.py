@@ -1,8 +1,8 @@
 # routes package
-from .api import api_bp
-from .ui import ui_bp
+from .api import Api_Blueprint
+from .ui import Ui_Blueprint
 
 __all__ = [
-    "api_bp",
-    "ui_bp",
+    "Api_Blueprint",
+    "Ui_Blueprint",
 ]
