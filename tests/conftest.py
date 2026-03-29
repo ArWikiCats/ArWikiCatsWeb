@@ -2,9 +2,15 @@
 """
 Pytest configuration for the tests directory.
 """
+import os
 import pytest
 
-# Set the database path for testing os.environ["DATABASE_PATH"] = ''
+
+@pytest.fixture(scope="session", autouse=True)
+def set_database_path(tmp_path_factory):
+    """Set DATABASE_PATH environment variable for testing."""
+    db_file = tmp_path_factory.mktemp("db") / "test.db"
+    os.environ["DATABASE_PATH"] = str(db_file)
 
 
 @pytest.fixture
