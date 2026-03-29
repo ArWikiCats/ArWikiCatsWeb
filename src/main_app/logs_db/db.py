@@ -5,6 +5,7 @@ from .db import Database
 import logging
 import sqlite3
 from contextlib import contextmanager
+from datetime import datetime, timezone
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -144,4 +145,14 @@ class Database:
 
 __all__ = [
     "Database",
+    "utc_now",
 ]
+
+
+def utc_now() -> str:
+    """Return current UTC timestamp as ISO format string.
+
+    All timestamps in the database are stored in UTC.
+    Use this function to generate timezone-aware timestamps.
+    """
+    return datetime.now(timezone.utc).isoformat()
