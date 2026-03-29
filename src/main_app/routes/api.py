@@ -122,9 +122,9 @@ def get_titles(data):
 
     delta = time.time() - start_time
 
-    len_titles = len(titles)
-    titles = list(set(titles))
-    duplicates = len_titles - len(titles)
+    titles_set = set(titles)
+    duplicates = len(titles) - len(titles_set)
+    titles = list(titles_set)
 
     if batch_resolve_labels is None:
         _manager.log_request("/api/list", titles, "error", delta)
