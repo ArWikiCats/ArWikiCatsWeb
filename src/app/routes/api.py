@@ -113,11 +113,15 @@ def get_title(title) -> str:
 
 @api_bp.route("/list", methods=["POST"])
 def get_titles():
-
     start_time = time.time()
-    data = request.get_json()
-    titles = data.get("titles", [])
 
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        delta = time.time() - start_time
+        log_request("/api/list", None, "error", delta)
+        return jsonify({"error": "No valid JSON payload provided"}), 400
+
+    titles = data.get("titles", [])
     # Check for User-Agent header
     ua_check = check_user_agent("/api/list", titles, start_time)
     if ua_check:
