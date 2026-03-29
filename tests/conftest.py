@@ -2,3 +2,4 @@
 """
 Pytest configuration for the tests directory.
 """
+import pytest
