@@ -67,12 +67,14 @@ class TestUIRoutes:
 
     def test_logs_by_day_page(self, client):
         """Test that logs_by_day page renders with mocked data."""
-        with patch("src.app.routes.ui.view_logs_by_date") as mock_retrieve:
-            mock_retrieve.return_value = {
+        with patch("src.app.routes.ui.load_logs_view") as mock_load_view:
+            mock_viewer = MagicMock()
+            mock_viewer.view_logs_by_date.return_value = {
                 "logs": [],
                 "tab": {"sum_all": "0", "table_name": "logs"},
                 "status_table": [],
             }
+            mock_load_view.return_value = mock_viewer
 
             response = client.get("/logs_by_day")
 
@@ -112,10 +114,11 @@ class TestUIWithQueryParams:
 
     def test_logs_page_with_pagination(self, client):
         """Test logs page with pagination parameters."""
-        with patch("src.app.routes.ui.view_logs_new") as mock_view:
+        with patch("src.app.routes.ui.load_logs_view") as mock_load_view:
             with patch("src.app.routes.ui.view_logs_request_handler") as mock_handler:
                 mock_handler.return_value = MagicMock()
-                mock_view.return_value = {
+                mock_viewer = MagicMock()
+                mock_viewer.view_logs.return_value = {
                     "logs": [],
                     "tab": {
                         "sum_all": "100",
@@ -136,18 +139,20 @@ class TestUIWithQueryParams:
                     "order_by_types": ["id", "timestamp"],
                     "status_table": ["All"],
                 }
+                mock_load_view.return_value = mock_viewer
 
                 response = client.get("/logs?page=2&per_page=10")
 
                 assert response.status_code == 200
-                mock_view.assert_called_once()
+                mock_viewer.view_logs.assert_called_once()
 
     def test_logs_page_with_status_filter(self, client):
         """Test logs page with status filter."""
-        with patch("src.app.routes.ui.view_logs_new") as mock_view:
+        with patch("src.app.routes.ui.load_logs_view") as mock_load_view:
             with patch("src.app.routes.ui.view_logs_request_handler") as mock_handler:
                 mock_handler.return_value = MagicMock()
-                mock_view.return_value = {
+                mock_viewer = MagicMock()
+                mock_viewer.view_logs.return_value = {
                     "logs": [],
                     "tab": {
                         "sum_all": "50",
@@ -168,6 +173,7 @@ class TestUIWithQueryParams:
                     "order_by_types": ["id", "timestamp"],
                     "status_table": ["All", "no_result"],
                 }
+                mock_load_view.return_value = mock_viewer
 
                 response = client.get("/logs?status=no_result")
 
@@ -175,12 +181,14 @@ class TestUIWithQueryParams:
 
     def test_logs_by_day_with_table_name(self, client):
         """Test logs_by_day page with table_name parameter."""
-        with patch("src.app.routes.ui.view_logs_by_date") as mock_retrieve:
-            mock_retrieve.return_value = {
+        with patch("src.app.routes.ui.load_logs_view") as mock_load_view:
+            mock_viewer = MagicMock()
+            mock_viewer.view_logs_by_date.return_value = {
                 "logs": [],
                 "tab": {"sum_all": "0", "table_name": "list_logs"},
                 "status_table": [],
             }
+            mock_load_view.return_value = mock_viewer
 
             response = client.get("/logs_by_day?table_name=list_logs")
 
