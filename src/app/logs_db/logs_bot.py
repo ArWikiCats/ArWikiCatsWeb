@@ -157,12 +157,15 @@ def view_logs_new(data: ViewLogsRequestHandler):
     _manager = load_data_manager()
     status_table = ["no_result", "All", "Category"]
 
+    # Convert "All" to "" for query (no filter), matching view_logs behavior
+    query_status = "" if data.status == "All" else data.status
+
     logs = _manager.get_logs(
         data.per_page,
         data.offset,
         data.order,
         order_by=data.order_by,
-        status=data.status,
+        status=query_status,
         table_name=data.table_name,
         like=data.like,
         day=data.day,
@@ -191,7 +194,7 @@ def view_logs_new(data: ViewLogsRequestHandler):
             }
         )
 
-    total_logs = _manager.count_all(status=data.status, table_name=data.table_name, like=data.like)
+    total_logs = _manager.count_all(status=query_status, table_name=data.table_name, like=data.like)
 
     # Pagination calculations
     total_pages = (total_logs + data.per_page - 1) // data.per_page
@@ -201,7 +204,7 @@ def view_logs_new(data: ViewLogsRequestHandler):
     end_page = min(start_page + settings.max_visible_pages, total_pages)
     start_page = max(1, end_page - settings.max_visible_pages)
 
-    sum_all = _manager.sum_response_count(status=data.status, table_name=data.table_name, like=data.like)
+    sum_all = _manager.sum_response_count(status=query_status, table_name=data.table_name, like=data.like)
 
     status = data.status or "All"
 
