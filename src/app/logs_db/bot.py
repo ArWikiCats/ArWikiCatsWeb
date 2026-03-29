@@ -93,7 +93,7 @@ class LogsManager:
         if status:
             if status == "Category":
                 conditions.append("response_status LIKE 'تصنيف%'")
-            else:
+            elif status.lower() != "all":
                 conditions.append("response_status = ?")
                 params.append(status)
         elif like:
