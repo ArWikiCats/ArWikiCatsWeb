@@ -12,7 +12,7 @@ class TestUserAgentHeader:
 
     def test_single_title_endpoint_without_user_agent(self, client):
         """Test that single title endpoint returns 400 without User-Agent."""
-        with patch("src.app.routes.api.load_data_manager") as mock_load:
+        with patch("src.main_app.routes.api.load_data_manager") as mock_load:
             mock_manager = mock_load.return_value
             mock_manager.log_request.return_value = True
             response = client.get("/api/Category:Yemen", headers={"User-Agent": ""})
@@ -26,8 +26,8 @@ class TestUserAgentHeader:
         """Test that single title endpoint works with User-Agent."""
         from unittest.mock import patch
 
-        with patch("src.app.routes.api.resolve_arabic_category_label") as mock_resolve:
-            with patch("src.app.routes.api.load_data_manager") as mock_load:
+        with patch("src.main_app.routes.api.resolve_arabic_category_label") as mock_resolve:
+            with patch("src.main_app.routes.api.load_data_manager") as mock_load:
                 mock_manager = mock_load.return_value
                 mock_manager.log_request.return_value = True
                 mock_resolve.return_value = "تصنيف:اليمن"
@@ -39,7 +39,7 @@ class TestUserAgentHeader:
 
     def test_list_endpoint_without_user_agent(self, client):
         """Test that list endpoint returns 400 without User-Agent."""
-        with patch("src.app.routes.api.load_data_manager") as mock_load:
+        with patch("src.main_app.routes.api.load_data_manager") as mock_load:
             mock_manager = mock_load.return_value
             mock_manager.log_request.return_value = True
             data = {"titles": ["test_title1", "test_title2"]}
@@ -58,8 +58,8 @@ class TestUserAgentHeader:
         mock_result.labels = {"test_title1": "تصنيف:اختبار1"}
         mock_result.no_labels = []
 
-        with patch("src.app.routes.api.batch_resolve_labels") as mock_batch:
-            with patch("src.app.routes.api.load_data_manager") as mock_load:
+        with patch("src.main_app.routes.api.batch_resolve_labels") as mock_batch:
+            with patch("src.main_app.routes.api.load_data_manager") as mock_load:
                 mock_manager = mock_load.return_value
                 mock_manager.log_request.return_value = True
                 mock_batch.return_value = mock_result
@@ -75,8 +75,8 @@ class TestUserAgentHeader:
         from unittest.mock import patch
 
         # Mock the library and log_request to avoid import errors
-        with patch("src.app.routes.api.resolve_arabic_category_label"):
-            with patch("src.app.routes.api.load_data_manager") as mock_load:
+        with patch("src.main_app.routes.api.resolve_arabic_category_label"):
+            with patch("src.main_app.routes.api.load_data_manager") as mock_load:
                 mock_manager = mock_load.return_value
                 mock_manager.log_request.return_value = True
                 # Test various endpoints

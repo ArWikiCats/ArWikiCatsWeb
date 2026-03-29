@@ -4,7 +4,7 @@ Tests for the logs_view module.
 """
 import pytest
 from unittest.mock import MagicMock, patch
-from src.app.logs_db.logs_view import LogsView, _build_date_index
+from src.main_app.logs_db.logs_view import LogsView, _build_date_index
 
 
 @pytest.fixture
@@ -39,7 +39,7 @@ class TestViewLogs:
 
     def test_view_logs_returns_dict_with_required_keys(self, mock_request):
         """Test that view_logs returns a dict with expected keys."""
-        from src.app.handler import view_logs_request_handler
+        from src.main_app.handler import view_logs_request_handler
 
         # Setup mock manager
         mock_manager = MagicMock()
@@ -58,7 +58,7 @@ class TestViewLogs:
 
     def test_view_logs_pagination_defaults(self, mock_request):
         """Test that view_logs uses correct pagination defaults."""
-        from src.app.handler import view_logs_request_handler
+        from src.main_app.handler import view_logs_request_handler
 
         # Setup mock manager
         mock_manager = MagicMock()
@@ -76,7 +76,7 @@ class TestViewLogs:
 
     def test_view_logs_validates_table_name(self):
         """Test that view_logs validates table_name parameter."""
-        from src.app.handler import view_logs_request_handler
+        from src.main_app.handler import view_logs_request_handler
 
         request = MagicMock()
         request.args.get = MagicMock(
@@ -106,7 +106,7 @@ class TestViewLogs:
 
     def test_view_logs_formats_request_data(self, mock_request):
         """Test that view_logs replaces underscores in request_data."""
-        from src.app.handler import view_logs_request_handler
+        from src.main_app.handler import view_logs_request_handler
 
         mock_manager = MagicMock()
         mock_manager.get_logs.return_value = [
@@ -140,7 +140,7 @@ class TestViewLogsEdgeCases:
         self, mock_request
     ):
         """Test view_logs with invalid order_by defaults to timestamp."""
-        from src.app.handler import view_logs_request_handler
+        from src.main_app.handler import view_logs_request_handler
 
         mock_manager = MagicMock()
         mock_manager.get_logs.return_value = []

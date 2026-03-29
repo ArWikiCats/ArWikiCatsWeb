@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 import pytest
 
-from src.app.logs_db.db import Database
+from src.main_app.logs_db.db import Database
 
 
 class TestFetchLogsEdgeCases:
@@ -41,7 +41,7 @@ class TestFetchLogsEdgeCases:
 
     @pytest.fixture
     def temp_db_instance(self, temp_db) -> Database:
-        from src.app.logs_db.db import Database
+        from src.main_app.logs_db.db import Database
         db_instance = Database(temp_db)
         return db_instance
 
@@ -80,7 +80,7 @@ class TestDatabaseErrorHandling:
 
     def test_db_commit_invalid_sql(self, tmp_path):
         """Test commit handles invalid SQL gracefully."""
-        from src.app.logs_db.db import Database
+        from src.main_app.logs_db.db import Database
 
         db_file = tmp_path / "test_error.db"
         conn = sqlite3.connect(str(db_file))
@@ -93,7 +93,7 @@ class TestDatabaseErrorHandling:
 
     def test_fetch_all_handles_missing_table(self, tmp_path):
         """Test fetch behavior with missing table."""
-        from src.app.logs_db.db import Database
+        from src.main_app.logs_db.db import Database
 
         db_file = tmp_path / "test_missing.db"
         conn = sqlite3.connect(str(db_file))
@@ -150,8 +150,8 @@ class TestAllLogsEn2Ar:
 
     @pytest.fixture
     def temp_manager(self, temp_db_with_logs):
-        from src.app.logs_db.bot import LogsManager
-        from src.app.logs_db.db import Database
+        from src.main_app.logs_db.bot import LogsManager
+        from src.main_app.logs_db.db import Database
 
         db_instance = Database(temp_db_with_logs)
         manager = LogsManager(db=db_instance, allowed_tables={})
@@ -223,8 +223,8 @@ class TestFetchLogsByDate:
     @pytest.fixture
     def manager(self, temp_db_grouped):
         """Create LogsManager instance for testing."""
-        from src.app.logs_db.bot import LogsManager
-        from src.app.logs_db.db import Database
+        from src.main_app.logs_db.bot import LogsManager
+        from src.main_app.logs_db.db import Database
 
         db_instance = Database(temp_db_grouped)
         return LogsManager(db=db_instance, allowed_tables={"logs"})
@@ -287,8 +287,8 @@ class TestGetResponseStatus:
     @pytest.fixture
     def manager(self, temp_db_status):
         """Create LogsManager instance for testing."""
-        from src.app.logs_db.bot import LogsManager
-        from src.app.logs_db.db import Database
+        from src.main_app.logs_db.bot import LogsManager
+        from src.main_app.logs_db.db import Database
 
         db_instance = Database(temp_db_status)
         return LogsManager(db=db_instance, allowed_tables={"logs"})
@@ -308,7 +308,7 @@ class TestInitDb:
 
     def test_init_db_creates_tables(self, tmp_path):
         """Test init_tables creates both logs and list_logs tables."""
-        from src.app.logs_db.db import Database
+        from src.main_app.logs_db.db import Database
 
         db_file = tmp_path / "test_init.db"
 
@@ -342,7 +342,7 @@ class TestInitDb:
 
     def test_init_db_is_idempotent(self, tmp_path):
         """Test init_tables can be called multiple times safely."""
-        from src.app.logs_db.db import Database
+        from src.main_app.logs_db.db import Database
 
         db_file = tmp_path / "test_idempotent.db"
 

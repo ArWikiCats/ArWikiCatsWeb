@@ -3,7 +3,7 @@
 Tests for the logs_view module.
 """
 from unittest.mock import MagicMock, patch
-from src.app.logs_db.logs_view import LogsView, _build_date_index
+from src.main_app.logs_db.logs_view import LogsView, _build_date_index
 
 
 class TestRetrieveLogsByDate:

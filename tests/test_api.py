@@ -13,7 +13,7 @@ class TestJsonify:
 
     def test_jsonify_returns_response(self):
         """Test that jsonify returns a Flask Response."""
-        from src.app.routes.api import jsonify
+        from src.main_app.routes.api import jsonify
 
         result = jsonify({"key": "value"})
 
@@ -21,7 +21,7 @@ class TestJsonify:
 
     def test_jsonify_handles_unicode(self):
         """Test that jsonify properly handles Arabic text."""
-        from src.app.routes.api import jsonify
+        from src.main_app.routes.api import jsonify
 
         data = {"result": "تصنيف:اختبار"}
         result = jsonify(data)
@@ -31,7 +31,7 @@ class TestJsonify:
 
     def test_jsonify_formats_output(self):
         """Test that jsonify formats JSON with indentation."""
-        from src.app.routes.api import jsonify
+        from src.main_app.routes.api import jsonify
 
         data = {"key1": "value1", "key2": "value2"}
         result = jsonify(data)
@@ -47,7 +47,7 @@ class TestCheckUserAgent:
     @pytest.fixture
     def app_context(self):
         """Create Flask app context for testing."""
-        from src.app import create_app
+        from src.main_app import create_app
 
         app = create_app()
         with app.test_request_context():
@@ -57,10 +57,10 @@ class TestCheckUserAgent:
         """Test that missing User-Agent returns error."""
         from flask import request
 
-        from src.app.routes.api import check_user_agent
+        from src.main_app.routes.api import check_user_agent
 
         with patch.object(request, "headers", {"User-Agent": ""}):
-            with patch("src.app.routes.api.load_data_manager") as mock_load:
+            with patch("src.main_app.routes.api.load_data_manager") as mock_load:
                 mock_manager = mock_load.return_value
                 mock_manager.log_request.return_value = True
                 result = check_user_agent("/api/test", "data", 0)
@@ -72,7 +72,7 @@ class TestCheckUserAgent:
         """Test that present User-Agent returns None."""
         from flask import request
 
-        from src.app.routes.api import check_user_agent
+        from src.main_app.routes.api import check_user_agent
 
         with patch.object(request, "headers", {"User-Agent": "TestAgent/1.0"}):
             result = check_user_agent("/api/test", "data", 0)
@@ -85,7 +85,7 @@ class TestApiEndpoints:
 
     def test_logs_by_day_endpoint(self, client):
         """Test /api/logs_by_day endpoint."""
-        with patch("src.app.routes.api.load_logs_view") as mock_load_view:
+        with patch("src.main_app.routes.api.load_logs_view") as mock_load_view:
             mock_viewer = mock_load_view.return_value
             mock_viewer.view_logs_by_date.return_value = {"logs": []}
 
@@ -96,7 +96,7 @@ class TestApiEndpoints:
 
     def test_status_endpoint(self, client):
         """Test /api/status endpoint."""
-        with patch("src.app.routes.api.load_data_manager") as mock_load:
+        with patch("src.main_app.routes.api.load_data_manager") as mock_load:
             mock_manager = mock_load.return_value
             mock_manager.get_response_status.return_value = ["no_result", "success"]
 
@@ -106,8 +106,8 @@ class TestApiEndpoints:
 
     def test_logs_endpoint(self, client):
         """Test /api/logs endpoint."""
-        with patch("src.app.routes.api.load_logs_view") as mock_load_view:
-            with patch("src.app.routes.api.view_logs_request_handler") as mock_handler:
+        with patch("src.main_app.routes.api.load_logs_view") as mock_load_view:
+            with patch("src.main_app.routes.api.view_logs_request_handler") as mock_handler:
                 mock_handler.return_value = MagicMock()
                 mock_viewer = mock_load_view.return_value
                 mock_viewer.view_logs.return_value = {"logs": [], "tab": {}, "status_table": [], "order_by_types": []}
@@ -118,7 +118,7 @@ class TestApiEndpoints:
 
     def test_all_endpoint_without_day(self, client):
         """Test /api/all endpoint without day parameter."""
-        with patch("src.app.routes.api.load_logs_view") as mock_load_view:
+        with patch("src.main_app.routes.api.load_logs_view") as mock_load_view:
             mock_viewer = mock_load_view.return_value
             mock_viewer.view_logs_en2ar.return_value = {"tab": {"sum_all": "0"}, "no_result": [], "data_result": {}}
 
@@ -129,7 +129,7 @@ class TestApiEndpoints:
 
     def test_all_endpoint_with_day(self, client):
         """Test /api/all/<day> endpoint with day parameter."""
-        with patch("src.app.routes.api.load_logs_view") as mock_load_view:
+        with patch("src.main_app.routes.api.load_logs_view") as mock_load_view:
             mock_viewer = mock_load_view.return_value
             mock_viewer.view_logs_en2ar.return_value = {"tab": {"sum_all": "0"}, "no_result": [], "data_result": {}}
 
@@ -140,7 +140,7 @@ class TestApiEndpoints:
 
     def test_category_endpoint(self, client):
         """Test /api/category endpoint."""
-        with patch("src.app.routes.api.load_logs_view") as mock_load_view:
+        with patch("src.main_app.routes.api.load_logs_view") as mock_load_view:
             mock_viewer = mock_load_view.return_value
             mock_viewer.view_logs_en2ar.return_value = {
                 "tab": {"sum_all": "5"},
@@ -157,7 +157,7 @@ class TestApiEndpoints:
 
     def test_no_result_endpoint(self, client):
         """Test /api/no_result endpoint."""
-        with patch("src.app.routes.api.load_logs_view") as mock_load_view:
+        with patch("src.main_app.routes.api.load_logs_view") as mock_load_view:
             mock_viewer = mock_load_view.return_value
             mock_viewer.view_logs_en2ar.return_value = {
                 "tab": {"sum_all": "5"},
@@ -178,7 +178,7 @@ class TestTitleEndpoint:
 
     def test_title_endpoint_without_user_agent(self, client):
         """Test title endpoint returns 400 without User-Agent."""
-        with patch("src.app.routes.api.load_data_manager") as mock_load:
+        with patch("src.main_app.routes.api.load_data_manager") as mock_load:
             mock_manager = mock_load.return_value
             mock_manager.log_request.return_value = True
             response = client.get("/api/Category:Test", headers={"User-Agent": ""})
@@ -188,8 +188,8 @@ class TestTitleEndpoint:
     def test_title_endpoint_with_user_agent(self, client):
         """Test title endpoint works with User-Agent."""
         # Patch the imported function from ArWikiCats module
-        with patch("src.app.routes.api.resolve_arabic_category_label") as mock_resolve:
-            with patch("src.app.routes.api.load_data_manager") as mock_load:
+        with patch("src.main_app.routes.api.resolve_arabic_category_label") as mock_resolve:
+            with patch("src.main_app.routes.api.load_data_manager") as mock_load:
                 mock_manager = mock_load.return_value
                 mock_manager.log_request.return_value = True
                 mock_resolve.return_value = "تصنيف:اختبار"
@@ -202,8 +202,8 @@ class TestTitleEndpoint:
 
     def test_title_endpoint_library_not_loaded(self, client):
         """Test title endpoint handles library not loaded."""
-        with patch("src.app.routes.api.resolve_arabic_category_label", None):
-            with patch("src.app.routes.api.load_data_manager") as mock_load:
+        with patch("src.main_app.routes.api.resolve_arabic_category_label", None):
+            with patch("src.main_app.routes.api.load_data_manager") as mock_load:
                 mock_manager = mock_load.return_value
                 mock_manager.log_request.return_value = True
                 response = client.get("/api/Category:Test", headers={"User-Agent": "TestAgent/1.0"})
@@ -216,7 +216,7 @@ class TestListEndpoint:
 
     def test_list_endpoint_without_user_agent(self, client):
         """Test list endpoint returns 400 without User-Agent."""
-        with patch("src.app.routes.api.load_data_manager") as mock_load:
+        with patch("src.main_app.routes.api.load_data_manager") as mock_load:
             mock_manager = mock_load.return_value
             mock_manager.log_request.return_value = True
             response = client.post("/api/list", json={"titles": ["test1", "test2"]}, headers={"User-Agent": ""})
@@ -225,7 +225,7 @@ class TestListEndpoint:
 
     def test_list_endpoint_invalid_data(self, client):
         """Test list endpoint handles invalid data."""
-        with patch("src.app.routes.api.load_data_manager") as mock_load:
+        with patch("src.main_app.routes.api.load_data_manager") as mock_load:
             mock_manager = mock_load.return_value
             mock_manager.log_request.return_value = True
             response = client.post("/api/list", json={"titles": "not_a_list"}, headers={"User-Agent": "TestAgent/1.0"})
@@ -238,8 +238,8 @@ class TestListEndpoint:
         mock_result.labels = {"Category:Test1": "تصنيف:اختبار1"}
         mock_result.no_labels = []
 
-        with patch("src.app.routes.api.batch_resolve_labels") as mock_batch:
-            with patch("src.app.routes.api.load_data_manager") as mock_load:
+        with patch("src.main_app.routes.api.batch_resolve_labels") as mock_batch:
+            with patch("src.main_app.routes.api.load_data_manager") as mock_load:
                 mock_manager = mock_load.return_value
                 mock_manager.log_request.return_value = True
                 mock_batch.return_value = mock_result
@@ -259,8 +259,8 @@ class TestListEndpoint:
         mock_result.labels = {"Category:Test1": "تصنيف:اختبار1"}
         mock_result.no_labels = []
 
-        with patch("src.app.routes.api.batch_resolve_labels") as mock_batch:
-            with patch("src.app.routes.api.load_data_manager") as mock_load:
+        with patch("src.main_app.routes.api.batch_resolve_labels") as mock_batch:
+            with patch("src.main_app.routes.api.load_data_manager") as mock_load:
                 mock_manager = mock_load.return_value
                 mock_manager.log_request.return_value = True
                 mock_batch.return_value = mock_result
@@ -277,8 +277,8 @@ class TestListEndpoint:
 
     def test_list_endpoint_library_not_loaded(self, client):
         """Test list endpoint handles library not loaded."""
-        with patch("src.app.routes.api.batch_resolve_labels", None):
-            with patch("src.app.routes.api.load_data_manager") as mock_load:
+        with patch("src.main_app.routes.api.batch_resolve_labels", None):
+            with patch("src.main_app.routes.api.load_data_manager") as mock_load:
                 mock_manager = mock_load.return_value
                 mock_manager.log_request.return_value = True
                 response = client.post("/api/list", json={"titles": ["test"]}, headers={"User-Agent": "TestAgent/1.0"})
@@ -291,8 +291,8 @@ class TestListEndpoint:
         mock_result.labels = {"Category:Test1": "تصنيف:اختبار1"}
         mock_result.no_labels = ["Category:NotFound", "Category:Test1"]
 
-        with patch("src.app.routes.api.batch_resolve_labels") as mock_batch:
-            with patch("src.app.routes.api.load_data_manager") as mock_load:
+        with patch("src.main_app.routes.api.batch_resolve_labels") as mock_batch:
+            with patch("src.main_app.routes.api.load_data_manager") as mock_load:
                 mock_manager = mock_load.return_value
                 mock_manager.log_request.return_value = True
                 mock_batch.return_value = mock_result

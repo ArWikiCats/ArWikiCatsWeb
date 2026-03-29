@@ -15,13 +15,13 @@ def set_database_path_and_clear_cache(tmp_path_factory):
 
     # Clear the lru_cache for load_database, load_data_manager, and load_logs_view
     # This must happen BEFORE any import of src.app to ensure fresh DB binding
-    from src.app import loader
+    from src.main_app import loader
     loader.load_database.cache_clear()
     loader.load_data_manager.cache_clear()
     loader.load_logs_view.cache_clear()
 
     # Also clear the settings cache to pick up the new DATABASE_PATH
-    from src.app import config
+    from src.main_app import config
     config.get_settings.cache_clear()
     config.settings = config.get_settings()
 
@@ -29,7 +29,7 @@ def set_database_path_and_clear_cache(tmp_path_factory):
 @pytest.fixture
 def client():
     """Create Flask test client."""
-    from src.app import create_app
+    from src.main_app import create_app
 
     app = create_app()
     app.config["TESTING"] = True
@@ -47,8 +47,8 @@ def logs_manager_factory():
             # ... setup database ...
             manager = logs_manager_factory(str(db_file))
     """
-    from src.app.logs_db.bot import LogsManager
-    from src.app.logs_db.db import Database
+    from src.main_app.logs_db.bot import LogsManager
+    from src.main_app.logs_db.db import Database
 
     def _create_manager(db_file, allowed_tables=None):
         if allowed_tables is None:

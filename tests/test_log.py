@@ -8,8 +8,8 @@ from unittest.mock import patch
 
 import pytest
 
-from src.app.logs_db.db import Database
-from src.app.logs_db.bot import LogsManager
+from src.main_app.logs_db.db import Database
+from src.main_app.logs_db.bot import LogsManager
 
 # Get the _apply_filters static method for testing
 _apply_filters = LogsManager._apply_filters
@@ -154,7 +154,7 @@ class TestDatabaseOperations:
 
     def test_fetch_all_returns_list(self, temp_db):
         """Test that fetch returns a list of dictionaries."""
-        from src.app.logs_db.db import Database
+        from src.main_app.logs_db.db import Database
 
         db_instance = Database(temp_db)
         result = db_instance.fetch("SELECT * FROM logs")
@@ -164,7 +164,7 @@ class TestDatabaseOperations:
 
     def test_fetch_all_fetch_one(self, temp_db):
         """Test that fetch with one=True returns single dict."""
-        from src.app.logs_db.db import Database
+        from src.main_app.logs_db.db import Database
 
         db_instance = Database(temp_db)
         result = db_instance.fetch("SELECT * FROM logs WHERE id = ?", [1], one=True)
@@ -173,7 +173,7 @@ class TestDatabaseOperations:
 
     def test_fetch_all_no_result(self, temp_db):
         """Test fetch returns empty list when no results."""
-        from src.app.logs_db.db import Database
+        from src.main_app.logs_db.db import Database
 
         db_instance = Database(temp_db)
         result = db_instance.fetch("SELECT * FROM logs WHERE id = ?", [999])
@@ -181,7 +181,7 @@ class TestDatabaseOperations:
 
     def test_db_commit_success(self, temp_db):
         """Test that commit returns True on success."""
-        from src.app.logs_db.db import Database
+        from src.main_app.logs_db.db import Database
 
         db_instance = Database(temp_db)
         result = db_instance.commit(
@@ -297,8 +297,8 @@ class TestCountAll:
     @pytest.fixture
     def manager(self, temp_db_with_data):
         """Create LogsManager instance for testing."""
-        from src.app.logs_db.bot import LogsManager
-        from src.app.logs_db.db import Database
+        from src.main_app.logs_db.bot import LogsManager
+        from src.main_app.logs_db.db import Database
 
         db_instance = Database(temp_db_with_data)
         return LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
@@ -353,8 +353,8 @@ class TestGetLogs:
     @pytest.fixture
     def manager(self, temp_db_for_logs):
         """Create LogsManager instance for testing."""
-        from src.app.logs_db.bot import LogsManager
-        from src.app.logs_db.db import Database
+        from src.main_app.logs_db.bot import LogsManager
+        from src.main_app.logs_db.db import Database
 
         db_instance = Database(temp_db_for_logs)
         return LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
@@ -430,8 +430,8 @@ class TestSumResponseCount:
     @pytest.fixture
     def manager(self, temp_db_for_sum):
         """Create LogsManager instance for testing."""
-        from src.app.logs_db.bot import LogsManager
-        from src.app.logs_db.db import Database
+        from src.main_app.logs_db.bot import LogsManager
+        from src.main_app.logs_db.db import Database
 
         db_instance = Database(temp_db_for_sum)
         return LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
