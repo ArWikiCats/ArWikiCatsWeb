@@ -12,6 +12,8 @@ from .config import settings
 from .logging_config import setup_logging
 from .routes import Api_Blueprint, Ui_Blueprint
 
+from .loader import load_database
+
 # Default log level can be overridden via LOG_LEVEL environment variable
 log_level = os.getenv("LOG_LEVEL", "INFO")
 setup_logging(
@@ -22,12 +24,17 @@ setup_logging(
 
 def create_app() -> Flask:
     """Instantiate and configure the Flask application."""
+    # Create all required tables
+    _db = load_database()
+    _db.init_tables()
 
+    # Create the Flask app
     app = Flask(
         __name__,
         template_folder="../templates",
         static_folder="../static",
     )
+
     # Allow cross-origin requests (needed when calling this API from pages like https://ar.wikipedia.org)
     CORS(
         app,
