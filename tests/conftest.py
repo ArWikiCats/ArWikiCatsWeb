@@ -4,6 +4,8 @@ Pytest configuration for the tests directory.
 """
 import pytest
 
+# Set the database path for testing os.environ["DATABASE_PATH"] = ''
+
 
 @pytest.fixture
 def client():

@@ -31,6 +31,8 @@ def _get_paths() -> Paths:
         db_path = Path("~").expanduser() / "ArWikiCatsWeb.db"
 
     db_path.parent.mkdir(parents=True, exist_ok=True)
+    if not db_path.exists():
+        db_path.touch()
 
     return Paths(
         db_path=str(db_path),
