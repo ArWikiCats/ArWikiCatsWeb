@@ -86,8 +86,8 @@ class LogsView:
             )
         ]
 
-        total_logs = self._m.count_all(status=data.status, table_name=data.table_name)
-        sum_all = self._m.sum_response_count(status=data.status, table_name=data.table_name)
+        total_logs = self._m.count_all(status=data.status, table_name=data.table_name, day=data.day)
+        sum_all = self._m.sum_response_count(status=data.status, table_name=data.table_name, day=data.day)
 
         # ── pagination ──
         total_pages = (total_logs + data.per_page - 1) // data.per_page
