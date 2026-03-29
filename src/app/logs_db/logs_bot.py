@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from . import logs_db
-from .config import settings
+from ..config import settings
+from .bot import (
+    get_logs,
+    count_all,
+    all_logs_en2ar,
+    fetch_logs_by_date,
+    sum_response_count,
+)
 
 
 def view_logs(request):
@@ -47,7 +53,7 @@ def view_logs(request):
 
     status = status if (status in status_table or status == "Category") else ""
 
-    logs = logs_db.get_logs(
+    logs = get_logs(
         per_page,
         offset,
         order,
@@ -82,7 +88,7 @@ def view_logs(request):
             }
         )
 
-    total_logs = logs_db.count_all(status=status, table_name=table_name, like=like)
+    total_logs = count_all(status=status, table_name=table_name, like=like)
 
     # Pagination calculations
     total_pages = (total_logs + per_page - 1) // per_page
@@ -92,7 +98,7 @@ def view_logs(request):
     end_page = min(start_page + settings.max_visible_pages, total_pages)
     start_page = max(1, end_page - settings.max_visible_pages)
 
-    sum_all = logs_db.sum_response_count(status=status, table_name=table_name, like=like)
+    sum_all = sum_response_count(status=status, table_name=table_name, like=like)
 
     if status == "":
         status = "All"
@@ -138,7 +144,7 @@ def retrieve_logs_by_date(request):
     if table_name not in settings.allowed_tables:
         table_name = "logs"
 
-    logs_data = logs_db.fetch_logs_by_date(table_name=table_name)
+    logs_data = fetch_logs_by_date(table_name=table_name)
 
     data_logs = {}
 
@@ -187,7 +193,7 @@ def retrieve_logs_by_date(request):
 
 def retrieve_logs_en_to_ar(day=None):
 
-    logs_data = logs_db.all_logs_en2ar(day=day)
+    logs_data = all_logs_en2ar(day=day)
 
     data_no_result = [x for x, v in logs_data.items() if v == "no_result"]
     data_result = {x: v for x, v in logs_data.items() if v != "no_result"}

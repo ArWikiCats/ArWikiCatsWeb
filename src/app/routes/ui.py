@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, render_template, request
 
-from ..logs_bot import retrieve_logs_by_date, view_logs
+from ..logs_db.logs_bot import retrieve_logs_by_date, view_logs
 
 # Create the UI Blueprint
 ui_bp = Blueprint("ui", __name__)

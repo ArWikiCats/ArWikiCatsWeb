@@ -4,7 +4,7 @@ import time
 
 from flask import Blueprint, Response, request
 
-from .. import logs_bot
+from ..logs_db import logs_bot
 from ..logs_db import get_response_status, log_request
 
 try:
