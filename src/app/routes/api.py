@@ -155,16 +155,20 @@ def get_titles(data):
     return jsonify(response_data)
 
 
+def logs_api(data) -> str:
+    _viewer = load_logs_view()
+    result = _viewer.view_logs(data)
+    return jsonify(result)
+
+
 class Api_Blueprint:
     def __init__(self, api_bp: Blueprint, allowed_tables):
         self.allowed_tables = allowed_tables
 
         @api_bp.route("/logs", methods=["GET"])
-        def logs_api():
+        def _logs_api():
             data = view_logs_request_handler(request, self.allowed_tables)
-            _viewer = load_logs_view()
-            result = _viewer.view_logs(data)
-            return jsonify(result)
+            return logs_api(data)
 
         @api_bp.route("/list", methods=["POST"])
         def _get_titles():

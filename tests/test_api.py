@@ -115,7 +115,7 @@ class TestApiEndpoints:
 
     def test_logs_endpoint(self, client):
         """Test /api/logs endpoint."""
-        with patch("src.app.routes.api.view_logs_new") as mock_view_logs:
+        with patch("src.app.routes.api.view_logs") as mock_view_logs:
             with patch("src.app.routes.api.view_logs_request_handler") as mock_handler:
                 mock_handler.return_value = MagicMock()
                 mock_view_logs.return_value = {"logs": [], "tab": {}, "status_table": [], "order_by_types": []}

@@ -158,5 +158,3 @@ class TestBuildDateIndex:
         """Test that _build_date_index handles empty input."""
         result = _build_date_index([])
         assert result == []
-
-
