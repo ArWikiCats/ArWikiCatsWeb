@@ -226,8 +226,11 @@ class TestLogRequest:
         manager.log_request("/api/test", "test_data", "success", 0.123456789)
 
         # Check that the call was made with rounded time
+        # call_args[0] = (query, params_tuple)
+        # params_tuple = (endpoint, request_data, response_status, response_time)
         call_args = mock_db.call_args
-        assert call_args[0][0][3] == 0.123  # 4th param is response_time
+        params = call_args[0][1]  # Second argument is the params tuple
+        assert params[3] == 0.123  # 4th param is response_time
 
     def test_log_request_uses_logs_table(self, mock_db):
         """Test that non-list endpoints use the 'logs' table."""
