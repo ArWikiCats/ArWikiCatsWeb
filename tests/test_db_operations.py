@@ -38,7 +38,7 @@ class TestFetchLogsEdgeCases:
         yield str(db_file)
 
     def test_fetch_all_empty_table(self, temp_db):
-        """Test fetch_all on empty table returns empty list."""
+        """Test fetch on empty table returns empty list."""
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db)
@@ -46,7 +46,7 @@ class TestFetchLogsEdgeCases:
         assert result == []
 
     def test_fetch_all_with_special_characters(self, temp_db):
-        """Test fetch_all handles special characters in data."""
+        """Test fetch handles special characters in data."""
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db)
@@ -61,7 +61,7 @@ class TestFetchLogsEdgeCases:
         assert "Quote" in result[0]["request_data"]
 
     def test_fetch_all_with_unicode(self, temp_db):
-        """Test fetch_all handles Arabic and other unicode."""
+        """Test fetch handles Arabic and other unicode."""
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db)
@@ -80,7 +80,7 @@ class TestDatabaseErrorHandling:
     """Tests for database error handling."""
 
     def test_db_commit_invalid_sql(self, tmp_path):
-        """Test db_commit handles invalid SQL gracefully."""
+        """Test commit handles invalid SQL gracefully."""
         from src.app.logs_db.db import Database
 
         db_file = tmp_path / "test_error.db"
@@ -93,7 +93,7 @@ class TestDatabaseErrorHandling:
         assert result is False
 
     def test_fetch_all_handles_missing_table(self, tmp_path):
-        """Test fetch_all behavior with missing table."""
+        """Test fetch behavior with missing table."""
         from src.app.logs_db.db import Database
 
         db_file = tmp_path / "test_missing.db"
@@ -303,10 +303,10 @@ class TestGetResponseStatus:
 
 
 class TestInitDb:
-    """Tests for init_db function."""
+    """Tests for init_tables function."""
 
     def test_init_db_creates_tables(self, tmp_path):
-        """Test init_db creates both logs and list_logs tables."""
+        """Test init_tables creates both logs and list_logs tables."""
         from src.app.logs_db.db import Database
 
         db_file = tmp_path / "test_init.db"
@@ -315,7 +315,7 @@ class TestInitDb:
         conn = sqlite3.connect(str(db_file))
         conn.close()
 
-        # Run init_db
+        # Run init_tables
         db_instance = Database(str(db_file))
         db_instance.init_tables()
 
@@ -340,7 +340,7 @@ class TestInitDb:
         conn.close()
 
     def test_init_db_is_idempotent(self, tmp_path):
-        """Test init_db can be called multiple times safely."""
+        """Test init_tables can be called multiple times safely."""
         from src.app.logs_db.db import Database
 
         db_file = tmp_path / "test_idempotent.db"
@@ -348,7 +348,7 @@ class TestInitDb:
         conn = sqlite3.connect(str(db_file))
         conn.close()
 
-        # Run init_db twice
+        # Run init_tables twice
         db_instance = Database(str(db_file))
         db_instance.init_tables()
         db_instance.init_tables()

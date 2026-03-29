@@ -153,54 +153,54 @@ class TestDatabaseOperations:
         yield str(db_file)
 
     def test_fetch_all_returns_list(self, temp_db):
-        """Test that fetch_all returns a list of dictionaries."""
+        """Test that fetch returns a list of dictionaries."""
         from src.app.logs_db import db
         from src.app.logs_db.db import Database
 
         with patch.object(Database, "__init__", return_value=None):
-            db_instance = Database()
-            db_instance.db_path = temp_db
+            db_instance = Database(temp_db)
+
             with patch.object(db, "_db", db_instance):
-                result = db.fetch_all("SELECT * FROM logs")
+                result = db.fetch("SELECT * FROM logs")
                 assert isinstance(result, list)
                 assert len(result) == 3
                 assert all(isinstance(row, dict) for row in result)
 
     def test_fetch_all_fetch_one(self, temp_db):
-        """Test that fetch_all with fetch_one=True returns single dict."""
+        """Test that fetch with fetch_one=True returns single dict."""
         from src.app.logs_db import db
         from src.app.logs_db.db import Database
 
         with patch.object(Database, "__init__", return_value=None):
-            db_instance = Database()
-            db_instance.db_path = temp_db
+            db_instance = Database(temp_db)
+
             with patch.object(db, "_db", db_instance):
-                result = db.fetch_all("SELECT * FROM logs WHERE id = ?", [1], fetch_one=True)
+                result = db.fetch("SELECT * FROM logs WHERE id = ?", [1], fetch_one=True)
                 assert isinstance(result, dict)
                 assert result["id"] == 1
 
     def test_fetch_all_no_result(self, temp_db):
-        """Test fetch_all returns empty list when no results."""
+        """Test fetch returns empty list when no results."""
         from src.app.logs_db import db
         from src.app.logs_db.db import Database
 
         with patch.object(Database, "__init__", return_value=None):
-            db_instance = Database()
-            db_instance.db_path = temp_db
+            db_instance = Database(temp_db)
+
             with patch.object(db, "_db", db_instance):
-                result = db.fetch_all("SELECT * FROM logs WHERE id = ?", [999])
+                result = db.fetch("SELECT * FROM logs WHERE id = ?", [999])
                 assert result == []
 
     def test_db_commit_success(self, temp_db):
-        """Test that db_commit returns True on success."""
+        """Test that commit returns True on success."""
         from src.app.logs_db import db
         from src.app.logs_db.db import Database
 
         with patch.object(Database, "__init__", return_value=None):
-            db_instance = Database()
-            db_instance.db_path = temp_db
+            db_instance = Database(temp_db)
+
             with patch.object(db, "_db", db_instance):
-                result = db.db_commit(
+                result = db.commit(
                     "INSERT INTO logs (endpoint, request_data, response_status, response_time) VALUES (?, ?, ?, ?)",
                     ["/api/new", "NewData", "success", 0.1],
                 )
@@ -310,8 +310,7 @@ class TestCountAll:
         from src.app.logs_db.db import Database
 
         with patch.object(Database, "__init__", return_value=None):
-            db_instance = Database()
-            db_instance.db_path = temp_db_with_data
+            db_instance = Database(temp_db_with_data)
             manager = LogsManager(db=db_instance)
             result = manager.count_all()
             assert result == 8
@@ -322,8 +321,7 @@ class TestCountAll:
         from src.app.logs_db.db import Database
 
         with patch.object(Database, "__init__", return_value=None):
-            db_instance = Database()
-            db_instance.db_path = temp_db_with_data
+            db_instance = Database(temp_db_with_data)
             manager = LogsManager(db=db_instance)
             result = manager.count_all(status="no_result")
             assert result == 5
@@ -371,8 +369,8 @@ class TestGetLogs:
         from src.app.logs_db.db import Database
 
         with patch.object(Database, "__init__", return_value=None):
-            db_instance = Database()
-            db_instance.db_path = temp_db_for_logs
+            db_instance = Database(temp_db_for_logs)
+
             manager = LogsManager(db=db_instance)
             result = manager.get_logs(per_page=5, offset=0)
             assert len(result) == 5
@@ -383,8 +381,8 @@ class TestGetLogs:
         from src.app.logs_db.db import Database
 
         with patch.object(Database, "__init__", return_value=None):
-            db_instance = Database()
-            db_instance.db_path = temp_db_for_logs
+            db_instance = Database(temp_db_for_logs)
+
             manager = LogsManager(db=db_instance)
             result = manager.get_logs(per_page=5, offset=0, order="DESC", order_by="response_count")
             # Should be ordered by response_count descending
@@ -397,8 +395,8 @@ class TestGetLogs:
         from src.app.logs_db.db import Database
 
         with patch.object(Database, "__init__", return_value=None):
-            db_instance = Database()
-            db_instance.db_path = temp_db_for_logs
+            db_instance = Database(temp_db_for_logs)
+
             manager = LogsManager(db=db_instance)
             result = manager.get_logs(per_page=5, offset=0, order="ASC", order_by="response_count")
             counts = [row["response_count"] for row in result]
@@ -410,8 +408,8 @@ class TestGetLogs:
         from src.app.logs_db.db import Database
 
         with patch.object(Database, "__init__", return_value=None):
-            db_instance = Database()
-            db_instance.db_path = temp_db_for_logs
+            db_instance = Database(temp_db_for_logs)
+
             manager = LogsManager(db=db_instance)
             result = manager.get_logs(per_page=5, offset=0, order="INVALID", order_by="response_count")
             counts = [row["response_count"] for row in result]
@@ -467,8 +465,7 @@ class TestSumResponseCount:
         from src.app.logs_db.db import Database
 
         with patch.object(Database, "__init__", return_value=None):
-            db_instance = Database()
-            db_instance.db_path = temp_db_for_sum
+            db_instance = Database(temp_db_for_sum)
             manager = LogsManager(db=db_instance)
             result = manager.sum_response_count()
             assert result == 35  # 10 + 20 + 5
@@ -479,8 +476,7 @@ class TestSumResponseCount:
         from src.app.logs_db.db import Database
 
         with patch.object(Database, "__init__", return_value=None):
-            db_instance = Database()
-            db_instance.db_path = temp_db_for_sum
+            db_instance = Database(temp_db_for_sum)
             manager = LogsManager(db=db_instance)
             result = manager.sum_response_count(status="success")
             assert result == 30  # 10 + 20

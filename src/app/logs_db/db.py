@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-from .db import Database, init_db
+from .db import Database
 """
 import logging
 import sqlite3
 from contextlib import contextmanager
 from typing import Any
-
-from ..config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -141,29 +139,6 @@ class Database:
         return f"Database(path={self.db_path!r})"
 
 
-# ── module-level singleton ──────────────────────────────────────────────────
-
-_db = Database(settings.paths.db_path_main)
-
-
-def init_db() -> None:
-    _db.init_tables()
-
-
-def db_commit(query: str, params: list | tuple = ()) -> bool:
-    return _db.commit(query, params)
-
-
-def fetch_all(
-    query: str,
-    params: list | tuple = (),
-    fetch_one: bool = False,
-) -> list[dict] | dict | None:
-    return _db.fetch(query, params, one=fetch_one)
-
-
 __all__ = [
     "Database",
-    "db_commit",
-    "fetch_all",
 ]
