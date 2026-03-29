@@ -93,7 +93,7 @@ class TestApiEndpoints:
 
     def test_logs_by_day_endpoint(self, client):
         """Test /api/logs_by_day endpoint."""
-        with patch("src.app.logs_db.logs_bot.retrieve_logs_by_date") as mock_retrieve:
+        with patch("src.app.logs_db.logs_bot2.retrieve_logs_by_date") as mock_retrieve:
             mock_retrieve.return_value = {"logs": []}
 
             response = client.get("/api/logs_by_day")
@@ -121,7 +121,7 @@ class TestApiEndpoints:
 
     def test_all_endpoint_without_day(self, client):
         """Test /api/all endpoint without day parameter."""
-        with patch("src.app.logs_db.logs_bot.retrieve_logs_en_to_ar") as mock_retrieve:
+        with patch("src.app.logs_db.logs_bot2.retrieve_logs_en_to_ar") as mock_retrieve:
             mock_retrieve.return_value = {"tab": {"sum_all": "0"}, "no_result": [], "data_result": {}}
 
             response = client.get("/api/all")
@@ -131,7 +131,7 @@ class TestApiEndpoints:
 
     def test_all_endpoint_with_day(self, client):
         """Test /api/all/<day> endpoint with day parameter."""
-        with patch("src.app.logs_db.logs_bot.retrieve_logs_en_to_ar") as mock_retrieve:
+        with patch("src.app.logs_db.logs_bot2.retrieve_logs_en_to_ar") as mock_retrieve:
             mock_retrieve.return_value = {"tab": {"sum_all": "0"}, "no_result": [], "data_result": {}}
 
             response = client.get("/api/all/2025-01-27")
@@ -141,7 +141,7 @@ class TestApiEndpoints:
 
     def test_category_endpoint(self, client):
         """Test /api/category endpoint."""
-        with patch("src.app.logs_db.logs_bot.retrieve_logs_en_to_ar") as mock_retrieve:
+        with patch("src.app.logs_db.logs_bot2.retrieve_logs_en_to_ar") as mock_retrieve:
             mock_retrieve.return_value = {
                 "tab": {"sum_all": "5"},
                 "no_result": ["test"],
@@ -157,7 +157,7 @@ class TestApiEndpoints:
 
     def test_no_result_endpoint(self, client):
         """Test /api/no_result endpoint."""
-        with patch("src.app.logs_db.logs_bot.retrieve_logs_en_to_ar") as mock_retrieve:
+        with patch("src.app.logs_db.logs_bot2.retrieve_logs_en_to_ar") as mock_retrieve:
             mock_retrieve.return_value = {
                 "tab": {"sum_all": "5"},
                 "no_result": ["test"],

@@ -2,7 +2,8 @@
 from flask import Blueprint, render_template, request
 
 from ..handler import view_logs_request_handler
-from ..logs_db.logs_bot import retrieve_logs_by_date, view_logs_new
+from ..logs_db.logs_bot import view_logs_new
+from ..logs_db.logs_bot2 import retrieve_logs_by_date
 
 
 class Ui_Blueprint:

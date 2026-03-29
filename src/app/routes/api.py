@@ -14,7 +14,8 @@ except ImportError:
 from ..config import settings
 from ..handler import view_logs_request_handler
 from ..logs_db import Database, LogsManager
-from ..logs_db.logs_bot import retrieve_logs_by_date, retrieve_logs_en_to_ar, view_logs_new
+from ..logs_db.logs_bot import view_logs_new
+from ..logs_db.logs_bot2 import retrieve_logs_by_date, retrieve_logs_en_to_ar
 
 
 @functools.lru_cache(maxsize=1)
