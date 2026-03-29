@@ -18,6 +18,7 @@ class LogsManager:
     """
 
     ALLOWED_ORDERS = {"ASC", "DESC"}
+    ALLOWED_ORDER_BY_COLUMNS = {"id", "endpoint", "request_data", "response_status", "response_time", "response_count", "timestamp", "date_only"}
 
     def __init__(self, db: Database, allowed_tables: set[str]):
         self.allowed_tables = allowed_tables
@@ -34,6 +35,11 @@ class LogsManager:
     def _validate_order(order: str) -> str:
         """Normalize ORDER direction — fallback to DESC if invalid."""
         return order if order in LogsManager.ALLOWED_ORDERS else "DESC"
+
+    def _validate_order_by(self, order_by: str) -> None:
+        """Whitelist check to prevent SQL injection via ORDER BY column names."""
+        if order_by not in self.ALLOWED_ORDER_BY_COLUMNS:
+            raise ValueError(f"Invalid order_by column: {order_by!r}")
 
     @staticmethod
     def _resolve_table(endpoint: str) -> str:
@@ -112,6 +118,7 @@ class LogsManager:
         self,
         status: str = "",
         table_name: str = "logs",
+        day: str = "",
     ) -> int:
         """Return the total sum of response_count matching the given filters."""
         self._validate_table(table_name)
@@ -119,6 +126,7 @@ class LogsManager:
             f"SELECT SUM(response_count) AS count_all FROM {table_name}",
             [],
             status=status,
+            day=day,
         )
         result = self._db.fetch(query, params, one=True)
         return (result or {}).get("count_all") or 0
@@ -127,6 +135,7 @@ class LogsManager:
         self,
         status: str = "",
         table_name: str = "logs",
+        day: str = "",
     ) -> int:
         """Return the number of rows matching the given filters."""
         self._validate_table(table_name)
@@ -134,6 +143,7 @@ class LogsManager:
             f"SELECT COUNT(*) AS total FROM {table_name}",
             [],
             status=status,
+            day=day,
         )
         result = self._db.fetch(query, params, one=True)
         return (result or {}).get("total") or 0
@@ -163,6 +173,7 @@ class LogsManager:
         """Return a paginated, optionally-filtered page of log rows."""
         self._validate_table(table_name)
         order = self._validate_order(order)
+        self._validate_order_by(order_by)
 
         query, params = self._apply_filters(
             f"SELECT * FROM {table_name} ",
@@ -200,6 +211,9 @@ class LogsManager:
         """
         Return a {request_data: response_status} mapping, optionally filtered
         by a full date (YYYY-MM-DD) or year-month (YYYY-MM).
+
+        When multiple rows share the same request_data, prefer any non-"no_result"
+        over "no_result" for deterministic results.
         """
         query = "SELECT request_data, response_status FROM logs"
         params: list = []
@@ -216,7 +230,18 @@ class LogsManager:
 
         logger.debug("[LogsManager] all_logs_en2ar query=%s params=%s", query, params)
         rows = self._db.fetch(query, params)
-        return {row["request_data"]: row["response_status"] for row in rows}
+
+        # Deterministic merge: prefer non-"no_result" over "no_result"
+        result: dict[str, str] = {}
+        for row in rows:
+            key = row["request_data"]
+            status = row["response_status"]
+            if key not in result:
+                result[key] = status
+            elif status != "no_result" and result[key] == "no_result":
+                result[key] = status
+
+        return result
 
     # ───────────────────────── dunder helpers ──────────────────────────
 
