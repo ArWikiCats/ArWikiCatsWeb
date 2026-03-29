@@ -42,7 +42,7 @@ def create_app() -> Flask:
     # Rate limiting to prevent abuse
     limiter = Limiter(
         key_func=get_remote_address,
-        default_limits=["200 per minute"],
+        default_limits=[settings.rate_limit],
         storage_uri="memory://",
     )
     limiter.init_app(app)
