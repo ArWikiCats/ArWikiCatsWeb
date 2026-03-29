@@ -81,24 +81,20 @@ class LogsManager:
         params: list,
         *,
         status: str = "",
-        like: str = "",
         day: str = "",
     ) -> tuple[str, list]:
         """
-        Append WHERE clauses for status / like / day filters.
+        Append WHERE clauses for status / day filters.
         Mutates and returns (query, params).
         """
         conditions = []
 
-        if status:
+        if status and status.lower() != "all":
             if status == "Category":
                 conditions.append("response_status LIKE 'تصنيف%'")
-            elif status.lower() != "all":
+            else:
                 conditions.append("response_status = ?")
                 params.append(status)
-        elif like:
-            conditions.append("response_status LIKE ?")
-            params.append(like)
 
         if day and re.match(r"\d{4}-\d{2}-\d{2}", day):
             conditions.append("date_only = ?")
@@ -115,7 +111,6 @@ class LogsManager:
         self,
         status: str = "",
         table_name: str = "logs",
-        like: str = "",
     ) -> int:
         """Return the total sum of response_count matching the given filters."""
         self._validate_table(table_name)
@@ -123,7 +118,6 @@ class LogsManager:
             f"SELECT SUM(response_count) AS count_all FROM {table_name}",
             [],
             status=status,
-            like=like,
         )
         result = self._db.fetch(query, params, one=True)
         return (result or {}).get("count_all") or 0
@@ -132,7 +126,6 @@ class LogsManager:
         self,
         status: str = "",
         table_name: str = "logs",
-        like: str = "",
     ) -> int:
         """Return the number of rows matching the given filters."""
         self._validate_table(table_name)
@@ -140,7 +133,6 @@ class LogsManager:
             f"SELECT COUNT(*) AS total FROM {table_name}",
             [],
             status=status,
-            like=like,
         )
         result = self._db.fetch(query, params, one=True)
         return (result or {}).get("total") or 0
@@ -165,7 +157,6 @@ class LogsManager:
         order_by: str = "timestamp",
         status: str = "",
         table_name: str = "logs",
-        like: str = "",
         day: str = "",
     ) -> list[dict]:
         """Return a paginated, optionally-filtered page of log rows."""
@@ -176,7 +167,6 @@ class LogsManager:
             f"SELECT * FROM {table_name} ",
             [],
             status=status,
-            like=like,
             day=day,
         )
         query += f" ORDER BY {order_by} {order} LIMIT ? OFFSET ?"

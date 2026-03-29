@@ -9,7 +9,6 @@ class ViewLogsRequestHandler:
     order_by: str
     day: str
     status: str
-    like: str
     table_name: str
     offset: int = field(init=False)
 
@@ -68,6 +67,5 @@ def view_logs_request_handler(request, allowed_tables) -> ViewLogsRequestHandler
         order_by=request.args.get("order_by", "response_count"),
         day=request.args.get("day", ""),
         status=request.args.get("status", ""),
-        like=request.args.get("like", ""),
         table_name=table_name,
     )

@@ -28,7 +28,6 @@ class TestViewLogs:
             "order_by": "response_count",
             "day": "",
             "status": "",
-            "like": "",
             "table_name": "logs",
         }
         value = defaults.get(key, default)

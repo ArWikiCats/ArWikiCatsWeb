@@ -38,17 +38,6 @@ class TestAddStatus:
         assert "response_status like 'تصنيف%'" in result_query
         assert len(result_params) == 0  # No params added for Category
 
-    def test_add_status_with_like(self):
-        """Test _apply_filters adds LIKE clause correctly."""
-
-        query = "SELECT * FROM logs"
-        params = []
-        result_query, result_params = _apply_filters(query, params, like="test%")
-
-        assert "WHERE" in result_query
-        assert "response_status like ?" in result_query
-        assert "test%" in result_params
-
     def test_add_status_with_valid_day(self):
         """Test _apply_filters adds date filter for valid day format."""
 
