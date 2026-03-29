@@ -9,88 +9,84 @@ from unittest.mock import patch
 
 import pytest
 
+from src.app.logs_db.bot import LogsManager
+_apply_filters = LogsManager()._apply_filters
+
 
 class TestAddStatus:
-    """Tests for the add_status function."""
+    """Tests for the _apply_filters function."""
 
     def test_add_status_with_status(self):
-        """Test add_status adds correct WHERE clause for status."""
-        from src.app.logs_db.bot import add_status
+        """Test _apply_filters adds correct WHERE clause for status."""
 
         query = "SELECT * FROM logs"
         params = []
-        result_query, result_params = add_status(query, params, status="no_result")
+        result_query, result_params = _apply_filters(query, params, status="no_result")
 
         assert "WHERE" in result_query
         assert "response_status = ?" in result_query
         assert "no_result" in result_params
 
     def test_add_status_with_category(self):
-        """Test add_status handles 'Category' status specially."""
-        from src.app.logs_db.bot import add_status
+        """Test _apply_filters handles 'Category' status specially."""
 
         query = "SELECT * FROM logs"
         params = []
-        result_query, result_params = add_status(query, params, status="Category")
+        result_query, result_params = _apply_filters(query, params, status="Category")
 
         assert "WHERE" in result_query
         assert "response_status like 'تصنيف%'" in result_query
         assert len(result_params) == 0  # No params added for Category
 
     def test_add_status_with_like(self):
-        """Test add_status adds LIKE clause correctly."""
-        from src.app.logs_db.bot import add_status
+        """Test _apply_filters adds LIKE clause correctly."""
 
         query = "SELECT * FROM logs"
         params = []
-        result_query, result_params = add_status(query, params, like="test%")
+        result_query, result_params = _apply_filters(query, params, like="test%")
 
         assert "WHERE" in result_query
         assert "response_status like ?" in result_query
         assert "test%" in result_params
 
     def test_add_status_with_valid_day(self):
-        """Test add_status adds date filter for valid day format."""
-        from src.app.logs_db.bot import add_status
+        """Test _apply_filters adds date filter for valid day format."""
 
         query = "SELECT * FROM logs"
         params = []
-        result_query, result_params = add_status(query, params, day="2025-01-27")
+        result_query, result_params = _apply_filters(query, params, day="2025-01-27")
 
         assert "WHERE" in result_query
         assert "date_only = ?" in result_query
         assert "2025-01-27" in result_params
 
     def test_add_status_with_invalid_day(self):
-        """Test add_status ignores invalid day format."""
-        from src.app.logs_db.bot import add_status
+        """Test _apply_filters ignores invalid day format."""
 
         query = "SELECT * FROM logs"
         params = []
-        result_query, result_params = add_status(query, params, day="invalid-date")
+        result_query, result_params = _apply_filters(query, params, day="invalid-date")
 
         assert "date_only" not in result_query
         assert len(result_params) == 0
 
     def test_add_status_with_multiple_conditions(self):
-        """Test add_status combines multiple conditions with AND."""
-        from src.app.logs_db.bot import add_status
+        """Test _apply_filters combines multiple conditions with AND."""
 
         query = "SELECT * FROM logs"
         params = []
-        result_query, result_params = add_status(query, params, status="no_result", day="2025-01-27")
+        result_query, result_params = _apply_filters(query, params, status="no_result", day="2025-01-27")
 
         assert "WHERE" in result_query
         assert "AND" in result_query
         assert len(result_params) == 2
 
     def test_add_status_with_tuple_params(self):
-        """Test add_status converts tuple params to list."""
-        from src.app.logs_db.bot import add_status
+        """Test _apply_filters converts tuple params to list."""
 
         query = "SELECT * FROM logs"
         params = ()  # tuple instead of list
-        result_query, result_params = add_status(query, params, status="no_result")
+        result_query, result_params = _apply_filters(query, params, status="no_result")
 
         assert isinstance(result_params, list)
         assert "no_result" in result_params
