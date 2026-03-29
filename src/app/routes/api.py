@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import json
-import functools
 import time
 
 from flask import Blueprint, Response, request
@@ -12,7 +11,6 @@ except ImportError:
     resolve_arabic_category_label = None
 
 from ..handler import view_logs_request_handler
-from ..logs_db.logs_bot import view_logs
 from ..loader import load_logs_view, load_data_manager
 
 
@@ -164,7 +162,8 @@ class Api_Blueprint:
         @api_bp.route("/logs", methods=["GET"])
         def logs_api():
             data = view_logs_request_handler(request, self.allowed_tables)
-            result = view_logs(data)
+            _viewer = load_logs_view()
+            result = _viewer.view_logs(data)
             return jsonify(result)
 
         @api_bp.route("/list", methods=["POST"])

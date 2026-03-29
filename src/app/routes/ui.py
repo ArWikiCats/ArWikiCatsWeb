@@ -2,8 +2,7 @@
 from flask import Blueprint, render_template, request
 
 from ..handler import view_logs_request_handler
-from ..logs_db.logs_bot import view_logs_new
-from ..logs_db.logs_bot2 import view_logs_by_date
+from ..loader import load_logs_view
 
 
 class Ui_Blueprint:
@@ -17,7 +16,8 @@ class Ui_Blueprint:
         @ui_bp.route("/logs", methods=["GET"])
         def render_logs_view() -> str:
             data = view_logs_request_handler(request, self.allowed_tables)
-            result = view_logs_new(data)
+            _viewer = load_logs_view()
+            result = _viewer.view_logs(data)
             return render_template("logs.html", result=result)
 
         @ui_bp.route("/no_result", methods=["GET"])
@@ -32,7 +32,8 @@ class Ui_Blueprint:
             if table_name not in self.allowed_tables:
                 table_name = "logs"
 
-            result = view_logs_by_date(table_name)
+            _viewer = load_logs_view()
+            result = _viewer.view_logs_by_date(table_name)
 
             return render_template(
                 "logs_by_day.html",
