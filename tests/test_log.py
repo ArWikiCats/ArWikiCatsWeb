@@ -4,16 +4,15 @@
 Tests for the logs database functionality.
 """
 import sqlite3
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
-from src.app.logs_db.bot import LogsManager
+from src.app.loader import load_data_manager
 from src.app.logs_db.db import Database
 
 # Create a LogsManager instance with a mock database for testing _apply_filters
-_apply_filters = LogsManager()._apply_filters
+_apply_filters = load_data_manager()._apply_filters
 
 
 class TestAddStatus:
@@ -220,9 +219,8 @@ class TestLogRequest:
 
     def test_log_request_rounds_response_time(self, mock_db):
         """Test that response_time is rounded to 3 decimal places."""
-        from src.app.logs_db.bot import LogsManager
 
-        manager = LogsManager()
+        manager = load_data_manager()
         manager.log_request("/api/test", "test_data", "success", 0.123456789)
 
         # Check that the call was made with rounded time
@@ -234,9 +232,8 @@ class TestLogRequest:
 
     def test_log_request_uses_logs_table(self, mock_db):
         """Test that non-list endpoints use the 'logs' table."""
-        from src.app.logs_db.bot import LogsManager
 
-        manager = LogsManager()
+        manager = load_data_manager()
         manager.log_request("/api/test", "test_data", "success", 0.1)
 
         call_args = mock_db.call_args
@@ -245,9 +242,8 @@ class TestLogRequest:
 
     def test_log_request_uses_list_logs_table(self, mock_db):
         """Test that /api/list endpoint uses 'list_logs' table."""
-        from src.app.logs_db.bot import LogsManager
 
-        manager = LogsManager()
+        manager = load_data_manager()
         manager.log_request("/api/list", "test_data", "success", 0.1)
 
         call_args = mock_db.call_args
@@ -255,9 +251,8 @@ class TestLogRequest:
 
     def test_log_request_converts_status_to_string(self, mock_db):
         """Test that response_status is converted to string."""
-        from src.app.logs_db.bot import LogsManager
 
-        manager = LogsManager()
+        manager = load_data_manager()
         manager.log_request("/api/test", "test_data", 200, 0.1)
 
         # Check that the call was made with string status

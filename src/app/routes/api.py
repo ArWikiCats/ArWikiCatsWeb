@@ -11,24 +11,9 @@ except ImportError:
     batch_resolve_labels = None
     resolve_arabic_category_label = None
 
-from ..config import settings
 from ..handler import view_logs_request_handler
-from ..logs_db import Database, LogsManager, LogsView
-from ..logs_db.logs_bot import view_logs_new
-from ..logs_db.logs_bot2 import view_logs_by_date, view_logs_en2ar
-
-
-@functools.lru_cache(maxsize=1)
-def load_data_manager() -> LogsManager:
-    _manager = LogsManager(db=Database(settings.paths.db_path_main))
-    return _manager
-
-
-@functools.lru_cache(maxsize=1)
-def load_logs_view() -> LogsView:
-    _manager = load_data_manager()
-    _viewer = LogsView(manager=_manager)
-    return _viewer
+from ..logs_db.logs_bot import view_logs
+from ..loader import load_logs_view, load_data_manager
 
 
 def jsonify(data: dict) -> str:
@@ -46,8 +31,9 @@ def check_user_agent(endpoint, data, start_time):
 
 
 def get_logs_by_day(table_name) -> str:
+    _viewer = load_logs_view()
 
-    result = view_logs_by_date(table_name)
+    result = _viewer.view_logs_by_date(table_name)
     result = result.get("logs", [])
 
     return jsonify(result)
@@ -178,7 +164,7 @@ class Api_Blueprint:
         @api_bp.route("/logs", methods=["GET"])
         def logs_api():
             data = view_logs_request_handler(request, self.allowed_tables)
-            result = view_logs_new(data)
+            result = view_logs(data)
             return jsonify(result)
 
         @api_bp.route("/list", methods=["POST"])

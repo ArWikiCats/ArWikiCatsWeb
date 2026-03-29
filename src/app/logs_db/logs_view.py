@@ -2,25 +2,16 @@
 """
 from .logs_view import LogsView
 """
-import functools
 import logging
 
 from ..config import settings
 from ..handler import ViewLogsRequestHandler
 from .bot import LogsManager
-from .db import Database
 
 logger = logging.getLogger(__name__)
 
-
-# ── singleton factory ───────────────────────────────────────────────────────
-
-@functools.lru_cache(maxsize=1)
-def _get_manager() -> LogsManager:
-    return LogsManager(db=Database(settings.paths.db_path_main))
-
-
 # ── helpers ─────────────────────────────────────────────────────────────────
+
 
 def _format_log_row(log: dict) -> dict:
     """Normalise a raw DB row into a clean display-ready dict."""
@@ -71,8 +62,8 @@ class LogsView:
     Transforms raw LogsManager output into view-ready payloads.
     """
 
-    def __init__(self, manager: LogsManager = None):
-        self._m = manager or _get_manager()
+    def __init__(self, manager: LogsManager):
+        self._m = manager
 
     # ────────────────────────── paginated logs ──────────────────────────
 

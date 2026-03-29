@@ -4,9 +4,10 @@ Tests for the logs_bot2 module.
 """
 from unittest.mock import patch
 from src.app.routes.api import load_logs_view
-_viewer = load_logs_view()
 
+_viewer = load_logs_view()
 view_logs_en2ar = _viewer.view_logs_en2ar
+view_logs_by_date = _viewer.view_logs_by_date
 
 
 class TestRetrieveLogsByDate:
@@ -15,7 +16,6 @@ class TestRetrieveLogsByDate:
     @patch("src.app.logs_db.logs_bot2.load_data_manager")
     def test_view_logs_by_date_returns_dict(self, mock_load_data_manager):
         """Test that view_logs_by_date returns expected structure."""
-        from src.app.logs_db.logs_bot2 import view_logs_by_date
 
         mock_manager = mock_load_data_manager.return_value
         mock_manager.fetch_logs_by_date.return_value = []
@@ -30,7 +30,6 @@ class TestRetrieveLogsByDate:
     @patch("src.app.logs_db.logs_bot2.load_data_manager")
     def test_view_logs_by_date_aggregates_data(self, mock_load_data_manager):
         """Test that view_logs_by_date properly aggregates data by date."""
-        from src.app.logs_db.logs_bot2 import view_logs_by_date
 
         mock_manager = mock_load_data_manager.return_value
         mock_manager.fetch_logs_by_date.return_value = [
@@ -52,7 +51,6 @@ class TestRetrieveLogsByDate:
     @patch("src.app.logs_db.logs_bot2.load_data_manager")
     def test_view_logs_by_date_sorts_by_day(self, mock_load_data_manager):
         """Test that logs are sorted by day."""
-        from src.app.logs_db.logs_bot2 import view_logs_by_date
 
         mock_manager = mock_load_data_manager.return_value
         mock_manager.fetch_logs_by_date.return_value = [

@@ -1,16 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import functools
-
-from ..config import settings
-from .bot import LogsManager
-from .db import Database
-
-
-@functools.lru_cache(maxsize=1)
-def load_data_manager() -> LogsManager:
-    _manager = LogsManager(db=Database(settings.paths.db_path_main))
-    return _manager
+from ..loader import load_data_manager
 
 
 def view_logs_by_date(table_name):

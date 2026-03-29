@@ -4,14 +4,12 @@ import functools
 
 from ..config import settings
 from ..handler import ViewLogsRequestHandler
-from .bot import LogsManager
-from .db import Database
+from ..loader import load_logs_view, load_data_manager
 
 
-@functools.lru_cache(maxsize=1)
-def load_data_manager() -> LogsManager:
-    _manager = LogsManager(db=Database(settings.paths.db_path_main))
-    return _manager
+def view_logs(data: ViewLogsRequestHandler) -> dict:
+    _viewer = load_logs_view()
+    return _viewer.view_logs(data)
 
 
 def view_logs_new(data: ViewLogsRequestHandler):

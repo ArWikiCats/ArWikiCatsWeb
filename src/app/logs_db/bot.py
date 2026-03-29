@@ -19,8 +19,8 @@ class LogsManager:
 
     ALLOWED_ORDERS = {"ASC", "DESC"}
 
-    def __init__(self, db: Database = None):
-        self._db = db or Database(settings.paths.db_path_main)
+    def __init__(self, db: Database):
+        self._db = db
 
     # ─────────────────────────── validation ────────────────────────────
 
