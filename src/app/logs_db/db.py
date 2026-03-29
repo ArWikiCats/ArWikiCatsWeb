@@ -6,6 +6,7 @@ import logging
 import sqlite3
 from contextlib import contextmanager
 from typing import Any, Optional
+
 from ..config import settings
 
 logger = logging.getLogger(__name__)

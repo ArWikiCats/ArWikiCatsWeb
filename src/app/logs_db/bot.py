@@ -65,9 +65,7 @@ class LogsManager:
                 response_time  = excluded.response_time,
                 timestamp      = CURRENT_TIMESTAMP
         """
-        success = self._db.commit(
-            query, (endpoint, str(request_data), response_status, response_time)
-        )
+        success = self._db.commit(query, (endpoint, str(request_data), response_status, response_time))
 
         if not success:
             logger.error("[LogsManager] Failed to log request: %s %s", endpoint, request_data)

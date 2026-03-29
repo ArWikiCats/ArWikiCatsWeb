@@ -39,7 +39,9 @@ class TestViewLogs:
     @patch("src.app.logs_db.logs_bot.sum_response_count")
     @patch("src.app.logs_db.logs_bot.count_all")
     @patch("src.app.logs_db.logs_bot.get_logs")
-    def test_view_logs_returns_dict_with_required_keys(self, mock_get_logs, mock_count_all, mock_sum_response_count, mock_request):
+    def test_view_logs_returns_dict_with_required_keys(
+        self, mock_get_logs, mock_count_all, mock_sum_response_count, mock_request
+    ):
         """Test that view_logs returns a dict with expected keys."""
         from src.app.logs_db.logs_bot import view_logs
 
@@ -261,7 +263,9 @@ class TestViewLogsEdgeCases:
     @patch("src.app.logs_db.logs_bot.sum_response_count")
     @patch("src.app.logs_db.logs_bot.count_all")
     @patch("src.app.logs_db.logs_bot.get_logs")
-    def test_view_logs_invalid_order_by_defaults_to_timestamp(self, mock_get_logs, mock_count_all, mock_sum_response_count, mock_request):
+    def test_view_logs_invalid_order_by_defaults_to_timestamp(
+        self, mock_get_logs, mock_count_all, mock_sum_response_count, mock_request
+    ):
         """Test view_logs with invalid order_by defaults to timestamp."""
         from src.app.logs_db.logs_bot import view_logs
 

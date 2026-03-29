@@ -3,11 +3,10 @@
 from .bot import (
     LogsManager,
 )
-
 from .db import (
     Database,
-    fetch_all,
     db_commit,
+    fetch_all,
     init_db,
 )
 

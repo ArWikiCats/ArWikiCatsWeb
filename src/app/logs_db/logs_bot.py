@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import functools
+
 from ..config import settings
+from ..handler import ViewLogsRequestHandler
 from .bot import LogsManager
 from .db import Database
-from ..handler import ViewLogsRequestHandler
 
 
 @functools.lru_cache(maxsize=1)
@@ -26,7 +27,7 @@ def view_logs_new(data: ViewLogsRequestHandler):
         status=data.status,
         table_name=data.table_name,
         like=data.like,
-        day=data.day
+        day=data.day,
     )
 
     # Convert to list of dicts

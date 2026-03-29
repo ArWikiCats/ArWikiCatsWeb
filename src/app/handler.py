@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass, field
 
 
@@ -14,14 +13,20 @@ class ViewLogsRequestHandler:
     table_name: str
     offset: int = field(init=False)
 
-    ALLOWED_ORDERS: frozenset = field(
-        default_factory=lambda: frozenset({"ASC", "DESC"}), init=False, repr=False
-    )
+    ALLOWED_ORDERS: frozenset = field(default_factory=lambda: frozenset({"ASC", "DESC"}), init=False, repr=False)
     ALLOWED_ORDER_BY: frozenset = field(
-        default_factory=lambda: frozenset({
-            "id", "endpoint", "request_data", "response_status",
-            "response_time", "response_count", "timestamp", "date_only",
-        }),
+        default_factory=lambda: frozenset(
+            {
+                "id",
+                "endpoint",
+                "request_data",
+                "response_status",
+                "response_time",
+                "response_count",
+                "timestamp",
+                "date_only",
+            }
+        ),
         init=False,
         repr=False,
     )

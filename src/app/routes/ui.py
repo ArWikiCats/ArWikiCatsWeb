@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, render_template, request
 
-from ..handler import view_logs_request_handler
-
 from ..config import settings
+from ..handler import view_logs_request_handler
 from ..logs_db.logs_bot import retrieve_logs_by_date, view_logs_new
 
 # Create the UI Blueprint
@@ -17,7 +16,7 @@ def render_index_page() -> str:
 
 @ui_bp.route("/logs", methods=["GET"])
 def render_logs_view() -> str:
-    data = view_logs_request_handler(request)
+    data = view_logs_request_handler(request, settings.allowed_tables)
     result = view_logs_new(data)
 
     return render_template("logs.html", result=result)

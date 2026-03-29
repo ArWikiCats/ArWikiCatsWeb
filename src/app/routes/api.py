@@ -12,9 +12,9 @@ except ImportError:
     batch_resolve_labels = None
     resolve_arabic_category_label = None
 
+from ..config import settings
 from ..logs_db import Database, LogsManager
 from ..logs_db.logs_bot import retrieve_logs_by_date, retrieve_logs_en_to_ar, view_logs_new
-from ..config import settings
 
 _manager = LogsManager(db=Database(settings.paths.db_path_main))
 
@@ -177,6 +177,6 @@ def get_titles():
 
 @api_bp.route("/logs", methods=["GET"])
 def logs_api():
-    data = view_logs_request_handler(request)
+    data = view_logs_request_handler(request, settings.allowed_tables)
     result = view_logs_new(data)
     return jsonify(result)
