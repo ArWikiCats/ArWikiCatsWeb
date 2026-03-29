@@ -142,12 +142,7 @@ def _view_logs(page, per_page, order, order_by, day, status, like, table_name, o
     return result
 
 
-def retrieve_logs_by_date(request):
-
-    table_name = request.args.get("table_name", "")
-
-    if table_name not in settings.allowed_tables:
-        table_name = "logs"
+def retrieve_logs_by_date(table_name):
 
     logs_data = fetch_logs_by_date(table_name=table_name)
 

@@ -6,6 +6,7 @@ from flask import Blueprint, Response, request
 
 from ..logs_db import logs_bot
 from ..logs_db import get_response_status, log_request
+from ..config import settings
 
 try:
     from ArWikiCats import batch_resolve_labels, resolve_arabic_category_label  # type: ignore
@@ -32,7 +33,13 @@ def check_user_agent(endpoint, data, start_time):
 
 @api_bp.route("/logs_by_day", methods=["GET"])
 def get_logs_by_day() -> str:
-    result = logs_bot.retrieve_logs_by_date(request)
+
+    table_name = request.args.get("table_name", "")
+
+    if table_name not in settings.allowed_tables:
+        table_name = "logs"
+
+    result = logs_bot.retrieve_logs_by_date(table_name)
     result = result.get("logs", [])
 
     return jsonify(result)

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, render_template, request
 
+from ..config import settings
 from ..logs_db.logs_bot import retrieve_logs_by_date, view_logs
 
 # Create the UI Blueprint
@@ -29,7 +30,12 @@ def render_no_results_page() -> str:
 @ui_bp.route("/logs_by_day", methods=["GET"])
 def render_daily_logs() -> str:
 
-    result = retrieve_logs_by_date(request)
+    table_name = request.args.get("table_name", "")
+
+    if table_name not in settings.allowed_tables:
+        table_name = "logs"
+
+    result = retrieve_logs_by_date(table_name)
 
     return render_template(
         "logs_by_day.html",
