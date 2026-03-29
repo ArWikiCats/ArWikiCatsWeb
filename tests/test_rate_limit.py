@@ -9,10 +9,16 @@ Run individual tests (recommended for rate limit tests):
     pytest tests/test_rate_limit.py::TestBRateLimiterStatusEndpoint -v
 """
 
-import pytest
+from flask.app import Flask
 from flask_testing import TestCase
+from src.main_app import create_app
 
-from src.app import app
+
+def _create_app() -> Flask:
+    app = create_app()
+    """Create the test app."""
+    app.config["TESTING"] = True
+    return app
 
 
 class TestARateLimiterNormalRequests(TestCase):
@@ -23,8 +29,7 @@ class TestARateLimiterNormalRequests(TestCase):
 
     def create_app(self):
         """Create the test app."""
-        app.config["TESTING"] = True
-        return app
+        return _create_app()
 
     def test_normal_requests_under_limit_succeed(self):
         """Test that 50 requests under the limit succeed."""
@@ -38,8 +43,7 @@ class TestBRateLimiterStatusEndpoint(TestCase):
 
     def create_app(self):
         """Create the test app."""
-        app.config["TESTING"] = True
-        return app
+        return _create_app()
 
     def test_rate_limit_exceeded_on_status_endpoint(self):
         """Test 429 response when exceeding rate limit on /api/status.
@@ -70,8 +74,7 @@ class TestCRateLimiterListEndpoint(TestCase):
 
     def create_app(self):
         """Create the test app."""
-        app.config["TESTING"] = True
-        return app
+        return _create_app()
 
     def test_rate_limit_exceeded_on_list_endpoint(self):
         """Test 429 response when exceeding rate limit on /api/list."""
@@ -97,8 +100,7 @@ class TestDRateLimiterTitleEndpoint(TestCase):
 
     def create_app(self):
         """Create the test app."""
-        app.config["TESTING"] = True
-        return app
+        return _create_app()
 
     def test_rate_limit_exceeded_on_title_endpoint(self):
         """Test 429 response when exceeding rate limit on /api/<title>."""
@@ -123,8 +125,7 @@ class TestERateLimiterHeaders(TestCase):
 
     def create_app(self):
         """Create the test app."""
-        app.config["TESTING"] = True
-        return app
+        return _create_app()
 
     def test_rate_limit_headers_present(self):
         """Test that requests return valid status (200 or 429)."""
@@ -138,8 +139,7 @@ class TestFRateLimiterResponseFormat(TestCase):
 
     def create_app(self):
         """Create the test app."""
-        app.config["TESTING"] = True
-        return app
+        return _create_app()
 
     def test_429_response_format(self):
         """Test the format of 429 Too Many Requests response."""
@@ -152,7 +152,3 @@ class TestFRateLimiterResponseFormat(TestCase):
                 assert "too many requests" in response_text
                 print(f"429 response: {response.get_data(as_text=True)}")
                 break
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v", "-s"])
