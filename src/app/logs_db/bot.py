@@ -19,14 +19,15 @@ class LogsManager:
 
     ALLOWED_ORDERS = {"ASC", "DESC"}
 
-    def __init__(self, db: Database):
+    def __init__(self, db: Database, allowed_tables: set[str]):
+        self.allowed_tables = allowed_tables
         self._db = db
 
     # ─────────────────────────── validation ────────────────────────────
 
     def _validate_table(self, table_name: str) -> None:
         """Whitelist check to prevent SQL injection via table names."""
-        if table_name not in settings.allowed_tables:
+        if table_name not in self.allowed_tables:
             raise ValueError(f"Invalid table name: {table_name!r}")
 
     @staticmethod

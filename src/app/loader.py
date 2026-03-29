@@ -14,7 +14,7 @@ def load_database() -> Database:
 @functools.lru_cache(maxsize=1)
 def load_data_manager() -> LogsManager:
     _db = load_database()
-    _manager = LogsManager(db=_db)
+    _manager = LogsManager(db=_db, allowed_tables=settings.allowed_tables)
     return _manager
 
 
