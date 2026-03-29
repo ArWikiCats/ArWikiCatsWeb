@@ -4,6 +4,7 @@ Pytest configuration for the tests directory.
 """
 import functools
 import os
+
 import pytest
 
 
@@ -16,12 +17,14 @@ def set_database_path_and_clear_cache(tmp_path_factory):
     # Clear the lru_cache for load_database, load_data_manager, and load_logs_view
     # This must happen BEFORE any import of src.app to ensure fresh DB binding
     from src.main_app import loader
+
     loader.load_database.cache_clear()
     loader.load_data_manager.cache_clear()
     loader.load_logs_view.cache_clear()
 
     # Also clear the settings cache to pick up the new DATABASE_PATH
     from src.main_app import config
+
     config.get_settings.cache_clear()
     config.settings = config.get_settings()
 

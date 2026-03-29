@@ -18,7 +18,16 @@ class LogsManager:
     """
 
     ALLOWED_ORDERS = {"ASC", "DESC"}
-    ALLOWED_ORDER_BY_COLUMNS = {"id", "endpoint", "request_data", "response_status", "response_time", "response_count", "timestamp", "date_only"}
+    ALLOWED_ORDER_BY_COLUMNS = {
+        "id",
+        "endpoint",
+        "request_data",
+        "response_status",
+        "response_time",
+        "response_count",
+        "timestamp",
+        "date_only",
+    }
 
     def __init__(self, db: Database, allowed_tables: set[str]):
         self.allowed_tables = allowed_tables

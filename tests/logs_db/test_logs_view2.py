@@ -2,8 +2,10 @@
 """
 Tests for the logs_view module.
 """
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
+
 from src.main_app.logs_db.logs_view import LogsView, _build_date_index
 
 
@@ -136,9 +138,7 @@ class TestViewLogs:
 class TestViewLogsEdgeCases:
     """Tests for edge cases in view_logs function."""
 
-    def test_view_logs_invalid_order_by_defaults_to_timestamp(
-        self, mock_request
-    ):
+    def test_view_logs_invalid_order_by_defaults_to_timestamp(self, mock_request):
         """Test view_logs with invalid order_by defaults to timestamp."""
         from src.main_app.handler import view_logs_request_handler
 
