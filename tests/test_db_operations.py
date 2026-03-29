@@ -149,35 +149,29 @@ class TestAllLogsEn2Ar:
         conn.close()
         yield str(db_file)
 
-    def test_all_logs_en2ar_returns_dict(self, temp_db_with_logs):
-        """Test all_logs_en2ar returns dictionary."""
+    @pytest.fixture
+    def temp_manager(self, temp_db_with_logs):
         from src.app.logs_db.bot import LogsManager
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db_with_logs)
-        manager = LogsManager(db=db_instance)
-        result = manager.all_logs_en2ar()
+        manager = LogsManager(db=db_instance, allowed_tables={})
+        return manager
+
+    def test_all_logs_en2ar_returns_dict(self, temp_manager):
+        """Test all_logs_en2ar returns dictionary."""
+        result = temp_manager.all_logs_en2ar()
         assert isinstance(result, dict)
         assert len(result) == 3
 
-    def test_all_logs_en2ar_with_day_filter(self, temp_db_with_logs):
+    def test_all_logs_en2ar_with_day_filter(self, temp_manager):
         """Test all_logs_en2ar filters by day."""
-        from src.app.logs_db.bot import LogsManager
-        from src.app.logs_db.db import Database
-
-        db_instance = Database(temp_db_with_logs)
-        manager = LogsManager(db=db_instance)
-        result = manager.all_logs_en2ar(day="2025-01-27")
+        result = temp_manager.all_logs_en2ar(day="2025-01-27")
         assert len(result) == 2
 
-    def test_all_logs_en2ar_with_month_filter(self, temp_db_with_logs):
+    def test_all_logs_en2ar_with_month_filter(self, temp_manager):
         """Test all_logs_en2ar filters by month."""
-        from src.app.logs_db.bot import LogsManager
-        from src.app.logs_db.db import Database
-
-        db_instance = Database(temp_db_with_logs)
-        manager = LogsManager(db=db_instance)
-        result = manager.all_logs_en2ar(day="2025-01")
+        result = temp_manager.all_logs_en2ar(day="2025-01")
         assert len(result) == 3  # All in January
 
 

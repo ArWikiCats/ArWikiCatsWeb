@@ -8,11 +8,11 @@ from unittest.mock import patch
 
 import pytest
 
-from src.app.loader import load_data_manager
 from src.app.logs_db.db import Database
+from src.app.logs_db.bot import LogsManager
 
-# Create a LogsManager instance with a mock database for testing _apply_filters
-_apply_filters = load_data_manager()._apply_filters
+# Get the _apply_filters static method for testing
+_apply_filters = LogsManager._apply_filters
 
 
 class TestAddStatus:
@@ -201,10 +201,19 @@ class TestLogRequest:
             mock_commit.return_value = True
             yield mock_commit
 
-    def test_log_request_rounds_response_time(self, mock_db):
+    @pytest.fixture
+    def manager(self, mock_db):
+        """Create a LogsManager instance with mocked database."""
+        # Create a mock Database that delegates commit to our mock
+        db_instance = Database(":memory:")
+        # Patch the db instance's commit method to use our mock
+        with patch.object(db_instance, "commit", mock_db):
+            manager = LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
+            yield manager
+
+    def test_log_request_rounds_response_time(self, manager, mock_db):
         """Test that response_time is rounded to 3 decimal places."""
 
-        manager = load_data_manager()
         manager.log_request("/api/test", "test_data", "success", 0.123456789)
 
         # Check that the call was made with rounded time
@@ -214,29 +223,26 @@ class TestLogRequest:
         params = call_args[0][1]  # Second argument is the params tuple
         assert params[3] == 0.123  # 4th param is response_time
 
-    def test_log_request_uses_logs_table(self, mock_db):
+    def test_log_request_uses_logs_table(self, manager, mock_db):
         """Test that non-list endpoints use the 'logs' table."""
 
-        manager = load_data_manager()
         manager.log_request("/api/test", "test_data", "success", 0.1)
 
         call_args = mock_db.call_args
         assert "logs" in call_args[0][0]
         assert "list_logs" not in call_args[0][0]
 
-    def test_log_request_uses_list_logs_table(self, mock_db):
+    def test_log_request_uses_list_logs_table(self, manager, mock_db):
         """Test that /api/list endpoint uses 'list_logs' table."""
 
-        manager = load_data_manager()
         manager.log_request("/api/list", "test_data", "success", 0.1)
 
         call_args = mock_db.call_args
         assert "list_logs" in call_args[0][0]
 
-    def test_log_request_converts_status_to_string(self, mock_db):
+    def test_log_request_converts_status_to_string(self, manager, mock_db):
         """Test that response_status is converted to string."""
 
-        manager = load_data_manager()
         manager.log_request("/api/test", "test_data", 200, 0.1)
 
         # Check that the call was made with string status
@@ -294,7 +300,7 @@ class TestCountAll:
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db_with_data)
-        manager = LogsManager(db=db_instance)
+        manager = LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
         result = manager.count_all()
         assert result == 8
 
@@ -304,7 +310,7 @@ class TestCountAll:
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db_with_data)
-        manager = LogsManager(db=db_instance)
+        manager = LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
         result = manager.count_all(status="no_result")
         assert result == 5
 
@@ -351,7 +357,7 @@ class TestGetLogs:
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db_for_logs)
-        manager = LogsManager(db=db_instance)
+        manager = LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
         result = manager.get_logs(per_page=5, offset=0)
         assert len(result) == 5
 
@@ -361,7 +367,7 @@ class TestGetLogs:
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db_for_logs)
-        manager = LogsManager(db=db_instance)
+        manager = LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
         result = manager.get_logs(per_page=5, offset=0, order="DESC", order_by="response_count")
         # Should be ordered by response_count descending
         counts = [row["response_count"] for row in result]
@@ -373,7 +379,7 @@ class TestGetLogs:
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db_for_logs)
-        manager = LogsManager(db=db_instance)
+        manager = LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
         result = manager.get_logs(per_page=5, offset=0, order="ASC", order_by="response_count")
         counts = [row["response_count"] for row in result]
         assert counts == sorted(counts)
@@ -384,7 +390,7 @@ class TestGetLogs:
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db_for_logs)
-        manager = LogsManager(db=db_instance)
+        manager = LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
         result = manager.get_logs(per_page=5, offset=0, order="INVALID", order_by="response_count")
         counts = [row["response_count"] for row in result]
         assert counts == sorted(counts, reverse=True)
@@ -439,7 +445,7 @@ class TestSumResponseCount:
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db_for_sum)
-        manager = LogsManager(db=db_instance)
+        manager = LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
         result = manager.sum_response_count()
         assert result == 35  # 10 + 20 + 5
 
@@ -449,6 +455,6 @@ class TestSumResponseCount:
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db_for_sum)
-        manager = LogsManager(db=db_instance)
+        manager = LogsManager(db=db_instance, allowed_tables={"logs", "list_logs"})
         result = manager.sum_response_count(status="success")
         assert result == 30  # 10 + 20
