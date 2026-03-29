@@ -260,8 +260,12 @@ class TestLogRequest:
         manager = LogsManager()
         manager.log_request("/api/test", "test_data", 200, 0.1)
 
+        # Check that the call was made with string status
+        # call_args[0] = (query, params_tuple)
+        # params_tuple = (endpoint, request_data, response_status, response_time)
         call_args = mock_db.call_args
-        assert call_args[0][0][2] == "200"  # 3rd param is response_status
+        params = call_args[0][1]  # Second argument is the params tuple
+        assert params[2] == "200"  # 3rd param is response_status
 
 
 class TestCountAll:
