@@ -17,10 +17,26 @@ def _get_db_path_main() -> str:
     return db_path_main
 
 
-def _validate_table_name(table_name: str) -> None:
-    """Validate table name against whitelist to prevent SQL injection."""
-    if table_name not in settings.allowed_tables:
-        raise ValueError(f"Invalid table name: {table_name}")
+def _create_logs_table(table_name: str) -> None:
+    """Create a logs table with the standard schema.
+
+    Note: All timestamps are stored in UTC using SQLite's CURRENT_TIMESTAMP.
+    The date_only field is derived from the timestamp using DATE('now') in UTC.
+    """
+    query = f"""
+        CREATE TABLE IF NOT EXISTS {table_name} (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            endpoint TEXT NOT NULL,
+            request_data TEXT NOT NULL,
+            response_status TEXT NOT NULL,
+            response_time REAL,
+            response_count INTEGER DEFAULT 1,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            date_only DATE DEFAULT (DATE('now')),
+            UNIQUE(request_data, response_status, date_only)
+        );
+        """
+    db_commit(query)
 
 
 def db_commit(query, params=[]):
@@ -39,29 +55,6 @@ def db_commit(query, params=[]):
     finally:
         if conn:
             conn.close()
-
-
-def _create_logs_table(table_name: str) -> None:
-    """Create a logs table with the standard schema.
-
-    Note: All timestamps are stored in UTC using SQLite's CURRENT_TIMESTAMP.
-    The date_only field is derived from the timestamp using DATE('now') in UTC.
-    """
-    _validate_table_name(table_name)
-    query = f"""
-        CREATE TABLE IF NOT EXISTS {table_name} (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            endpoint TEXT NOT NULL,
-            request_data TEXT NOT NULL,
-            response_status TEXT NOT NULL,
-            response_time REAL,
-            response_count INTEGER DEFAULT 1,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-            date_only DATE DEFAULT (DATE('now')),
-            UNIQUE(request_data, response_status, date_only)
-        );
-        """
-    db_commit(query)
 
 
 def init_db():
