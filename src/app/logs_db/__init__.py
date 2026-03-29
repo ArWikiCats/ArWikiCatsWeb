@@ -2,7 +2,6 @@
 
 from .bot import (
     all_logs_en2ar,
-    change_db_path,
     count_all,
     db_commit,
     fetch_all,
@@ -15,7 +14,6 @@ from .bot import (
 )
 
 __all__ = [
-    "change_db_path",
     "sum_response_count",
     "db_commit",
     "init_db",

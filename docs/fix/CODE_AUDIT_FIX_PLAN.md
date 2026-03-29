@@ -351,7 +351,6 @@
 
 1. Add tests for:
     - `src/app/logging_config.py` — custom color formatting functions
-    - `src/app/logs_db/bot_update.py` — database migration scripts
     - Error paths in database operations (connection failure, corrupt data)
 2. Run coverage report:
     ```bash

@@ -20,10 +20,7 @@ class TestUserAgentHeader:
 
     def test_single_title_endpoint_without_user_agent(self, client):
         """Test that single title endpoint returns 400 without User-Agent."""
-        response = client.get(
-            "/api/Category:Yemen",
-            headers={"User-Agent": ""}
-        )
+        response = client.get("/api/Category:Yemen", headers={"User-Agent": ""})
 
         assert response.status_code == 400
         data = response.get_json()
@@ -38,10 +35,7 @@ class TestUserAgentHeader:
             with patch("src.app.routes.api.log_request", return_value="test"):
                 mock_resolve.return_value = "تصنيف:اليمن"
 
-                response = client.get(
-                    "/api/Category:Yemen",
-                    headers={"User-Agent": "TestAgent/1.0"}
-                )
+                response = client.get("/api/Category:Yemen", headers={"User-Agent": "TestAgent/1.0"})
 
                 # Should either succeed with the mock or return library error
                 assert response.status_code in [200, 500]
@@ -49,11 +43,7 @@ class TestUserAgentHeader:
     def test_list_endpoint_without_user_agent(self, client):
         """Test that list endpoint returns 400 without User-Agent."""
         data = {"titles": ["test_title1", "test_title2"]}
-        response = client.post(
-            "/api/list",
-            json=data,
-            headers={"User-Agent": ""}
-        )
+        response = client.post("/api/list", json=data, headers={"User-Agent": ""})
 
         assert response.status_code == 400
         data = response.get_json()
@@ -62,7 +52,7 @@ class TestUserAgentHeader:
 
     def test_list_endpoint_with_user_agent(self, client):
         """Test that list endpoint works with User-Agent."""
-        from unittest.mock import patch, MagicMock
+        from unittest.mock import MagicMock, patch
 
         mock_result = MagicMock()
         mock_result.labels = {"test_title1": "تصنيف:اختبار1"}
@@ -73,11 +63,7 @@ class TestUserAgentHeader:
                 mock_batch.return_value = mock_result
 
                 data = {"titles": ["test_title1", "test_title2"]}
-                response = client.post(
-                    "/api/list",
-                    json=data,
-                    headers={"User-Agent": "TestAgent/1.0"}
-                )
+                response = client.post("/api/list", json=data, headers={"User-Agent": "TestAgent/1.0"})
 
                 # Should either succeed with the mock or return library error
                 assert response.status_code in [200, 500]
@@ -97,16 +83,9 @@ class TestUserAgentHeader:
 
                 for endpoint, method in endpoints:
                     if method == "GET":
-                        response = client.get(
-                            endpoint,
-                            headers={"User-Agent": ""}
-                        )
+                        response = client.get(endpoint, headers={"User-Agent": ""})
                     else:
-                        response = client.post(
-                            endpoint,
-                            json={"titles": ["test"]},
-                            headers={"User-Agent": ""}
-                        )
+                        response = client.post(endpoint, json={"titles": ["test"]}, headers={"User-Agent": ""})
 
                     # All should return 400 for missing User-Agent
                     assert response.status_code == 400, f"Endpoint {endpoint} should require User-Agent"

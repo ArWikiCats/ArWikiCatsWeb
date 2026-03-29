@@ -14,6 +14,7 @@ class TestUIRoutes:
     def client(self):
         """Create Flask test client."""
         from src.app import create_app
+
         app = create_app()
         app.config["TESTING"] = True
         with app.test_client() as client:
@@ -45,12 +46,10 @@ class TestUIRoutes:
                     "status": "All",
                     "like": "",
                     "day": "",
-                    "db_path": None,
                     "table_name": "logs",
                 },
                 "order_by_types": ["id", "timestamp"],
                 "status_table": ["All"],
-                "dbs": [],
             }
 
             response = client.get("/logs")
@@ -68,9 +67,8 @@ class TestUIRoutes:
         with patch("src.app.routes.ui.retrieve_logs_by_date") as mock_retrieve:
             mock_retrieve.return_value = {
                 "logs": [],
-                "tab": {"sum_all": "0", "db_path": None, "table_name": "logs"},
+                "tab": {"sum_all": "0", "table_name": "logs"},
                 "status_table": [],
-                "dbs": [],
             }
 
             response = client.get("/logs_by_day")
@@ -103,6 +101,7 @@ class TestUIWithQueryParams:
     def client(self):
         """Create Flask test client."""
         from src.app import create_app
+
         app = create_app()
         app.config["TESTING"] = True
         with app.test_client() as client:
@@ -128,12 +127,10 @@ class TestUIWithQueryParams:
                     "status": "All",
                     "like": "",
                     "day": "",
-                    "db_path": None,
                     "table_name": "logs",
                 },
                 "order_by_types": ["id", "timestamp"],
                 "status_table": ["All"],
-                "dbs": [],
             }
 
             response = client.get("/logs?page=2&per_page=10")
@@ -161,12 +158,10 @@ class TestUIWithQueryParams:
                     "status": "no_result",
                     "like": "",
                     "day": "",
-                    "db_path": None,
                     "table_name": "logs",
                 },
                 "order_by_types": ["id", "timestamp"],
                 "status_table": ["All", "no_result"],
-                "dbs": [],
             }
 
             response = client.get("/logs?status=no_result")
@@ -178,9 +173,8 @@ class TestUIWithQueryParams:
         with patch("src.app.routes.ui.retrieve_logs_by_date") as mock_retrieve:
             mock_retrieve.return_value = {
                 "logs": [],
-                "tab": {"sum_all": "0", "db_path": None, "table_name": "list_logs"},
+                "tab": {"sum_all": "0", "table_name": "list_logs"},
                 "status_table": [],
-                "dbs": [],
             }
 
             response = client.get("/logs_by_day?table_name=list_logs")
@@ -195,6 +189,7 @@ class TestErrorHandling:
     def client(self):
         """Create Flask test client."""
         from src.app import create_app
+
         app = create_app()
         app.config["TESTING"] = True
         with app.test_client() as client:

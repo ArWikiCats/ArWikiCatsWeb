@@ -592,11 +592,11 @@ def health_check():
 ```python
 # CURRENT (src/app/logs_bot.py)
 def view_logs(request):
-    # ---
+
     db_path = request.args.get("db_path")
-    # ---
+
     dbs = []
-    # ---
+
 ```
 
 **Recommendation:** Remove redundant separator comments.
