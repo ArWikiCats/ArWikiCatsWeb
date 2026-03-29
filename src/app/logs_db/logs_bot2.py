@@ -64,7 +64,7 @@ def retrieve_logs_by_date(table_name):
     return data
 
 
-def retrieve_logs_en_to_ar(day=None):
+def view_logs_en2ar(day=None):
 
     _manager = load_data_manager()
 

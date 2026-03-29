@@ -2,7 +2,7 @@
 """
 Tests for the UI routes.
 """
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -28,32 +28,34 @@ class TestUIRoutes:
 
     def test_logs_page(self, client):
         """Test that logs page renders with mocked data."""
-        with patch("src.app.routes.ui.view_logs") as mock_view:
-            mock_view.return_value = {
-                "logs": [],
-                "tab": {
-                    "sum_all": "0",
-                    "total_pages": 1,
-                    "total_logs": "0",
-                    "start_log": 0,
-                    "end_log": 0,
-                    "start_page": 1,
-                    "end_page": 1,
-                    "order": "DESC",
-                    "order_by": "response_count",
-                    "per_page": 10,
-                    "page": 1,
-                    "status": "All",
-                    "day": "",
-                    "table_name": "logs",
-                },
-                "order_by_types": ["id", "timestamp"],
-                "status_table": ["All"],
-            }
+        with patch("src.app.routes.ui.view_logs_new") as mock_view:
+            with patch("src.app.routes.ui.view_logs_request_handler") as mock_handler:
+                mock_handler.return_value = MagicMock()
+                mock_view.return_value = {
+                    "logs": [],
+                    "tab": {
+                        "sum_all": "0",
+                        "total_pages": 1,
+                        "total_logs": "0",
+                        "start_log": 0,
+                        "end_log": 0,
+                        "start_page": 1,
+                        "end_page": 1,
+                        "order": "DESC",
+                        "order_by": "response_count",
+                        "per_page": 10,
+                        "page": 1,
+                        "status": "All",
+                        "day": "",
+                        "table_name": "logs",
+                    },
+                    "order_by_types": ["id", "timestamp"],
+                    "status_table": ["All"],
+                }
 
-            response = client.get("/logs")
+                response = client.get("/logs")
 
-            assert response.status_code == 200
+                assert response.status_code == 200
 
     def test_no_result_page(self, client):
         """Test that no_result page renders successfully."""
@@ -108,62 +110,66 @@ class TestUIWithQueryParams:
 
     def test_logs_page_with_pagination(self, client):
         """Test logs page with pagination parameters."""
-        with patch("src.app.routes.ui.view_logs") as mock_view:
-            mock_view.return_value = {
-                "logs": [],
-                "tab": {
-                    "sum_all": "100",
-                    "total_pages": 10,
-                    "total_logs": "100",
-                    "start_log": 11,
-                    "end_log": 20,
-                    "start_page": 1,
-                    "end_page": 5,
-                    "order": "DESC",
-                    "order_by": "response_count",
-                    "per_page": 10,
-                    "page": 2,
-                    "status": "All",
-                    "day": "",
-                    "table_name": "logs",
-                },
-                "order_by_types": ["id", "timestamp"],
-                "status_table": ["All"],
-            }
+        with patch("src.app.routes.ui.view_logs_new") as mock_view:
+            with patch("src.app.routes.ui.view_logs_request_handler") as mock_handler:
+                mock_handler.return_value = MagicMock()
+                mock_view.return_value = {
+                    "logs": [],
+                    "tab": {
+                        "sum_all": "100",
+                        "total_pages": 10,
+                        "total_logs": "100",
+                        "start_log": 11,
+                        "end_log": 20,
+                        "start_page": 1,
+                        "end_page": 5,
+                        "order": "DESC",
+                        "order_by": "response_count",
+                        "per_page": 10,
+                        "page": 2,
+                        "status": "All",
+                        "day": "",
+                        "table_name": "logs",
+                    },
+                    "order_by_types": ["id", "timestamp"],
+                    "status_table": ["All"],
+                }
 
-            response = client.get("/logs?page=2&per_page=10")
+                response = client.get("/logs?page=2&per_page=10")
 
-            assert response.status_code == 200
-            mock_view.assert_called_once()
+                assert response.status_code == 200
+                mock_view.assert_called_once()
 
     def test_logs_page_with_status_filter(self, client):
         """Test logs page with status filter."""
-        with patch("src.app.routes.ui.view_logs") as mock_view:
-            mock_view.return_value = {
-                "logs": [],
-                "tab": {
-                    "sum_all": "50",
-                    "total_pages": 5,
-                    "total_logs": "50",
-                    "start_log": 1,
-                    "end_log": 10,
-                    "start_page": 1,
-                    "end_page": 5,
-                    "order": "DESC",
-                    "order_by": "response_count",
-                    "per_page": 10,
-                    "page": 1,
-                    "status": "no_result",
-                    "day": "",
-                    "table_name": "logs",
-                },
-                "order_by_types": ["id", "timestamp"],
-                "status_table": ["All", "no_result"],
-            }
+        with patch("src.app.routes.ui.view_logs_new") as mock_view:
+            with patch("src.app.routes.ui.view_logs_request_handler") as mock_handler:
+                mock_handler.return_value = MagicMock()
+                mock_view.return_value = {
+                    "logs": [],
+                    "tab": {
+                        "sum_all": "50",
+                        "total_pages": 5,
+                        "total_logs": "50",
+                        "start_log": 1,
+                        "end_log": 10,
+                        "start_page": 1,
+                        "end_page": 5,
+                        "order": "DESC",
+                        "order_by": "response_count",
+                        "per_page": 10,
+                        "page": 1,
+                        "status": "no_result",
+                        "day": "",
+                        "table_name": "logs",
+                    },
+                    "order_by_types": ["id", "timestamp"],
+                    "status_table": ["All", "no_result"],
+                }
 
-            response = client.get("/logs?status=no_result")
+                response = client.get("/logs?status=no_result")
 
-            assert response.status_code == 200
+                assert response.status_code == 200
 
     def test_logs_by_day_with_table_name(self, client):
         """Test logs_by_day page with table_name parameter."""

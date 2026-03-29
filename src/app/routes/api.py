@@ -13,15 +13,22 @@ except ImportError:
 
 from ..config import settings
 from ..handler import view_logs_request_handler
-from ..logs_db import Database, LogsManager
+from ..logs_db import Database, LogsManager, LogsView
 from ..logs_db.logs_bot import view_logs_new
-from ..logs_db.logs_bot2 import retrieve_logs_by_date, retrieve_logs_en_to_ar
+from ..logs_db.logs_bot2 import retrieve_logs_by_date, view_logs_en2ar
 
 
 @functools.lru_cache(maxsize=1)
 def load_data_manager() -> LogsManager:
     _manager = LogsManager(db=Database(settings.paths.db_path_main))
     return _manager
+
+
+@functools.lru_cache(maxsize=1)
+def load_logs_view() -> LogsView:
+    _manager = load_data_manager()
+    _viewer = LogsView(manager=_manager)
+    return _viewer
 
 
 def jsonify(data: dict) -> str:
@@ -47,13 +54,13 @@ def get_logs_by_day(table_name) -> str:
 
 
 def get_logs_all(day=None) -> str:
-    result = retrieve_logs_en_to_ar(day)
-
+    _viewer = load_logs_view()
+    result = _viewer.view_logs_en2ar(day)
     return jsonify(result)
 
 
 def get_logs_category(day=None) -> str:
-    result = retrieve_logs_en_to_ar(day)
+    result = view_logs_en2ar(day)
 
     if "no_result" in result:
         del result["no_result"]
@@ -62,7 +69,7 @@ def get_logs_category(day=None) -> str:
 
 
 def get_logs_no_result(day=None) -> str:
-    result = retrieve_logs_en_to_ar(day)
+    result = view_logs_en2ar(day)
 
     if "data_result" in result:
         del result["data_result"]

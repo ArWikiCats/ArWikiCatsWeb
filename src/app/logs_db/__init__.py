@@ -3,6 +3,7 @@
 from .bot import (
     LogsManager,
 )
+
 from .db import (
     Database,
     db_commit,
@@ -10,7 +11,10 @@ from .db import (
     init_db,
 )
 
+from .logs_view import LogsView
+
 __all__ = [
+    "LogsView",
     "LogsManager",
     "Database",
     "db_commit",
