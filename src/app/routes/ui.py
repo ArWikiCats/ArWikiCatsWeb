@@ -39,7 +39,6 @@ class Ui_Blueprint:
                 "logs_by_day.html",
                 logs=result.get("logs", []),
                 tab=result.get("tab", []),
-                status_table=result.get("status_table", []),
             )
 
         @ui_bp.route("/list", methods=["GET"])
