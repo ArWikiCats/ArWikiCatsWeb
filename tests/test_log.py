@@ -304,22 +304,26 @@ class TestCountAll:
 
     def test_count_all_total(self, temp_db_with_data):
         """Test count_all returns total count without filters."""
-        from unittest.mock import patch
+        from src.app.logs_db.bot import LogsManager
+        from src.app.logs_db.db import Database
 
-        from src.app.logs_db import bot, db
-
-        with patch.object(db, "_get_db_path_main", return_value=temp_db_with_data):
-            result = bot.count_all()
+        with patch.object(Database, "__init__", return_value=None):
+            db_instance = Database()
+            db_instance.db_path = temp_db_with_data
+            manager = LogsManager(db=db_instance)
+            result = manager.count_all()
             assert result == 8
 
     def test_count_all_with_status(self, temp_db_with_data):
         """Test count_all with status filter."""
-        from unittest.mock import patch
+        from src.app.logs_db.bot import LogsManager
+        from src.app.logs_db.db import Database
 
-        from src.app.logs_db import bot, db
-
-        with patch.object(db, "_get_db_path_main", return_value=temp_db_with_data):
-            result = bot.count_all(status="no_result")
+        with patch.object(Database, "__init__", return_value=None):
+            db_instance = Database()
+            db_instance.db_path = temp_db_with_data
+            manager = LogsManager(db=db_instance)
+            result = manager.count_all(status="no_result")
             assert result == 5
 
 
@@ -361,45 +365,53 @@ class TestGetLogs:
 
     def test_get_logs_pagination(self, temp_db_for_logs):
         """Test get_logs respects pagination parameters."""
-        from unittest.mock import patch
+        from src.app.logs_db.bot import LogsManager
+        from src.app.logs_db.db import Database
 
-        from src.app.logs_db import bot, db
-
-        with patch.object(db, "_get_db_path_main", return_value=temp_db_for_logs):
-            result = bot.get_logs(per_page=5, offset=0)
+        with patch.object(Database, "__init__", return_value=None):
+            db_instance = Database()
+            db_instance.db_path = temp_db_for_logs
+            manager = LogsManager(db=db_instance)
+            result = manager.get_logs(per_page=5, offset=0)
             assert len(result) == 5
 
     def test_get_logs_order_desc(self, temp_db_for_logs):
         """Test get_logs orders DESC by default."""
-        from unittest.mock import patch
+        from src.app.logs_db.bot import LogsManager
+        from src.app.logs_db.db import Database
 
-        from src.app.logs_db import bot, db
-
-        with patch.object(db, "_get_db_path_main", return_value=temp_db_for_logs):
-            result = bot.get_logs(per_page=5, offset=0, order="DESC", order_by="response_count")
+        with patch.object(Database, "__init__", return_value=None):
+            db_instance = Database()
+            db_instance.db_path = temp_db_for_logs
+            manager = LogsManager(db=db_instance)
+            result = manager.get_logs(per_page=5, offset=0, order="DESC", order_by="response_count")
             # Should be ordered by response_count descending
             counts = [row["response_count"] for row in result]
             assert counts == sorted(counts, reverse=True)
 
     def test_get_logs_order_asc(self, temp_db_for_logs):
         """Test get_logs can order ASC."""
-        from unittest.mock import patch
+        from src.app.logs_db.bot import LogsManager
+        from src.app.logs_db.db import Database
 
-        from src.app.logs_db import bot, db
-
-        with patch.object(db, "_get_db_path_main", return_value=temp_db_for_logs):
-            result = bot.get_logs(per_page=5, offset=0, order="ASC", order_by="response_count")
+        with patch.object(Database, "__init__", return_value=None):
+            db_instance = Database()
+            db_instance.db_path = temp_db_for_logs
+            manager = LogsManager(db=db_instance)
+            result = manager.get_logs(per_page=5, offset=0, order="ASC", order_by="response_count")
             counts = [row["response_count"] for row in result]
             assert counts == sorted(counts)
 
     def test_get_logs_invalid_order_defaults_to_desc(self, temp_db_for_logs):
         """Test get_logs defaults to DESC for invalid order."""
-        from unittest.mock import patch
+        from src.app.logs_db.bot import LogsManager
+        from src.app.logs_db.db import Database
 
-        from src.app.logs_db import bot, db
-
-        with patch.object(db, "_get_db_path_main", return_value=temp_db_for_logs):
-            result = bot.get_logs(per_page=5, offset=0, order="INVALID", order_by="response_count")
+        with patch.object(Database, "__init__", return_value=None):
+            db_instance = Database()
+            db_instance.db_path = temp_db_for_logs
+            manager = LogsManager(db=db_instance)
+            result = manager.get_logs(per_page=5, offset=0, order="INVALID", order_by="response_count")
             counts = [row["response_count"] for row in result]
             assert counts == sorted(counts, reverse=True)
 
