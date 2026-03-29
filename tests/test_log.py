@@ -5,11 +5,14 @@ Tests for the logs database functionality.
 """
 import sqlite3
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from src.app.logs_db.bot import LogsManager
+from src.app.logs_db.db import Database
+
+# Create a LogsManager instance with a mock database for testing _apply_filters
 _apply_filters = LogsManager()._apply_filters
 
 
@@ -35,7 +38,7 @@ class TestAddStatus:
         result_query, result_params = _apply_filters(query, params, status="Category")
 
         assert "WHERE" in result_query
-        assert "response_status like 'تصنيف%'" in result_query
+        assert "response_status LIKE 'تصنيف%'" in result_query
         assert len(result_params) == 0  # No params added for Category
 
     def test_add_status_with_valid_day(self):
@@ -70,11 +73,11 @@ class TestAddStatus:
         assert "AND" in result_query
         assert len(result_params) == 2
 
-    def test_add_status_with_tuple_params(self):
-        """Test _apply_filters converts tuple params to list."""
+    def test_add_status_with_empty_list_params(self):
+        """Test _apply_filters works with empty list params."""
 
         query = "SELECT * FROM logs"
-        params = ()  # tuple instead of list
+        params = []
         result_query, result_params = _apply_filters(query, params, status="no_result")
 
         assert isinstance(result_params, list)
@@ -152,49 +155,57 @@ class TestDatabaseOperations:
 
     def test_fetch_all_returns_list(self, temp_db):
         """Test that fetch_all returns a list of dictionaries."""
-        from unittest.mock import patch
-
         from src.app.logs_db import db
+        from src.app.logs_db.db import Database
 
-        with patch.object(db, "_get_db_path_main", return_value=temp_db):
-            result = db.fetch_all("SELECT * FROM logs")
-            assert isinstance(result, list)
-            assert len(result) == 3
-            assert all(isinstance(row, dict) for row in result)
+        with patch.object(Database, "__init__", return_value=None):
+            db_instance = Database()
+            db_instance.db_path = temp_db
+            with patch.object(db, "_db", db_instance):
+                result = db.fetch_all("SELECT * FROM logs")
+                assert isinstance(result, list)
+                assert len(result) == 3
+                assert all(isinstance(row, dict) for row in result)
 
     def test_fetch_all_fetch_one(self, temp_db):
         """Test that fetch_all with fetch_one=True returns single dict."""
-        from unittest.mock import patch
-
         from src.app.logs_db import db
+        from src.app.logs_db.db import Database
 
-        with patch.object(db, "_get_db_path_main", return_value=temp_db):
-            result = db.fetch_all("SELECT * FROM logs WHERE id = ?", [1], fetch_one=True)
-            assert isinstance(result, dict)
-            assert result["id"] == 1
+        with patch.object(Database, "__init__", return_value=None):
+            db_instance = Database()
+            db_instance.db_path = temp_db
+            with patch.object(db, "_db", db_instance):
+                result = db.fetch_all("SELECT * FROM logs WHERE id = ?", [1], fetch_one=True)
+                assert isinstance(result, dict)
+                assert result["id"] == 1
 
     def test_fetch_all_no_result(self, temp_db):
         """Test fetch_all returns empty list when no results."""
-        from unittest.mock import patch
-
         from src.app.logs_db import db
+        from src.app.logs_db.db import Database
 
-        with patch.object(db, "_get_db_path_main", return_value=temp_db):
-            result = db.fetch_all("SELECT * FROM logs WHERE id = ?", [999])
-            assert result == []
+        with patch.object(Database, "__init__", return_value=None):
+            db_instance = Database()
+            db_instance.db_path = temp_db
+            with patch.object(db, "_db", db_instance):
+                result = db.fetch_all("SELECT * FROM logs WHERE id = ?", [999])
+                assert result == []
 
     def test_db_commit_success(self, temp_db):
         """Test that db_commit returns True on success."""
-        from unittest.mock import patch
-
         from src.app.logs_db import db
+        from src.app.logs_db.db import Database
 
-        with patch.object(db, "_get_db_path_main", return_value=temp_db):
-            result = db.db_commit(
-                "INSERT INTO logs (endpoint, request_data, response_status, response_time) VALUES (?, ?, ?, ?)",
-                ["/api/new", "NewData", "success", 0.1],
-            )
-            assert result is True
+        with patch.object(Database, "__init__", return_value=None):
+            db_instance = Database()
+            db_instance.db_path = temp_db
+            with patch.object(db, "_db", db_instance):
+                result = db.db_commit(
+                    "INSERT INTO logs (endpoint, request_data, response_status, response_time) VALUES (?, ?, ?, ?)",
+                    ["/api/new", "NewData", "success", 0.1],
+                )
+                assert result is True
 
 
 class TestLogRequest:
@@ -202,26 +213,28 @@ class TestLogRequest:
 
     @pytest.fixture
     def mock_db(self):
-        """Mock database functions."""
-        with patch("src.app.logs_db.bot.db_commit") as mock_commit:
+        """Mock database commit method."""
+        with patch.object(Database, "commit") as mock_commit:
             mock_commit.return_value = True
             yield mock_commit
 
     def test_log_request_rounds_response_time(self, mock_db):
         """Test that response_time is rounded to 3 decimal places."""
-        from src.app.logs_db.bot import log_request
+        from src.app.logs_db.bot import LogsManager
 
-        log_request("/api/test", "test_data", "success", 0.123456789)
+        manager = LogsManager()
+        manager.log_request("/api/test", "test_data", "success", 0.123456789)
 
         # Check that the call was made with rounded time
         call_args = mock_db.call_args
-        assert call_args[0][1][3] == 0.123  # 4th param is response_time
+        assert call_args[0][0][3] == 0.123  # 4th param is response_time
 
     def test_log_request_uses_logs_table(self, mock_db):
         """Test that non-list endpoints use the 'logs' table."""
-        from src.app.logs_db.bot import log_request
+        from src.app.logs_db.bot import LogsManager
 
-        log_request("/api/test", "test_data", "success", 0.1)
+        manager = LogsManager()
+        manager.log_request("/api/test", "test_data", "success", 0.1)
 
         call_args = mock_db.call_args
         assert "logs" in call_args[0][0]
@@ -229,21 +242,23 @@ class TestLogRequest:
 
     def test_log_request_uses_list_logs_table(self, mock_db):
         """Test that /api/list endpoint uses 'list_logs' table."""
-        from src.app.logs_db.bot import log_request
+        from src.app.logs_db.bot import LogsManager
 
-        log_request("/api/list", "test_data", "success", 0.1)
+        manager = LogsManager()
+        manager.log_request("/api/list", "test_data", "success", 0.1)
 
         call_args = mock_db.call_args
         assert "list_logs" in call_args[0][0]
 
     def test_log_request_converts_status_to_string(self, mock_db):
         """Test that response_status is converted to string."""
-        from src.app.logs_db.bot import log_request
+        from src.app.logs_db.bot import LogsManager
 
-        log_request("/api/test", "test_data", 200, 0.1)
+        manager = LogsManager()
+        manager.log_request("/api/test", "test_data", 200, 0.1)
 
         call_args = mock_db.call_args
-        assert call_args[0][1][2] == "200"  # 3rd param is response_status
+        assert call_args[0][0][2] == "200"  # 3rd param is response_status
 
 
 class TestCountAll:
