@@ -3,9 +3,12 @@
 Tests for the logs_bot2 module.
 """
 from unittest.mock import patch
-from src.app.routes.api import load_logs_view
+from src.app.routes.api import load_data_manager
+from src.app.logs_db.logs_view import LogsView
 
-_viewer = load_logs_view()
+_manager = load_data_manager()
+_viewer = LogsView(manager=_manager)
+
 view_logs_en2ar = _viewer.view_logs_en2ar
 view_logs_by_date = _viewer.view_logs_by_date
 
