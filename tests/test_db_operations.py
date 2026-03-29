@@ -7,6 +7,8 @@ from unittest.mock import patch
 
 import pytest
 
+from src.app.logs_db.db import Database
+
 
 class TestFetchLogsEdgeCases:
     """Tests for edge cases in fetch operations."""
@@ -37,41 +39,40 @@ class TestFetchLogsEdgeCases:
         conn.close()
         yield str(db_file)
 
-    def test_fetch_all_empty_table(self, temp_db):
-        """Test fetch on empty table returns empty list."""
+    @pytest.fixture
+    def temp_db_instance(self, temp_db) -> Database:
+
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db)
-        result = db_instance.fetch("SELECT * FROM logs")
+        return db_instance
+
+    def test_fetch_all_empty_table(self, temp_db_instance):
+        """Test fetch on empty table returns empty list."""
+        result = temp_db_instance.fetch("SELECT * FROM logs")
         assert result == []
 
-    def test_fetch_all_with_special_characters(self, temp_db):
+    def test_fetch_all_with_special_characters(self, temp_db_instance):
         """Test fetch handles special characters in data."""
-        from src.app.logs_db.db import Database
-
-        db_instance = Database(temp_db)
         # Insert data with special characters
-        db_instance.commit(
+        temp_db_instance.commit(
             "INSERT INTO logs (endpoint, request_data, response_status, response_time) VALUES (?, ?, ?, ?)",
             ["/api/test", "Category:Test'Quote\"Double", "تصنيف:اختبار", 0.1],
         )
 
-        result = db_instance.fetch("SELECT * FROM logs")
+        result = temp_db_instance.fetch("SELECT * FROM logs")
         assert len(result) == 1
         assert "Quote" in result[0]["request_data"]
 
-    def test_fetch_all_with_unicode(self, temp_db):
+    def test_fetch_all_with_unicode(self, temp_db_instance):
         """Test fetch handles Arabic and other unicode."""
-        from src.app.logs_db.db import Database
-
-        db_instance = Database(temp_db)
         # Insert Arabic data
-        db_instance.commit(
+        temp_db_instance.commit(
             "INSERT INTO logs (endpoint, request_data, response_status, response_time) VALUES (?, ?, ?, ?)",
             ["/api/test", "تصنيف:اختبار_عربي", "تصنيف:نتيجة", 0.1],
         )
 
-        result = db_instance.fetch("SELECT * FROM logs")
+        result = temp_db_instance.fetch("SELECT * FROM logs")
         assert len(result) == 1
         assert "عربي" in result[0]["request_data"]
 
@@ -227,7 +228,7 @@ class TestFetchLogsByDate:
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db_grouped)
-        manager = LogsManager(db=db_instance, allowed_tables={})
+        manager = LogsManager(db=db_instance, allowed_tables={"logs"})
         result = manager.fetch_logs_by_date()
         assert isinstance(result, list)
         # Should have grouped entries
@@ -287,7 +288,7 @@ class TestGetResponseStatus:
         from src.app.logs_db.db import Database
 
         db_instance = Database(temp_db_status)
-        manager = LogsManager(db=db_instance, allowed_tables={})
+        manager = LogsManager(db=db_instance, allowed_tables={"logs"})
         result = manager.get_response_status()
         assert isinstance(result, list)
         assert "no_result" in result
