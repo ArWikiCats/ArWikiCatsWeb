@@ -38,13 +38,13 @@ cp -f "$HOME"/srcx/requirements.txt "$TARGET_DIR"/requirements.txt -v
 
 # source $HOME/www/python/venv/bin/activate
 
-if source "$HOME/www/python/venv/bin/activate"; then
-    # pip install -r $HOME/www/python/src/requirements.txt
-    pip install -r "$TARGET_DIR"/requirements.txt -U
-    # exit 1
-else
-    echo "Failed to activate virtual environment" >&2
-fi
+# if source "$HOME/www/python/venv/bin/activate"; then
+#     # pip install -r $HOME/www/python/src/requirements.txt
+#     pip install -r "$TARGET_DIR"/requirements.txt -U
+#     # exit 1
+# else
+#     echo "Failed to activate virtual environment" >&2
+# fi
 
 
 # webservice python3.11 restart

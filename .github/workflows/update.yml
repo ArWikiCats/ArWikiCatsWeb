@@ -1,0 +1,29 @@
+name: Deploy
+
+on:
+    push:
+        branches:
+            - main
+jobs:
+    update:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+
+            - name: Deploy on Toolforge
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.HOST }}
+                  username: ${{ secrets.USERNAME }}
+                  port: 22
+                  request_pty: true
+                  script_stop: true
+                  key: ${{ secrets.KEY }}
+                  script: |
+                      become armake bash -lc "
+                        toolforge-jobs run update --image python3.11 --command "~/web_sh/update1.sh" --wait &&
+                        toolforge-jobs run pipup --image python3.11 --command "~/web_sh/pip.sh" --wait &&
+                        toolforge-webservice python3.11 restart &&
+                        echo ''
+                      "
