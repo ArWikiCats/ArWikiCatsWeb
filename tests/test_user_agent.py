@@ -6,19 +6,9 @@ from unittest.mock import patch
 
 import pytest
 
-from src.app import create_app
-
 
 class TestUserAgentHeader:
     """Tests for User-Agent header validation in API endpoints."""
-
-    @pytest.fixture
-    def client(self):
-        """Create Flask test client."""
-        app = create_app()
-        app.config["TESTING"] = True
-        with app.test_client() as client:
-            yield client
 
     def test_single_title_endpoint_without_user_agent(self, client):
         """Test that single title endpoint returns 400 without User-Agent."""

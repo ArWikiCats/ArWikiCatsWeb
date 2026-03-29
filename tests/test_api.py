@@ -83,16 +83,6 @@ class TestCheckUserAgent:
 class TestApiEndpoints:
     """Tests for API endpoints using Flask test client."""
 
-    @pytest.fixture
-    def client(self):
-        """Create Flask test client."""
-        from src.app import create_app
-
-        app = create_app()
-        app.config["TESTING"] = True
-        with app.test_client() as client:
-            yield client
-
     def test_logs_by_day_endpoint(self, client):
         """Test /api/logs_by_day endpoint."""
         with patch("src.app.routes.api.load_logs_view") as mock_load_view:
@@ -186,16 +176,6 @@ class TestApiEndpoints:
 class TestTitleEndpoint:
     """Tests for the /api/<title> endpoint."""
 
-    @pytest.fixture
-    def client(self):
-        """Create Flask test client."""
-        from src.app import create_app
-
-        app = create_app()
-        app.config["TESTING"] = True
-        with app.test_client() as client:
-            yield client
-
     def test_title_endpoint_without_user_agent(self, client):
         """Test title endpoint returns 400 without User-Agent."""
         with patch("src.app.routes.api.load_data_manager") as mock_load:
@@ -233,16 +213,6 @@ class TestTitleEndpoint:
 
 class TestListEndpoint:
     """Tests for the /api/list POST endpoint."""
-
-    @pytest.fixture
-    def client(self):
-        """Create Flask test client."""
-        from src.app import create_app
-
-        app = create_app()
-        app.config["TESTING"] = True
-        with app.test_client() as client:
-            yield client
 
     def test_list_endpoint_without_user_agent(self, client):
         """Test list endpoint returns 400 without User-Agent."""

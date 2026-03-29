@@ -10,16 +10,6 @@ import pytest
 class TestUIRoutes:
     """Tests for UI Blueprint routes."""
 
-    @pytest.fixture
-    def client(self):
-        """Create Flask test client."""
-        from src.app import create_app
-
-        app = create_app()
-        app.config["TESTING"] = True
-        with app.test_client() as client:
-            yield client
-
     def test_index_page(self, client):
         """Test that index page renders successfully."""
         response = client.get("/")
@@ -101,16 +91,6 @@ class TestUIRoutes:
 
 class TestUIWithQueryParams:
     """Tests for UI routes with query parameters."""
-
-    @pytest.fixture
-    def client(self):
-        """Create Flask test client."""
-        from src.app import create_app
-
-        app = create_app()
-        app.config["TESTING"] = True
-        with app.test_client() as client:
-            yield client
 
     def test_logs_page_with_pagination(self, client):
         """Test logs page with pagination parameters."""
@@ -197,16 +177,6 @@ class TestUIWithQueryParams:
 
 class TestErrorHandling:
     """Tests for error handling in UI routes."""
-
-    @pytest.fixture
-    def client(self):
-        """Create Flask test client."""
-        from src.app import create_app
-
-        app = create_app()
-        app.config["TESTING"] = True
-        with app.test_client() as client:
-            yield client
 
     def test_404_error(self, client):
         """Test that 404 errors are handled."""
